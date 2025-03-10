@@ -36,7 +36,7 @@ public class Program
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information) // Ignore noisy logs
             .Enrich.FromLogContext()
             .WriteTo.Console() // Logs to Console
-            .WriteTo.File("logs/api_log.txt", rollingInterval: RollingInterval.Day) // Logs to a file
+            .WriteTo.File("Logs/api_log.txt", rollingInterval: RollingInterval.Day) // Logs to a file
             .CreateLogger();
 
         builder.Host.UseSerilog(); // Replace default logging with Serilog
