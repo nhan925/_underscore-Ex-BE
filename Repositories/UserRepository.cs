@@ -1,5 +1,5 @@
 ﻿using Dapper;
-using student_management_api.Contracts;
+using student_management_api.Contracts.IRepositories;
 using student_management_api.Models.DTO;
 using System.Data;
 

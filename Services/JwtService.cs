@@ -1,5 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using student_management_api.Contracts;
+using student_management_api.Contracts.IRepositories;
+using student_management_api.Contracts.IServices;
 using student_management_api.Models.Authentication;
 using student_management_api.Models.DTO;
 using System.IdentityModel.Tokens.Jwt;

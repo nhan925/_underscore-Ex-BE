@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using student_management_api.Contracts;
+using student_management_api.Contracts.IRepositories;
+using student_management_api.Contracts.IServices;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 
@@ -11,30 +12,39 @@ namespace student_management_api.Controllers;
 [Authorize]
 public class StudentController : Controller
 {
-    private readonly IStudentRepository _studentRepository;
+    private readonly IStudentService _studentService;
 
-    public StudentController(IStudentRepository studentRepository)
+    public StudentController(IStudentService studentService)
     {
-        _studentRepository = studentRepository;
+        _studentService = studentService;
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetStudentById(string id)
     {
-        var student = await _studentRepository.GetStudentById(id);
-        if (student == null)
+        try
         {
-            return NotFound(new { message = "student not found" });
+            var student = await _studentService.GetStudentById(id);
+            return Ok(student);
         }
-
-        return Ok(student);
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 
     [HttpGet]
     public async Task<IActionResult> GetStudents([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
     {
-        var students = await _studentRepository.GetStudents(page, pageSize, search);
-        return Ok(students);
+        try
+        {
+            var students = await _studentService.GetStudents(page, pageSize, search);
+            return Ok(students);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 
     [HttpPut("{id}")]
@@ -45,25 +55,38 @@ public class StudentController : Controller
             return BadRequest(ModelState);
         }
 
-        var updatedCount = await _studentRepository.UpdateStudentById(id, request);
-        if (updatedCount == 0)
+        try
         {
-            return NotFound(new { message = "student not found or no changes made" });
-        }
+            var updatedCount = await _studentService.UpdateStudentById(id, request);
+            if (updatedCount == 0)
+            {
+                return NotFound(new { message = "student not found or no changes made" });
+            }
 
-        return Ok(new { message = "student updated successfully" });
+            return Ok(new { message = "student updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteStudentById(string id)
     {
-        var deletedCount = await _studentRepository.DeleteStudentById(id);
-        if (deletedCount == 0)
+        try
         {
-            return NotFound(new { message = "student not found" });
+            var deletedCount = await _studentService.DeleteStudentById(id);
+            if (deletedCount == 0)
+            {
+                return NotFound(new { message = "student not found" });
+            }
+            return Ok(new { message = "student deleted successfully" });
         }
-
-        return Ok(new { message = "student deleted successfully" });
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 
     [HttpPost]
@@ -76,12 +99,12 @@ public class StudentController : Controller
 
         try
         {
-            var studentId = await _studentRepository.AddStudent(request);
+            var studentId = await _studentService.AddStudent(request);
             return Ok(new { StudentId = studentId });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, ex.Message);
+            return StatusCode(500, new { message = ex.Message });
         }
     }
 }

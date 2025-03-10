@@ -1,7 +1,7 @@
 ﻿using student_management_api.Models.Authentication;
 using student_management_api.Models.DTO;
 
-namespace student_management_api.Contracts;
+namespace student_management_api.Contracts.IServices;
 
 public interface IJwtService
 {

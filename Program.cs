@@ -7,13 +7,14 @@ using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using Serilog.Events;
 using Serilog;
-using student_management_api.Contracts;
 using student_management_api.Repositories;
 using student_management_api.Services;
 using System;
 using System.Data;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using student_management_api.Contracts.IRepositories;
+using student_management_api.Contracts.IServices;
 
 namespace student_management_api;
 
@@ -43,11 +44,17 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddSingleton<IDbConnection>(sp => new NpgsqlConnection(connectionString));
-        builder.Services.AddSingleton<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<IJwtService, JwtService>();
+        builder.Services.AddSingleton<IFacultyService, FacultyService>();
+        builder.Services.AddSingleton<IStudentService, StudentService>();
+        builder.Services.AddSingleton<IStudentStatusService, StudentStatusService>();
+
+
+        builder.Services.AddSingleton<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<IStudentRepository, StudentRepository>();
         builder.Services.AddSingleton<IFacultyRepository, FacultyRepository>();
         builder.Services.AddSingleton<IStudentStatusRepository, StudentStatusRepository>();
+        
         builder.Services.AddControllers();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>

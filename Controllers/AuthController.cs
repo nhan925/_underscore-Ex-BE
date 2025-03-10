@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using student_management_api.Contracts;
+using student_management_api.Contracts.IServices;
 using student_management_api.Models.Authentication;
 using student_management_api.Services;
 
