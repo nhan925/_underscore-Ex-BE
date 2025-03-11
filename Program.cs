@@ -42,6 +42,20 @@ public class Program
 
         builder.Host.UseSerilog(); // Replace default logging with Serilog
 
+        var MyAllowSpecificOrigins = "_myCorsPolicy";
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy(name: MyAllowSpecificOrigins,
+                policy =>
+                {
+                    policy.WithOrigins("https://localhost:7088") // Change to your Blazor domain
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                });
+        });
+
         // Add services to the container.
         builder.Services.AddSingleton<IDbConnection>(sp => new NpgsqlConnection(connectionString));
         builder.Services.AddSingleton<IJwtService, JwtService>();
@@ -124,6 +138,8 @@ public class Program
         }
         
         app.UseSerilogRequestLogging();
+
+        app.UseCors(MyAllowSpecificOrigins);
 
         app.UseHttpsRedirection();
 
