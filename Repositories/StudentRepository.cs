@@ -35,8 +35,8 @@ public class StudentRepository : IStudentRepository
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            queryBuilder.Append(" WHERE id ILIKE @Search");
-            countQueryBuilder.Append(" WHERE id ILIKE @Search");
+            queryBuilder.Append(" WHERE id ILIKE @Search OR full_name ILIKE @Search");
+            countQueryBuilder.Append(" WHERE id ILIKE @Search OR full_name ILIKE @Search");
         }
 
         queryBuilder.Append(" ORDER BY id LIMIT @PageSize OFFSET @Offset");
