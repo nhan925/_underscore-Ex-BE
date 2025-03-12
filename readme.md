@@ -1,4 +1,4 @@
-﻿# [BE] Student Management
+# [BE] Student Management
 
 ## Cấu trúc source code
 ```
@@ -28,6 +28,8 @@ student_management_api
 - Cài gói `ASP.NET and web development`
 - Thêm file .env vào thư mục gốc của project theo mẫu (xem file `.env.example`)
 - Cần chạy source Backend để có thể chạy được Frontend
+- Chạy source bằng cách nhấn `F5` hoặc `Ctrl + F5`
 
-# Biên dịch (tùy theo ngôn ngữ sử dụng)
-# Chạy chương trình
+## Lưu ý
+- Để xem danh sách các API, sau khi chạy source, vào link `https://localhost:7285/index.html`
+- Cần thêm file `.env` vào thư mục gốc của project để chạy được chương trình
