@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using student_management_api.Models.DTO;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace student_management_api.Models.Student;
@@ -21,10 +22,13 @@ public class AddStudentRequest
     public int IntakeYear { get; set; }
 
     [Required]
-    public string Program { get; set; }
+    public int ProgramId { get; set; }
 
     [Required]
-    public string Address { get; set; }
+    public List<Address> Addresses { get; set; }
+
+    [Required]
+    public IdentityInfo IdentityInfo { get; set; }
 
     [EmailAddress, Required]
     public string Email { get; set; }
@@ -34,4 +38,7 @@ public class AddStudentRequest
 
     [Required]
     public int StatusId { get; set; }
+
+    [Required]
+    public string Nationality { get; set; }
 }

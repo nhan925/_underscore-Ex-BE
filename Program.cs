@@ -15,6 +15,8 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
+using Dapper;
+using student_management_api.Helpers;
 
 namespace student_management_api;
 
@@ -31,6 +33,9 @@ public class Program
         var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION");
         var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
             ?? throw new Exception("JWT_SECRET is missing");
+
+        // Register custom type handlers
+        SqlMapper.AddTypeHandler(new JsonbTypeHandler<Dictionary<string, string>>());
 
         // Configure Serilog
         Log.Logger = new LoggerConfiguration()

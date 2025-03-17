@@ -34,11 +34,12 @@ public class StudentController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetStudents([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
+    public async Task<IActionResult> GetStudents([FromQuery] int page = 1, [FromQuery] int pageSize = 10, 
+        [FromQuery] string? search = null, [FromQuery] StudentFilter? filter = null)
     {
         try
         {
-            var students = await _studentService.GetStudents(page, pageSize, search);
+            var students = await _studentService.GetStudents(page, pageSize, search, filter);
             return Ok(students);
         }
         catch (Exception ex)

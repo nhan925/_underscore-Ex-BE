@@ -7,7 +7,7 @@ public interface IStudentService
 {
     Task<int> DeleteStudentById(string id);
 
-    Task<PagedResult<Student>> GetStudents(int page, int pageSize, string? search);
+    Task<PagedResult<SimplifiedStudent>> GetStudents(int page, int pageSize, string? search, StudentFilter? filter);
 
     Task<int> UpdateStudentById(string id, UpdateStudentRequest request);
 

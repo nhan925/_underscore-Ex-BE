@@ -46,9 +46,9 @@ public class StudentService: IStudentService
         return student;
     }
 
-    public async Task<PagedResult<Student>> GetStudents(int page, int pageSize, string? search)
+    public async Task<PagedResult<SimplifiedStudent>> GetStudents(int page, int pageSize, string? search, StudentFilter? filter)
     {
-        var result = await _studentRepository.GetStudents(page, pageSize, search);
+        var result = await _studentRepository.GetStudents(page, pageSize, search, filter);
         return result;
     }
 
