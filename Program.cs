@@ -67,13 +67,15 @@ public class Program
         builder.Services.AddSingleton<IFacultyService, FacultyService>();
         builder.Services.AddSingleton<IStudentService, StudentService>();
         builder.Services.AddSingleton<IStudentStatusService, StudentStatusService>();
+        builder.Services.AddSingleton<IStudyProgramService, StudyProgramService>();
 
 
         builder.Services.AddSingleton<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<IStudentRepository, StudentRepository>();
         builder.Services.AddSingleton<IFacultyRepository, FacultyRepository>();
         builder.Services.AddSingleton<IStudentStatusRepository, StudentStatusRepository>();
-        
+        builder.Services.AddSingleton<IStudyProgramRepository, StudyProgramRepository>();
+
         builder.Services.AddControllers();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>

@@ -19,4 +19,31 @@ public class StudentStatusRepository : IStudentStatusRepository
         var result = await _db.QueryAsync<StudentStatus>(query);
         return result.ToList();
     }
+
+    public async Task<int> UpdateStudentStatus(StudentStatus studentStatus)
+    {
+        string query = "UPDATE student_statuses SET name = @Name WHERE id = @Id";
+        var count = await _db.ExecuteAsync(query, studentStatus);
+        if (count == 0)
+        {
+            throw new Exception("student status not found");
+        }
+
+        return count;
+    }
+
+    public async Task<int> AddStudentStatus(string name)
+    {
+        string query = "INSERT INTO student_statuses (name) VALUES (@Name)";
+        await _db.ExecuteAsync(query, new { Name = name });
+
+        string getIdQuery = "SELECT LAST_INSERT_ID()";
+        var id = await _db.QueryFirstOrDefaultAsync<int>(getIdQuery);
+        if (id == 0)
+        {
+            throw new Exception("failed to add student status");
+        }
+
+        return id;
+    }
 }

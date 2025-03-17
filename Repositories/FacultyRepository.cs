@@ -19,4 +19,31 @@ public class FacultyRepository : IFacultyRepository
         var result = await _db.QueryAsync<Faculty>(query);
         return result.ToList();
     }
+
+    public async Task<int> UpdateFaculty(Faculty faculty)
+    {
+        string query = "UPDATE faculties SET name = @Name WHERE id = @Id";
+        var count = await _db.ExecuteAsync(query, faculty);
+        if (count == 0)
+        {
+            throw new Exception("faculty not found");
+        }
+
+        return count;
+    }
+
+    public async Task<int> AddFaculty(string name)
+    {
+        string query = "INSERT INTO faculties (name) VALUES (@Name)";
+        await _db.ExecuteAsync(query, new { Name = name });
+
+        string getIdQuery = "SELECT LAST_INSERT_ID()";
+        var id = await _db.QueryFirstOrDefaultAsync<int>(getIdQuery);
+        if (id == 0)
+        {
+            throw new Exception("failed to add faculty");
+        }
+
+        return id;
+    }
 }

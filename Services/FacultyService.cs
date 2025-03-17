@@ -22,4 +22,14 @@ public class FacultyService : IFacultyService
 
         return faculties;
     }
+
+    public async Task<int> UpdateFaculty(Faculty faculty)
+    {
+        return await _facultyRepository.UpdateFaculty(faculty);
+    }
+
+    public async Task<int> AddFaculty(string name)
+    {
+        return await _facultyRepository.AddFaculty(name);
+    }
 }
