@@ -51,7 +51,7 @@ public class StudentStatusController : Controller
     }
 
     [HttpPost("{name}")]
-    public async Task<IActionResult> AddStudentStatus([FromBody] string name)
+    public async Task<IActionResult> AddStudentStatus(string name)
     {
         try
         {

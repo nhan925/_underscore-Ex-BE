@@ -49,7 +49,7 @@ public class StudyProgramController : Controller
     }
 
     [HttpPost("{name}")]
-    public async Task<IActionResult> AddProgram([FromBody] string name)
+    public async Task<IActionResult> AddProgram(string name)
     {
         try
         {
