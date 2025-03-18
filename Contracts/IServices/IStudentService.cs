@@ -14,4 +14,12 @@ public interface IStudentService
     Task<string> AddStudent(AddStudentRequest request);
 
     Task<Student?> GetStudentById(string id);
+
+    Task AddStudents(List<AddStudentRequest> requests);
+
+    Stream ExportToExcel();
+
+    Stream ExportToJson();
+
+    Task<string> ImportExcelToJson(Stream fileStream);
 }

@@ -14,4 +14,8 @@ public interface IStudentRepository
     Task<PagedResult<SimplifiedStudent>> GetStudents(int page, int pageSize, string? search, StudentFilter? filter);
 
     Task<string> AddStudent(AddStudentRequest request);
+
+    Task AddStudents(List<AddStudentRequest> requests);
+
+    Task<List<Student>> GetAllStudents();
 }

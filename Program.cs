@@ -17,6 +17,8 @@ using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
 using Dapper;
 using student_management_api.Helpers;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace student_management_api;
 
@@ -129,6 +131,12 @@ public class Program
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
+
+        builder.Services.Configure<JsonOptions>(options =>
+        {
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            options.JsonSerializerOptions.WriteIndented = true;
+        });
 
         var app = builder.Build();
 

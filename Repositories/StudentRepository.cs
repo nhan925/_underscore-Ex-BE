@@ -1,10 +1,14 @@
 ﻿using Dapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.Extensions.Logging.Console;
+using Npgsql;
+using NpgsqlTypes;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using System.Data;
 using System.Text;
+using System.Text.Json;
 
 namespace student_management_api.Repositories;
 
@@ -234,27 +238,40 @@ public class StudentRepository : IStudentRepository
             catch
             {
                 transaction.Rollback();
-                throw new Exception("update student failed");
+                throw;
             }
         }
     }
 
     public async Task<string> GenerateStudentId(int intakeYear, int facultyId)
     {
-        string shortYear = (intakeYear % 100).ToString("D2"); // Get last 2 digits of intake year (XX)
-        string facultyCode = facultyId.ToString("D2"); // Ensure 2-digit faculty ID (YY)
+        string shortYear = (intakeYear % 100).ToString("D2"); // XX (last 2 digits of intake year)
+        string facultyCode = facultyId.ToString("D2"); // YY (faculty ID, always 2 digits)
 
-        string query = @"
-        SELECT COUNT(*) 
-        FROM students 
-        WHERE intake_year = @IntakeYear AND faculty_id = @FacultyId";
+        string sequenceName = $"student_seq_{intakeYear}_{facultyId}"; // Unique sequence for each intake & faculty
 
-        int count = await _db.QuerySingleAsync<int>(query, new { IntakeYear = intakeYear, FacultyId = facultyId });
+        // Ensure the sequence exists (each faculty + year gets its own sequence)
+        string createSequenceQuery = $@"
+            DO $$ 
+            BEGIN 
+                IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relname = '{sequenceName}') THEN
+                    EXECUTE 'CREATE SEQUENCE {sequenceName} START 1';
+                END IF;
+            END $$;";
 
-        string sequence = (count + 1).ToString("D4"); // ZZZZ → Ensure 4 digits
+        await _db.ExecuteAsync(createSequenceQuery); // Ensure the sequence exists
+
+        // Get the next sequence value
+        string getNextValueQuery = $"SELECT nextval('{sequenceName}')";
+
+        int sequenceNumber = await _db.QuerySingleAsync<int>(getNextValueQuery);
+
+        string sequence = sequenceNumber.ToString("D4"); // Ensure 4-digit sequence
 
         return $"{shortYear}{facultyCode}{sequence}"; // Format: XXYYZZZZ
     }
+
+
 
     public async Task<string> AddStudent(AddStudentRequest request)
     {
@@ -344,8 +361,172 @@ public class StudentRepository : IStudentRepository
             catch
             {
                 transaction.Rollback();
-                throw new Exception("add student failed"); ;
+                throw;
             }
         }
     }
+
+    public async Task AddStudents(List<AddStudentRequest> requests)
+    {
+        if (_db.State != ConnectionState.Open)
+        {
+            _db.Open();
+        }
+
+        using (var transaction = _db.BeginTransaction())
+        {
+            try
+            {
+                var studentValues = new List<string>();
+                var addressValues = new List<string>();
+                var identityValues = new List<string>();
+
+                var studentParameters = new List<NpgsqlParameter>();
+                var addressParameters = new List<NpgsqlParameter>();
+                var identityParameters = new List<NpgsqlParameter>();
+
+                int index = 0;
+
+                foreach (var request in requests)
+                {
+                    string studentId = await GenerateStudentId(request.IntakeYear, request.FacultyId);
+
+                    // Student Table
+                    studentValues.Add($"(@Id{index}, @FullName{index}, @DateOfBirth{index}, @Gender{index}, @FacultyId{index}, @IntakeYear{index}, " +
+                        $"@ProgramId{index}, @Email{index}, @PhoneNumber{index}, @StatusId{index}, @Nationality{index})");
+
+                    studentParameters.Add(new NpgsqlParameter($"@Id{index}", studentId));
+                    studentParameters.Add(new NpgsqlParameter($"@FullName{index}", request.FullName));
+                    studentParameters.Add(new NpgsqlParameter($"@DateOfBirth{index}", request.DateOfBirth));
+                    studentParameters.Add(new NpgsqlParameter($"@Gender{index}", request.Gender));
+                    studentParameters.Add(new NpgsqlParameter($"@FacultyId{index}", request.FacultyId));
+                    studentParameters.Add(new NpgsqlParameter($"@IntakeYear{index}", request.IntakeYear));
+                    studentParameters.Add(new NpgsqlParameter($"@ProgramId{index}", request.ProgramId));
+                    studentParameters.Add(new NpgsqlParameter($"@Email{index}", request.Email));
+                    studentParameters.Add(new NpgsqlParameter($"@PhoneNumber{index}", request.PhoneNumber));
+                    studentParameters.Add(new NpgsqlParameter($"@StatusId{index}", request.StatusId));
+                    studentParameters.Add(new NpgsqlParameter($"@Nationality{index}", request.Nationality));
+
+                    // Address Table
+                    int addressCount = 0;
+                    foreach (var address in request.Addresses)
+                    {
+                        addressValues.Add($"(@StudentId{index}_{addressCount}, @Other{index}_{addressCount}, @Village{index}_{addressCount}, @District{index}_{addressCount}, " +
+                            $"@City{index}_{addressCount}, @Country{index}_{addressCount}, @Type{index}_{addressCount})");
+
+                        addressParameters.Add(new NpgsqlParameter($"@StudentId{index}_{addressCount}", studentId));
+                        addressParameters.Add(new NpgsqlParameter($"@Other{index}_{addressCount}", address.Other));
+                        addressParameters.Add(new NpgsqlParameter($"@Village{index}_{addressCount}", address.Village));
+                        addressParameters.Add(new NpgsqlParameter($"@District{index}_{addressCount}", address.District));
+                        addressParameters.Add(new NpgsqlParameter($"@City{index}_{addressCount}", address.City));
+                        addressParameters.Add(new NpgsqlParameter($"@Country{index}_{addressCount}", address.Country));
+                        addressParameters.Add(new NpgsqlParameter($"@Type{index}_{addressCount}", address.Type));
+
+                        addressCount++;
+                    }
+
+                    // Identity Info Table
+                    identityValues.Add($"(@StudentId{index}, @Number{index}, @PlaceOfIssue{index}, @DateOfIssue{index}, @ExpiryDate{index}, @AdditionalInfo{index}, @Type{index})");
+
+                    identityParameters.Add(new NpgsqlParameter($"@StudentId{index}", studentId));
+                    identityParameters.Add(new NpgsqlParameter($"@Number{index}", request.IdentityInfo.Number));
+                    identityParameters.Add(new NpgsqlParameter($"@PlaceOfIssue{index}", request.IdentityInfo.PlaceOfIssue));
+                    identityParameters.Add(new NpgsqlParameter($"@DateOfIssue{index}", request.IdentityInfo.DateOfIssue));
+                    identityParameters.Add(new NpgsqlParameter($"@ExpiryDate{index}", request.IdentityInfo.ExpiryDate));
+                    identityParameters.Add(new NpgsqlParameter($"@Type{index}", request.IdentityInfo.Type));
+
+                    var additionalInfoParam = new NpgsqlParameter($"@AdditionalInfo{index}", NpgsqlDbType.Jsonb);
+                    additionalInfoParam.Value = request.IdentityInfo.AdditionalInfo is null
+                        ? (object)DBNull.Value  // Ensure it's cast to object
+                        : JsonSerializer.Serialize(request.IdentityInfo.AdditionalInfo);
+
+                    identityParameters.Add(additionalInfoParam);
+
+                    index++;
+                }
+
+                // Insert into Students Table
+                if (studentValues.Count > 0)
+                {
+                    string studentQuery = $@"
+                    INSERT INTO students (id, full_name, date_of_birth, gender, faculty_id, intake_year, program_id, email, phone_number, status_id, nationality) 
+                    VALUES {string.Join(", ", studentValues)}";
+
+                    using (var studentCmd = new NpgsqlCommand(studentQuery, (NpgsqlConnection?)_db, (NpgsqlTransaction?)transaction))
+                    {
+                        studentCmd.Parameters.AddRange(studentParameters.ToArray());
+                        await studentCmd.ExecuteNonQueryAsync();
+                    }
+                }
+
+                // Insert into Addresses Table
+                if (addressValues.Count > 0)
+                {
+                    string addressQuery = $@"
+                    INSERT INTO addresses (student_id, other, village, district, city, country, type)  
+                    VALUES {string.Join(", ", addressValues)}";
+
+                    using (var addressCmd = new NpgsqlCommand(addressQuery, (NpgsqlConnection?)_db, (NpgsqlTransaction?)transaction))
+                    {
+                        addressCmd.Parameters.AddRange(addressParameters.ToArray());
+                        await addressCmd.ExecuteNonQueryAsync();
+                    }
+                }
+
+                // Insert into Identity Infos Table
+                if (identityValues.Count > 0)
+                {
+                    string identityQuery = $@"
+                    INSERT INTO identity_info (student_id, number, place_of_issue, date_of_issue, expiry_date, additional_info, type)  
+                    VALUES {string.Join(", ", identityValues)}";
+
+                    using (var identityCmd = new NpgsqlCommand(identityQuery, (NpgsqlConnection?)_db, (NpgsqlTransaction?)transaction))
+                    {
+                        identityCmd.Parameters.AddRange(identityParameters.ToArray());
+                        await identityCmd.ExecuteNonQueryAsync();
+                    }
+                }
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+    }
+
+
+    public async Task<List<Student>> GetAllStudents()
+    {
+        string studentQuery = "SELECT * FROM students";
+        string addressQuery = "SELECT * FROM addresses WHERE student_id = ANY(@StudentIds)";
+        string identityInfoQuery = "SELECT * FROM identity_info WHERE student_id = ANY(@StudentIds)";
+
+        var students = (await _db.QueryAsync<Student>(studentQuery)).ToList();
+        
+        if (!students.Any()) 
+            throw new Exception("no students found");
+
+        var studentIds = students.Select(s => s.Id).ToArray();
+
+        var addresses = await _db.QueryAsync<FullAddress>(addressQuery, new { StudentIds = studentIds });
+        var identityInfos = await _db.QueryAsync<FullIdentityInfo>(identityInfoQuery, new { StudentIds = studentIds });
+
+        // Map addresses and identity info to students
+        var addressLookup = addresses
+            .GroupBy(a => a.StudentId)
+            .ToDictionary(g => g.Key, g => g.Select(fa => new Address(fa)).ToList());
+        var identityLookup = identityInfos.ToDictionary(i => i.StudentId, i => new IdentityInfo(i));
+
+        foreach (var student in students)
+        {
+            student.Addresses = addressLookup[student.Id]; 
+            student.IdentityInfo = identityLookup[student.Id]; 
+        }
+
+        return students;
+    }
+
 }
