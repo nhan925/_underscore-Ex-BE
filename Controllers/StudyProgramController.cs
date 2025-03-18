@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using student_management_api.Contracts.IServices;
 using student_management_api.Models.DTO;
 
@@ -27,6 +28,7 @@ public class StudyProgramController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: GetPrograms, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -41,6 +43,7 @@ public class StudyProgramController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: UpdateProgram, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -55,6 +58,7 @@ public class StudyProgramController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: AddProgram, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }

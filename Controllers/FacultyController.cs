@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
 using student_management_api.Models.DTO;
@@ -28,6 +29,7 @@ public class FacultyController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: GetFaculties, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -42,6 +44,7 @@ public class FacultyController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: UpdateFaculty, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -56,6 +59,7 @@ public class FacultyController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: AddFaculty, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }

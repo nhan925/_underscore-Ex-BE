@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using student_management_api.Contracts.IServices;
 using student_management_api.Models.Authentication;
 using student_management_api.Services;
@@ -37,6 +38,7 @@ public class AuthController : Controller
         }
         catch (UnauthorizedAccessException ex)
         {
+            Log.Error($"Action: Login, Message: {ex.Message}");
             return Unauthorized(new { message = ex.Message });
         }
     }

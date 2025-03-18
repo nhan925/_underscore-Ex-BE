@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
 using student_management_api.Models.DTO;
@@ -29,6 +30,7 @@ public class StudentStatusController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: GetStatuses, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -43,6 +45,7 @@ public class StudentStatusController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: UpdateStudentStatus, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -57,6 +60,7 @@ public class StudentStatusController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: AddStudentStatus, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }

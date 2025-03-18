@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
 using student_management_api.Models.DTO;
@@ -31,6 +32,7 @@ public class StudentController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: GetStudentById, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -46,6 +48,7 @@ public class StudentController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: GetStudents, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -70,6 +73,7 @@ public class StudentController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: UpdateStudentById, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -88,6 +92,7 @@ public class StudentController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: DeleteStudentById, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -107,6 +112,7 @@ public class StudentController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: AddStudent, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -159,10 +165,12 @@ public class StudentController : Controller
         }
         catch (JsonException)
         {
+            Log.Error($"Action: AddStudentsFromFile, Message: Invalid JSON format");
             return BadRequest(new { message = "Invalid JSON format" });
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: AddStudentsFromFile, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -199,6 +207,7 @@ public class StudentController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: ExportStudents, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
