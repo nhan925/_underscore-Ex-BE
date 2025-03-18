@@ -34,11 +34,9 @@ public class StudyProgramRepository : IStudyProgramRepository
 
     public async Task<int> AddProgram(string name)
     {
-        string query = "INSERT INTO programs (name) VALUES (@Name)";
-        await _db.ExecuteAsync(query, new { Name = name });
+        string query = "INSERT INTO programs (name) VALUES (@Name) RETURNING id";
+        var id = await _db.QueryFirstOrDefaultAsync<int>(query, new { Name = name });
 
-        string getIdQuery = "SELECT LAST_INSERT_ID()";
-        var id = await _db.QueryFirstOrDefaultAsync<int>(getIdQuery);
         if (id == 0)
         {
             throw new Exception("failed to add program");

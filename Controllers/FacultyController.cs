@@ -51,8 +51,8 @@ public class FacultyController : Controller
     {
         try
         {
-            var count = await _facultytService.AddFaculty(name);
-            return Ok(new { message = "add faculty successfully" });
+            var id = await _facultytService.AddFaculty(name);
+            return Ok(new { id = id });
         }
         catch (Exception ex)
         {

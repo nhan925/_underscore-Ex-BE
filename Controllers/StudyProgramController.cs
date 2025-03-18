@@ -50,8 +50,8 @@ public class StudyProgramController : Controller
     {
         try
         {
-            var count = await _programService.AddProgram(name);
-            return Ok(new { message = "add program successfully" });
+            var id = await _programService.AddProgram(name);
+            return Ok(new { id = id });
         }
         catch (Exception ex)
         {

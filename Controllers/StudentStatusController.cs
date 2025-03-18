@@ -52,8 +52,8 @@ public class StudentStatusController : Controller
     {
         try
         {
-            var count = await _studentStatusService.AddStudentStatus(name);
-            return Ok(new { message = "add student status successfully" });
+            var id = await _studentStatusService.AddStudentStatus(name);
+            return Ok(new { id = id });
         }
         catch (Exception ex)
         {
