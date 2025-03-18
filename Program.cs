@@ -19,6 +19,8 @@ using Dapper;
 using student_management_api.Helpers;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog.Sinks.PostgreSQL;
+using student_management_api.Middlewares;
 
 namespace student_management_api;
 
@@ -39,12 +41,24 @@ public class Program
         // Register custom type handlers
         SqlMapper.AddTypeHandler(new JsonbTypeHandler<Dictionary<string, string>>());
 
-        // Configure Serilog
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information) // Ignore noisy logs
+            .MinimumLevel.Information()
+            .WriteTo.Console()
+            .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+            .WriteTo.PostgreSQL(
+                connectionString: connectionString,
+                tableName: "logs",
+                needAutoCreateTable: true,
+                columnOptions: new Dictionary<string, ColumnWriterBase>
+                {
+                    { "Message", new RenderedMessageColumnWriter() },
+                    { "Level", new LevelColumnWriter() },
+                    { "Timestamp", new TimestampColumnWriter() },
+                    { "Exception", new ExceptionColumnWriter() }, 
+                    { "UserId", new SinglePropertyColumnWriter("UserId", PropertyWriteMethod.Raw) }
+                }
+            )
             .Enrich.FromLogContext()
-            .WriteTo.Console() // Logs to Console
-            .WriteTo.File("Logs/api_log.txt", rollingInterval: RollingInterval.Day) // Logs to a file
             .CreateLogger();
 
         builder.Host.UseSerilog(); // Replace default logging with Serilog
@@ -159,6 +173,8 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseAuthentication();
+
+        app.UseMiddleware<UserLoggingMiddleware>();
 
         app.UseAuthorization();
 
