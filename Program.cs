@@ -15,6 +15,12 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
+using Dapper;
+using student_management_api.Helpers;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
+using Serilog.Sinks.PostgreSQL;
+using student_management_api.Middlewares;
 
 namespace student_management_api;
 
@@ -32,12 +38,27 @@ public class Program
         var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
             ?? throw new Exception("JWT_SECRET is missing");
 
-        // Configure Serilog
+        // Register custom type handlers
+        SqlMapper.AddTypeHandler(new JsonbTypeHandler<Dictionary<string, string>>());
+
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information) // Ignore noisy logs
+            .MinimumLevel.Information()
+            .WriteTo.Console()
+            .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+            .WriteTo.PostgreSQL(
+                connectionString: connectionString,
+                tableName: "logs",
+                needAutoCreateTable: true,
+                columnOptions: new Dictionary<string, ColumnWriterBase>
+                {
+                    { "Message", new RenderedMessageColumnWriter() },
+                    { "Level", new LevelColumnWriter() },
+                    { "Timestamp", new TimestampColumnWriter() },
+                    { "Exception", new ExceptionColumnWriter() }, 
+                    { "UserId", new SinglePropertyColumnWriter("UserId", PropertyWriteMethod.Raw) }
+                }
+            )
             .Enrich.FromLogContext()
-            .WriteTo.Console() // Logs to Console
-            .WriteTo.File("Logs/api_log.txt", rollingInterval: RollingInterval.Day) // Logs to a file
             .CreateLogger();
 
         builder.Host.UseSerilog(); // Replace default logging with Serilog
@@ -62,13 +83,15 @@ public class Program
         builder.Services.AddSingleton<IFacultyService, FacultyService>();
         builder.Services.AddSingleton<IStudentService, StudentService>();
         builder.Services.AddSingleton<IStudentStatusService, StudentStatusService>();
+        builder.Services.AddSingleton<IStudyProgramService, StudyProgramService>();
 
 
         builder.Services.AddSingleton<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<IStudentRepository, StudentRepository>();
         builder.Services.AddSingleton<IFacultyRepository, FacultyRepository>();
         builder.Services.AddSingleton<IStudentStatusRepository, StudentStatusRepository>();
-        
+        builder.Services.AddSingleton<IStudyProgramRepository, StudyProgramRepository>();
+
         builder.Services.AddControllers();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
@@ -123,6 +146,12 @@ public class Program
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
 
+        builder.Services.Configure<JsonOptions>(options =>
+        {
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            options.JsonSerializerOptions.WriteIndented = true;
+        });
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -144,6 +173,8 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseAuthentication();
+
+        app.UseMiddleware<UserLoggingMiddleware>();
 
         app.UseAuthorization();
 

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using student_management_api.Models.DTO;
+using System.ComponentModel.DataAnnotations;
 
 namespace student_management_api.Models.Student;
 
@@ -14,9 +15,11 @@ public class UpdateStudentRequest
 
     public int? IntakeYear { get; set; }
 
-    public string? Program { get; set; }
+    public int? ProgramId { get; set; }
 
-    public string? Address { get; set; }
+    public List<Address>? Addresses { get; set; }
+
+    public IdentityInfo? IdentityInfo { get; set; }
 
     [EmailAddress]
     public string? Email { get; set; }
@@ -25,4 +28,6 @@ public class UpdateStudentRequest
     public string? PhoneNumber { get; set; }
 
     public int? StatusId { get; set; }
+
+    public string? Nationality { get; set; }
 }

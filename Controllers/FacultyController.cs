@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
+using student_management_api.Models.DTO;
 
 namespace student_management_api.Controllers;
 
@@ -27,6 +29,37 @@ public class FacultyController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: GetFaculties, Message: {ex.Message}");
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> UpdateFaculty([FromBody] Faculty faculty)
+    {
+        try
+        {
+            var count = await _facultytService.UpdateFaculty(faculty);
+            return Ok(new { message = "update faculty successfully" });
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Action: UpdateFaculty, Message: {ex.Message}");
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("{name}")]
+    public async Task<IActionResult> AddFaculty(string name)
+    {
+        try
+        {
+            var id = await _facultytService.AddFaculty(name);
+            return Ok(new { id = id });
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Action: AddFaculty, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }

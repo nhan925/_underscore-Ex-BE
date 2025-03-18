@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
+using student_management_api.Repositories;
+using System.Text.Json;
 
 namespace student_management_api.Controllers;
 
@@ -29,20 +32,23 @@ public class StudentController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: GetStudentById, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetStudents([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
+    public async Task<IActionResult> GetStudents([FromQuery] int page = 1, [FromQuery] int pageSize = 10, 
+        [FromQuery] string? search = null, [FromQuery] StudentFilter? filter = null)
     {
         try
         {
-            var students = await _studentService.GetStudents(page, pageSize, search);
+            var students = await _studentService.GetStudents(page, pageSize, search, filter);
             return Ok(students);
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: GetStudents, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -67,6 +73,7 @@ public class StudentController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: UpdateStudentById, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -85,6 +92,7 @@ public class StudentController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: DeleteStudentById, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
@@ -104,6 +112,102 @@ public class StudentController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error($"Action: AddStudent, Message: {ex.Message}");
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("import/{format}")]
+    public async Task<IActionResult> AddStudentsFromFile(IFormFile file, string format)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(new { message = "No file uploaded" });
+        }
+
+        try
+        {
+            // Read file into memory to avoid stream reuse issues
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream);
+            memoryStream.Position = 0; // Reset position
+
+            string jsonContent;
+            format = format.ToLowerInvariant(); // Normalize format
+
+            if (format == "excel")
+            {
+                jsonContent = await _studentService.ImportExcelToJson(memoryStream);
+            }
+            else if (format == "json")
+            {
+                memoryStream.Position = 0; // Reset position for reading JSON
+                using var reader = new StreamReader(memoryStream);
+                jsonContent = await reader.ReadToEndAsync();
+            }
+            else
+            {
+                return BadRequest(new { message = "Invalid format" });
+            }
+
+            var requests = JsonSerializer.Deserialize<List<AddStudentRequest>>(jsonContent, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (requests == null || !requests.Any())
+            {
+                return BadRequest(new { message = "Invalid or empty file" });
+            }
+
+            await _studentService.AddStudents(requests);
+            return Ok(new { message = "Students added successfully" });
+        }
+        catch (JsonException)
+        {
+            Log.Error($"Action: AddStudentsFromFile, Message: Invalid JSON format");
+            return BadRequest(new { message = "Invalid JSON format" });
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Action: AddStudentsFromFile, Message: {ex.Message}");
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+
+
+    [HttpGet("export/{format}")]
+    public IActionResult ExportStudents(string format)
+    {
+        try
+        {
+            Stream fileStream;
+            string fileName;
+            string contentType;
+
+            if (format.ToLower() == "json")
+            {
+                fileStream = _studentService.ExportToJson();
+                fileName = "students.json";
+                contentType = "application/json";
+            }
+            else if (format.ToLower() == "excel")
+            {
+                fileStream = _studentService.ExportToExcel();
+                fileName = "students.xlsx";
+                contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            }
+            else
+            {
+                return BadRequest(new { message = "invalid format" });
+            }
+
+            return File(fileStream, contentType, fileName);
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Action: ExportStudents, Message: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
