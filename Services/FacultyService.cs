@@ -15,12 +15,7 @@ public class FacultyService : IFacultyService
     public async Task<List<Faculty>> GetAllFaculties()
     {
         var faculties = await _facultyRepository.GetAllFaculties();
-        if (faculties == null)
-        {
-            throw new Exception("no faculties found");
-        }
-
-        return faculties;
+        return faculties ?? new();
     }
 
     public async Task<int> UpdateFaculty(Faculty faculty)

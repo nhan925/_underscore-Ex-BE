@@ -15,12 +15,7 @@ public class StudyProgramService: IStudyProgramService
     public async Task<List<StudyProgram>> GetAllPrograms()
     {
         var programs = await _programRepository.GetAllPrograms();
-        if (programs == null)
-        {
-            throw new Exception("no program found");
-        }
-
-        return programs;
+        return programs ?? new();
     }
 
     public async Task<int> UpdateProgram(StudyProgram program)

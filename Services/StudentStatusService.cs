@@ -16,12 +16,7 @@ public class StudentStatusService: IStudentStatusService
     public async Task<List<StudentStatus>> GetAllStudentStatuses()
     {
         var studentStatuses = await _studentStatusRepository.GetAllStudentStatuses();
-        if (studentStatuses == null)
-        {
-            throw new Exception("no student statuses found");
-        }
-        
-        return studentStatuses;
+        return studentStatuses ?? new();
     }
 
     public async Task<int> UpdateStudentStatus(StudentStatus studentStatus)
