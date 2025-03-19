@@ -21,6 +21,8 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog.Sinks.PostgreSQL;
 using student_management_api.Middlewares;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Hosting.Server;
 
 namespace student_management_api;
 
@@ -42,24 +44,33 @@ public class Program
         SqlMapper.AddTypeHandler(new JsonbTypeHandler<Dictionary<string, string>>());
 
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
-            .WriteTo.Console()
-            .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
-            .WriteTo.PostgreSQL(
-                connectionString: connectionString,
-                tableName: "logs",
-                needAutoCreateTable: true,
-                columnOptions: new Dictionary<string, ColumnWriterBase>
-                {
-                    { "Message", new RenderedMessageColumnWriter() },
-                    { "Level", new LevelColumnWriter() },
-                    { "Timestamp", new TimestampColumnWriter() },
-                    { "Exception", new ExceptionColumnWriter() }, 
-                    { "UserId", new SinglePropertyColumnWriter("UserId", PropertyWriteMethod.Raw) }
-                }
-            )
-            .Enrich.FromLogContext()
-            .CreateLogger();
+        .MinimumLevel.Information()
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning) // Ignore most Microsoft logs below Warning
+        .MinimumLevel.Override("System", LogEventLevel.Warning) // Ignore most System logs below Warning
+        .Enrich.FromLogContext() // Important for logging scoped properties
+        .Enrich.WithProperty("Application", "StudentManagementAPI") // Helps identify logs from this app
+        .WriteTo.Console(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] [User:{UserId}] {Scope} {Message}{NewLine}")
+        .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [User:{UserId}] {Scope} {Message}{NewLine}{Exception}")
+        .WriteTo.PostgreSQL(
+            connectionString: connectionString,
+            tableName: "logs",
+            needAutoCreateTable: true,
+            columnOptions: new Dictionary<string, ColumnWriterBase>
+            {
+                { "Message", new RenderedMessageColumnWriter() },
+                { "Level", new LevelColumnWriter() },
+                { "Timestamp", new TimestampColumnWriter() },
+                { "Exception", new ExceptionColumnWriter() },
+                { "UserId", new SinglePropertyColumnWriter("UserId", PropertyWriteMethod.Raw) },
+                { "RequestPath", new SinglePropertyColumnWriter("RequestPath", PropertyWriteMethod.Raw) },
+                { "Method", new SinglePropertyColumnWriter("Method", PropertyWriteMethod.Raw) },
+                { "CorrelationId", new SinglePropertyColumnWriter("CorrelationId", PropertyWriteMethod.Raw) },
+                { "SourceContext", new SinglePropertyColumnWriter("SourceContext", PropertyWriteMethod.Raw) },
+                { "ClientIp", new SinglePropertyColumnWriter("ClientIp", PropertyWriteMethod.Raw) },
+                { "UserAgent", new SinglePropertyColumnWriter("UserAgent", PropertyWriteMethod.Raw) }
+            }
+        )
+        .CreateLogger();
 
         builder.Host.UseSerilog(); // Replace default logging with Serilog
 
@@ -152,6 +163,27 @@ public class Program
             options.JsonSerializerOptions.WriteIndented = true;
         });
 
+        builder.Services.Configure<ApiBehaviorOptions>(options =>
+        {
+            options.InvalidModelStateResponseFactory = context =>
+            {
+                var errors = context.ModelState
+                    .Where(e => e.Value.Errors.Count > 0)
+                    .SelectMany(e => e.Value.Errors.Select(err => err.ErrorMessage)) // Extract only messages
+                    .ToList();
+
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogWarning("Validation failed: {Errors}", string.Join("; ", errors));
+
+                return new BadRequestObjectResult(new
+                {
+                    title = "One or more validation errors occurred.",
+                    status = 400,
+                    errors = context.ModelState
+                });
+            };
+        });
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -166,18 +198,13 @@ public class Program
             });
         }
         
-        app.UseSerilogRequestLogging();
-
         app.UseCors(MyAllowSpecificOrigins);
-
         app.UseHttpsRedirection();
-
         app.UseAuthentication();
-
-        app.UseMiddleware<UserLoggingMiddleware>();
-
+        app.UseMiddleware<LoggingEnrichmentMiddleware>();
+        app.UseSerilogRequestLogging();
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
         app.UseAuthorization();
-
         app.MapControllers();
 
         app.Run();
