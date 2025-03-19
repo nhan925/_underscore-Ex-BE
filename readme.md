@@ -30,7 +30,7 @@ student_management_api/
 │   ├── Authentication/
 │   │   └── AuthRequest.cs
 │   │
-│   ├── DTO/                      # Data Transfer Objects
+│   ├── DTO/                      
 │   │   ├── Address.cs 
 │   │   ├── Faculty.cs 
 │   │   ├── FullAddress.cs 
@@ -72,7 +72,7 @@ student_management_api/
 │
 ├── .env                          # Environment variables (not in repo)
 ├── .env.example                  # Example environment variables template
-├── create_db.sql_                # Script to create database schema
+├── create_db.sql                 # Script to create database schema
 └── Program.cs   
 ```
 ### Flow hoạt động
