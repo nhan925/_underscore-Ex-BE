@@ -1,4 +1,4 @@
-﻿# [BE] Student Management
+# [BE] Student Management
 
 ## Cấu trúc source code
 ### Các component
