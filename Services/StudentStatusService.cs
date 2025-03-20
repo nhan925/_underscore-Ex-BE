@@ -1,6 +1,7 @@
 ﻿using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
 using student_management_api.Models.DTO;
+using student_management_api.Repositories;
 
 namespace student_management_api.Services;
 
@@ -15,11 +16,16 @@ public class StudentStatusService: IStudentStatusService
     public async Task<List<StudentStatus>> GetAllStudentStatuses()
     {
         var studentStatuses = await _studentStatusRepository.GetAllStudentStatuses();
-        if (studentStatuses == null)
-        {
-            throw new Exception("no student statuses found");
-        }
-        
-        return studentStatuses;
+        return studentStatuses ?? new();
+    }
+
+    public async Task<int> UpdateStudentStatus(StudentStatus studentStatus)
+    {
+        return await _studentStatusRepository.UpdateStudentStatus(studentStatus);
+    }
+
+    public async Task<int> AddStudentStatus(string name)
+    {
+        return await _studentStatusRepository.AddStudentStatus(name);
     }
 }
