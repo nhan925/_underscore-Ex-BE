@@ -92,3 +92,5 @@ student_management_api/
 - Để test thử APIs có thể sử dụng Swagger (được tích hợp sẵn) bằng cách vào `http://localhost:5048` hoặc `https://localhost:7285`
 - Cần thêm file `.env` vào thư mục gốc của project để chạy được chương trình
 
+## Hình ảnh các chức năng
+- Xem bên source Front-end: [student-management-frontend](https://github.com/nhan925/_underscore-Ex-FE.git)
