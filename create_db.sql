@@ -222,7 +222,12 @@ INSERT INTO configurations (type, value) VALUES
     "3": [],
     "4": [1]
 }'),
-('email_domain', '["@student.com"]'),
+('email_domains', '["student.com"]'),
 ('phone_countries', '["VN"]');
 
 UPDATE student_statuses SET is_referenced = TRUE WHERE id IN (1, 2, 3, 4);
+
+ALTER TABLE students ADD COLUMN created_at TIMESTAMP DEFAULT NOW();
+
+ALTER TABLE configurations ADD COLUMN is_active BOOLEAN DEFAULT TRUE NOT NULL;
+
