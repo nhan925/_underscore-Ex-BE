@@ -1,5 +1,4 @@
 ﻿using Dapper;
-using Npgsql;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Models.DTO;
 using System.Data;
@@ -44,19 +43,5 @@ public class StudentStatusRepository : IStudentStatusRepository
         }
 
         return id;
-    }
-
-    // Check if the status is referenced in the configuration
-    private async Task<bool> IsStatusReferencedAsync(int statusId)
-    {
-        var sql = "SELECT is_referenced FROM student_statuses WHERE id = @StatusId;";
-
-        return await _db.QuerySingleAsync<bool>(sql, new { StatusId = statusId });
-    }
-
-    public async Task<int> UpdateReferenceState(int statusId, bool state)
-    {
-        var sql = "UPDATE student_statuses SET is_referenced = @State WHERE id = @StatusId;";
-        return await _db.ExecuteAsync(sql, new { StatusId = statusId, State = state });
     }
 }
