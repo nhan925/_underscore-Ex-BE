@@ -224,3 +224,5 @@ INSERT INTO configurations (type, value) VALUES
 }'),
 ('email_domain', '["@student.com"]'),
 ('phone_countries', '["VN"]');
+
+UPDATE student_statuses SET is_referenced = TRUE WHERE id IN (1, 2, 3, 4);
