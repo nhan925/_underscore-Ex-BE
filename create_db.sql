@@ -212,3 +212,15 @@ CREATE TABLE configurations (
     type TEXT UNIQUE NOT NULL,
     value JSONB NOT NULL
 );
+
+ALTER TABLE student_statuses ADD COLUMN is_referenced BOOLEAN DEFAULT FALSE;
+
+INSERT INTO configurations (type, value) VALUES 
+('student_status_rules', '{
+    "1": [2, 3, 4],
+    "2": [1],
+    "3": [],
+    "4": [1]
+}'),
+('email_domain', '["@student.com"]'),
+('phone_countries', '["VN"]');
