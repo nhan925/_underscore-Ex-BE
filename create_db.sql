@@ -205,3 +205,10 @@ INSERT INTO addresses (student_id, other, village, district, city, country, type
 
 ('22030002', '468 Lê Quang Định', 'Phường 21', 'Quận 21', 'Cần Thơ', 'Việt Nam', 'thuong_tru');
 
+
+------------------------ v3.0 -------------------------
+CREATE TABLE configurations (
+    id SERIAL PRIMARY KEY,
+    type TEXT UNIQUE NOT NULL,
+    value JSONB NOT NULL
+);
