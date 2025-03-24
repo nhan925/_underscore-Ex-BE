@@ -54,9 +54,19 @@ public class StudentStatusRepository : IStudentStatusRepository
         return await _db.QuerySingleAsync<bool>(sql, new { StatusId = statusId });
     }
 
-    public async Task<int> UpdateReferenceState(int statusId, bool state)
+    public async Task<int> ReferenceStudentStatuses(List<int> statusIds)
     {
-        var sql = "UPDATE student_statuses SET is_referenced = @State WHERE id = @StatusId;";
-        return await _db.ExecuteAsync(sql, new { StatusId = statusId, State = state });
+        // Set all statuses to false first
+        var sqlReset = "UPDATE student_statuses SET is_referenced = FALSE;";
+        await _db.ExecuteAsync(sqlReset);
+
+        // If there are statusIds to update, set them to true
+        if (statusIds != null && statusIds.Count > 0)
+        {
+            var sqlUpdate = "UPDATE student_statuses SET is_referenced = TRUE WHERE id = ANY(@StatusIds);";
+            return await _db.ExecuteAsync(sqlUpdate, new { StatusIds = statusIds.ToArray() });
+        }
+
+        return 0; // No updates needed if statusIds is empty
     }
 }

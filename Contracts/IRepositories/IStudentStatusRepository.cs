@@ -10,5 +10,6 @@ public interface IStudentStatusRepository
 
     Task<int> AddStudentStatus(string name);
 
-    Task<int> UpdateReferenceState(int statusId, bool state);
+    // Update all student statuses that are referenced in the configuration, others are set to false
+    Task<int> ReferenceStudentStatuses(List<int> statusIds);
 }

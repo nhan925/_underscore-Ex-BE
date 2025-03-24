@@ -42,6 +42,8 @@ public class Program
 
         // Register custom type handlers
         SqlMapper.AddTypeHandler(new JsonbTypeHandler<Dictionary<string, string>>());
+        SqlMapper.AddTypeHandler(new JsonbTypeHandler<List<string>>());
+        SqlMapper.AddTypeHandler(new JsonbTypeHandler<Dictionary<int, List<int>>>());
 
         Log.Logger = new LoggerConfiguration()
         .MinimumLevel.Information()
@@ -95,6 +97,8 @@ public class Program
         builder.Services.AddSingleton<IStudentService, StudentService>();
         builder.Services.AddSingleton<IStudentStatusService, StudentStatusService>();
         builder.Services.AddSingleton<IStudyProgramService, StudyProgramService>();
+        builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
+        builder.Services.AddSingleton<ICountryPhoneCodeService, CountryPhoneCodeService>();
 
 
         builder.Services.AddSingleton<IUserRepository, UserRepository>();
@@ -102,6 +106,7 @@ public class Program
         builder.Services.AddSingleton<IFacultyRepository, FacultyRepository>();
         builder.Services.AddSingleton<IStudentStatusRepository, StudentStatusRepository>();
         builder.Services.AddSingleton<IStudyProgramRepository, StudyProgramRepository>();
+        builder.Services.AddSingleton<IConfigurationRepository, ConfigurationRepository>();
 
         builder.Services.AddControllers();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
