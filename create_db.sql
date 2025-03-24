@@ -205,3 +205,24 @@ INSERT INTO addresses (student_id, other, village, district, city, country, type
 
 ('22030002', '468 Lê Quang Định', 'Phường 21', 'Quận 21', 'Cần Thơ', 'Việt Nam', 'thuong_tru');
 
+
+------------------------ v3.0 -------------------------
+CREATE TABLE configurations (
+    id SERIAL PRIMARY KEY,
+    type TEXT UNIQUE NOT NULL,
+    value JSONB NOT NULL
+);
+
+ALTER TABLE student_statuses ADD COLUMN is_referenced BOOLEAN DEFAULT FALSE;
+
+INSERT INTO configurations (type, value) VALUES 
+('student_status_rules', '{
+    "1": [2, 3, 4],
+    "2": [1],
+    "3": [],
+    "4": [1]
+}'),
+('email_domain', '["@student.com"]'),
+('phone_countries', '["VN"]');
+
+UPDATE student_statuses SET is_referenced = TRUE WHERE id IN (1, 2, 3, 4);
