@@ -205,7 +205,6 @@ INSERT INTO addresses (student_id, other, village, district, city, country, type
 
 ('22030002', '468 Lê Quang Định', 'Phường 21', 'Quận 21', 'Cần Thơ', 'Việt Nam', 'thuong_tru');
 
-
 ------------------------ v3.0 -------------------------
 CREATE TABLE configurations (
     id SERIAL PRIMARY KEY,
@@ -230,4 +229,3 @@ UPDATE student_statuses SET is_referenced = TRUE WHERE id IN (1, 2, 3, 4);
 ALTER TABLE students ADD COLUMN created_at TIMESTAMP DEFAULT NOW();
 
 ALTER TABLE configurations ADD COLUMN is_active BOOLEAN DEFAULT TRUE NOT NULL;
-
