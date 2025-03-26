@@ -9,4 +9,7 @@ public interface IStudentStatusRepository
     Task<int> UpdateStudentStatus(StudentStatus studentStatus);
 
     Task<int> AddStudentStatus(string name);
+
+    // Update all student statuses that are referenced in the configuration, others are set to false
+    Task<int> ReferenceStudentStatuses(List<int> statusIds);
 }

@@ -44,4 +44,28 @@ public class StudentStatusRepository : IStudentStatusRepository
 
         return id;
     }
+
+    // Check if the status is referenced in the configuration
+    private async Task<bool> IsStatusReferencedAsync(int statusId)
+    {
+        var sql = "SELECT is_referenced FROM student_statuses WHERE id = @StatusId;";
+
+        return await _db.QuerySingleAsync<bool>(sql, new { StatusId = statusId });
+    }
+
+    public async Task<int> ReferenceStudentStatuses(List<int> statusIds)
+    {
+        // Set all statuses to false first
+        var sqlReset = "UPDATE student_statuses SET is_referenced = FALSE;";
+        await _db.ExecuteAsync(sqlReset);
+
+        // If there are statusIds to update, set them to true
+        if (statusIds != null && statusIds.Count > 0)
+        {
+            var sqlUpdate = "UPDATE student_statuses SET is_referenced = TRUE WHERE id = ANY(@StatusIds);";
+            return await _db.ExecuteAsync(sqlUpdate, new { StatusIds = statusIds.ToArray() });
+        }
+
+        return 0; // No updates needed if statusIds is empty
+    }
 }
