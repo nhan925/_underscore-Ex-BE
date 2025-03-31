@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using DocumentFormat.OpenXml.Office2016.Excel;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using student_management_api.Contracts.IServices;
@@ -14,13 +16,129 @@ namespace student_management_api.Controllers;
 public class StudentController : Controller
 {
     private readonly IStudentService _studentService;
+    private readonly IConfigurationService _configurationService;
     private readonly ILogger<StudentController> _logger;
 
-    public StudentController(IStudentService studentService, ILogger<StudentController> logger)
+    public StudentController(
+        IStudentService studentService, 
+        IConfigurationService configurationService, 
+        ILogger<StudentController> logger
+    )
     {
         _studentService = studentService;
+        _configurationService = configurationService;
         _logger = logger;
     }
+
+    #region ValidateStudentInfomationsInRequestFunctions
+    private async Task<(bool, IActionResult)> ValidateStudentEmail(string email)
+    {
+        _logger.LogInformation("Checking email domain for {Email}", email);
+        var isValidEmail = await _configurationService.CheckEmailDomain(email);
+
+        if (!isValidEmail)
+        {
+            _logger.LogWarning("Invalid email domain for {Email}", email);
+            return (false, BadRequest(new { message = "Invalid email domain" }));
+        }
+
+        return (true, Ok());
+    }
+
+    private async Task<(bool, IActionResult)> ValidateStudentPhoneNumber(string phoneNumber)
+    {
+        _logger.LogInformation("Checking phone number for {PhoneNumber}", phoneNumber);
+        var isValidPhoneNumber = await _configurationService.CheckPhoneNumber(phoneNumber);
+
+        if (!isValidPhoneNumber)
+        {
+            _logger.LogWarning("Invalid phone number for {PhoneNumber}", phoneNumber);
+            return (false, BadRequest(new { message = "Invalid phone number" }));
+        }
+
+        return (true, Ok());
+    }
+
+    private async Task<(bool, IActionResult)> ValidateStudentStatus(int? currentStatus, int? nextStatus)
+    {
+        _logger.LogInformation("Checking student status transition from {CurrentStatus} to {NextStatus}", currentStatus, nextStatus);
+        var nextStatuses = await _configurationService.GetNextStatuses((int)currentStatus);
+        
+        if (!nextStatuses.Any(s => s.Id == nextStatus))
+        {
+            _logger.LogWarning("Invalid student status transition from {CurrentStatus} to {NextStatus}", currentStatus, nextStatus);
+            return (false, BadRequest(new { message = "Invalid student status transition" }));
+        }
+
+        return (true, Ok());
+    }
+
+    private async Task<(bool, IActionResult)> ValidateStudentInformationsInRequest(Object request, string? studentId = null)
+    {
+        if (request == null)
+        {
+            return (false, BadRequest(new { message = "Invalid request" }));
+        }
+
+        if (request is AddStudentRequest addStudentRequest)
+        {
+            var emailDomainValidationResult = await ValidateStudentEmail(addStudentRequest.Email);
+            if (!emailDomainValidationResult.Item1)
+            {
+                return (false, emailDomainValidationResult.Item2);
+            }
+
+            var phoneNumberValidationResult = await ValidateStudentPhoneNumber(addStudentRequest.PhoneNumber);
+            if (!phoneNumberValidationResult.Item1)
+            {
+                return (false, phoneNumberValidationResult.Item2);
+            }
+
+            return (true, Ok());
+        }
+        else if (request is UpdateStudentRequest updateStudentRequest)
+        {
+            if (updateStudentRequest.Email != null)
+            {
+                var result = await ValidateStudentEmail(updateStudentRequest.Email);
+                if (!result.Item1)
+                {
+                    return (false, result.Item2);
+                }
+            }
+
+            if (updateStudentRequest.PhoneNumber != null)
+            {
+                var result = await ValidateStudentPhoneNumber(updateStudentRequest.PhoneNumber);
+                if (!result.Item1)
+                {
+                    return (false, result.Item2);
+                }
+            }
+
+            if (updateStudentRequest.StatusId != null)
+            {
+                var currentStudent = await _studentService.GetStudentById(studentId);
+                if (currentStudent == null)
+                {
+                    return (false, NotFound(new { message = "Student not found" }));
+                }
+
+                var statusValidationResult = await ValidateStudentStatus(currentStudent.StatusId, updateStudentRequest.StatusId);
+                if (!statusValidationResult.Item1)
+                {
+                    return (false, statusValidationResult.Item2);
+                }
+            }
+
+            return (true, Ok());
+        }
+        else
+        {
+            return (false, BadRequest(new { message = "Invalid request" }));
+        }
+    } 
+    #endregion
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetStudentById(string id)
@@ -53,6 +171,12 @@ public class StudentController : Controller
 
         using (_logger.BeginScope("UpdateStudentById request for StudentId: {StudentId}", id))
         {
+            var testResult = await ValidateStudentInformationsInRequest(request, id);
+            if (!testResult.Item1) // If validation fails
+            {
+                return testResult.Item2;
+            }
+
             _logger.LogInformation("Updating student with ID: {StudentId}", id);
             var updatedCount = await _studentService.UpdateStudentById(id, request);
 
@@ -88,8 +212,15 @@ public class StudentController : Controller
 
         using (_logger.BeginScope("AddStudent request"))
         {
+            var testResult = await ValidateStudentInformationsInRequest(request);
+            if (!testResult.Item1) // If validation fails
+            {
+                return testResult.Item2;
+            }
+
             _logger.LogInformation("Adding new student");
             var studentId = await _studentService.AddStudent(request);
+
             _logger.LogInformation("Student added successfully with ID {StudentId}", studentId);
             return Ok(new { StudentId = studentId });
         }
@@ -136,6 +267,11 @@ public class StudentController : Controller
             if (requests == null || !requests.Any())
             {
                 return BadRequest(new { message = "Invalid or empty file" });
+            }
+
+            if (requests.Any(r => ValidateStudentInformationsInRequest(r).Result.Item1 == false)) // If validation fails
+            {
+                return BadRequest(new { message = "Invalid student information in file" });
             }
 
             await _studentService.AddStudents(requests);
