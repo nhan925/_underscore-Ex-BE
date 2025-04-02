@@ -104,24 +104,24 @@ public class ConfigurationService : IConfigurationService
     public async Task<List<StudentStatus>> GetNextStatuses(int statusId)
     {
         var studentStatusesConfig = await GetStudentStatusConfig();
+        var allStatuses = await _studentStatusRepository.GetAllStudentStatuses();
 
         if (studentStatusesConfig == null || (studentStatusesConfig.Value.Count == 0 && studentStatusesConfig.IsActive))
         {
-            return new List<StudentStatus>(); // No valid statuses to check
+            return allStatuses.Where(stt => stt.Id == statusId).ToList(); // No valid statuses to check
         }
 
         if (!studentStatusesConfig.IsActive)
         {
-            return await _studentStatusRepository.GetAllStudentStatuses();
+            return allStatuses;
         }
 
         if (!studentStatusesConfig.Value.ContainsKey(statusId))
         {
-            return new List<StudentStatus>(); // No valid statuses to check
+            return allStatuses.Where(stt => stt.Id == statusId).ToList(); // No valid statuses to check
         }
 
-        var allStatuses = await _studentStatusRepository.GetAllStudentStatuses();
-        var nextStatuses = allStatuses.Where(s => studentStatusesConfig.Value[statusId].Contains(s.Id)).ToList();
+        var nextStatuses = allStatuses.Where(s => studentStatusesConfig.Value[statusId].Contains(s.Id) || s.Id == statusId).ToList();
 
         return nextStatuses;
     }
