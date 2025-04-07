@@ -83,7 +83,7 @@ public class StudentService: IStudentService
 
         using (var workbook = new XLWorkbook())
         {
-            // 1️⃣ Students Sheet
+            // Students Sheet
             var studentSheet = CreateSheet(workbook, "Students",
                 "ID", "Full Name", "Date of Birth", "Gender", "Faculty ID", "Intake Year",
                 "Program ID", "Email", "Phone Number", "Status ID", "Nationality");
@@ -96,7 +96,7 @@ public class StudentService: IStudentService
                        student.Email, student.PhoneNumber, student.StatusId, student.Nationality);
             }
 
-            // 2️⃣ Addresses Sheet
+            // Addresses Sheet
             var addressSheet = CreateSheet(workbook, "Addresses",
                 "Student ID", "Type", "Other", "Village", "District", "City", "Country");
 
