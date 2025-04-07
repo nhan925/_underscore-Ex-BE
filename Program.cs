@@ -99,6 +99,7 @@ public class Program
         builder.Services.AddSingleton<IStudyProgramService, StudyProgramService>();
         builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
         builder.Services.AddSingleton<ICountryPhoneCodeService, CountryPhoneCodeService>();
+        builder.Services.AddSingleton<ILecturersService, LecturersService>();
 
 
         builder.Services.AddSingleton<IUserRepository, UserRepository>();
@@ -107,6 +108,7 @@ public class Program
         builder.Services.AddSingleton<IStudentStatusRepository, StudentStatusRepository>();
         builder.Services.AddSingleton<IStudyProgramRepository, StudyProgramRepository>();
         builder.Services.AddSingleton<IConfigurationRepository, ConfigurationRepository>();
+        builder.Services.AddSingleton<ILecturersRepository, LecturersRepository>();
 
         builder.Services.AddControllers();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
