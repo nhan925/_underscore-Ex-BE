@@ -3,7 +3,7 @@
 
 namespace student_management_api.Models.DTO;
 
-public class GetCourseClassRequest
+public class GetCourseClassResult
 {
     [Required]
     public string Id { get; set; }

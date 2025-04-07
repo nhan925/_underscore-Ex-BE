@@ -18,9 +18,9 @@ public class YearAndSemesterService : IYearAndSemesterService
         return years ?? new();
     }
 
-    public async Task<List<Semester>> GetSemestersByYear(int id)
+    public async Task<List<Semester>> GetSemestersByYear(int yearId)
     {
-        var semesters = await _yearAndSemesterRepository.GetSemestersByYear(id);
+        var semesters = await _yearAndSemesterRepository.GetSemestersByYear(yearId);
         return semesters ?? new();
     }
 }

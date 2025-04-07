@@ -20,10 +20,10 @@ public class YearAndSemesterRepository : IYearAndSemesterRepository
         return result.ToList();
     }
 
-    public async Task<List<Semester>> GetSemestersByYear(int id)
+    public async Task<List<Semester>> GetSemestersByYear(int yearId)
     {
-        var query = "SELECT * FROM semesters WHERE semesters.year_id = @Id";
-        var result = await _db.QueryAsync<Semester>(query, new { Id = id });
+        var query = "SELECT * FROM semesters WHERE semesters.year_id = @YearId";
+        var result = await _db.QueryAsync<Semester>(query, new { YearId = yearId });
         return result.ToList();
     }
 }

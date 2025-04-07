@@ -18,7 +18,7 @@ public class CourseClassService : ICourseClassService
         return await _courseClassRepository.AddCourseClass(courseClass);
     }
 
-    public async Task<List<GetCourseClassRequest>> GetAllCourseClassesBySemester(int semesterId)
+    public async Task<List<GetCourseClassResult>> GetAllCourseClassesBySemester(int semesterId)
     {
         var courseClasses = await _courseClassRepository.GetAllCourseClassesBySemester(semesterId);
         return courseClasses ?? new();

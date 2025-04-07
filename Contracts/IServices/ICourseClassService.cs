@@ -5,7 +5,7 @@ namespace student_management_api.Contracts.IServices;
 
 public interface ICourseClassService
 {
-    Task<List<GetCourseClassRequest>> GetAllCourseClassesBySemester(int semesterId);
+    Task<List<GetCourseClassResult>> GetAllCourseClassesBySemester(int semesterId);
 
     Task<string> AddCourseClass(CourseClass courseClass);
 }

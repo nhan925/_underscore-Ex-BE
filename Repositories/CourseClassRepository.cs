@@ -36,18 +36,18 @@ public class CourseClassRepository : ICourseClassRepository
         return courseClass.Id;
     }
 
-    public async Task<List<GetCourseClassRequest>> GetAllCourseClassesBySemester(int semesterId)
+    public async Task<List<GetCourseClassResult>> GetAllCourseClassesBySemester(int semesterId)
     {
         
         var courseClassQuery = "SELECT * FROM classes WHERE semester_id = @SemesterId";
         var courseClasses = await _db.QueryAsync<CourseClass>(courseClassQuery, new { SemesterId = semesterId });
 
-        var courseClassesRequest = new List<GetCourseClassRequest>();
+        var courseClassResults = new List<GetCourseClassResult>();
 
         foreach (var courseClass in courseClasses)
         {
             
-            var courseClassRequest = new GetCourseClassRequest
+            var courseClassResult = new GetCourseClassResult
             {
                 Id = courseClass.Id,
                 MaxStudents = courseClass.MaxStudents,
@@ -57,20 +57,20 @@ public class CourseClassRepository : ICourseClassRepository
 
             var courseQuery = "SELECT * FROM courses WHERE id = @CourseId";
             var course = await _db.QueryFirstOrDefaultAsync<Course>(courseQuery, new { CourseId = courseClass.CourseId });
-            courseClassRequest.Course = course;
+            courseClassResult.Course = course;
 
             var semesterQuery = "SELECT * FROM semesters WHERE id = @SemesterId";
             var semesterResult = await _db.QueryFirstOrDefaultAsync<Semester>(semesterQuery, new { SemesterId = courseClass.SemesterId });
-            courseClassRequest.Semester = semesterResult;
+            courseClassResult.Semester = semesterResult;
 
             var lecturerQuery = "SELECT * FROM lecturers WHERE id = @LecturerId";
             var lecturer = await _db.QueryFirstOrDefaultAsync<Lecturer>(lecturerQuery, new { LecturerId = courseClass.LecturerId });
-            courseClassRequest.Lecturer = lecturer;
+            courseClassResult.Lecturer = lecturer;
 
-            courseClassesRequest.Add(courseClassRequest);
+            courseClassResults.Add(courseClassResult);
         }
 
-        return courseClassesRequest;
+        return courseClassResults;
     }
 
 }

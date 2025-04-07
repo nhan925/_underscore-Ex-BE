@@ -45,7 +45,6 @@ public class CourseClassController : Controller
             _logger.LogInformation("Fetching all course classes for semester with ID: {SemesterId}", semesterId);
             var courseClasses = await _courseClassService.GetAllCourseClassesBySemester(semesterId);
 
-
             _logger.LogInformation("Successfully retrieved {Count} course classes for semester with ID: {SemesterId}", courseClasses.Count, semesterId);
             return Ok(courseClasses);
         }

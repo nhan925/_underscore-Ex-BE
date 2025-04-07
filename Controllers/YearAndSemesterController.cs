@@ -32,13 +32,13 @@ public class YearAndSemesterController : Controller
         }
     }
 
-    [HttpGet("{id}/semesters")]
-    public async Task<IActionResult> GetSemestersByYear(int id)
+    [HttpGet("{yearId}/semesters")]
+    public async Task<IActionResult> GetSemestersByYear(int yearId)
     {
-        using (_logger.BeginScope("GetSemesterByYear request with YearId: {YearId}", id))
+        using (_logger.BeginScope("GetSemesterByYear request with YearId: {YearId}", yearId))
         {
-            _logger.LogInformation("Fetching semesters for year with ID: {YearId}", id);
-            var semesters = await _yearAndSemesterService.GetSemestersByYear(id);
+            _logger.LogInformation("Fetching semesters for year with ID: {YearId}", yearId);
+            var semesters = await _yearAndSemesterService.GetSemestersByYear(yearId);
             return Ok(semesters);
         }
     }

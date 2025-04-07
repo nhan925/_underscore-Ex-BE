@@ -5,5 +5,5 @@ public interface IYearAndSemesterService
 {
     Task<List<Year>> GetAllYears();
 
-    Task<List<Semester>> GetSemestersByYear(int id);
+    Task<List<Semester>> GetSemestersByYear(int yearId);
 }
