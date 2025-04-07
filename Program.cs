@@ -23,6 +23,7 @@ using Serilog.Sinks.PostgreSQL;
 using student_management_api.Middlewares;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Hosting.Server;
+using student_management_api.Models.DTO;
 
 namespace student_management_api;
 
@@ -100,6 +101,7 @@ public class Program
         builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
         builder.Services.AddSingleton<ICountryPhoneCodeService, CountryPhoneCodeService>();
         builder.Services.AddSingleton<ILecturersService, LecturersService>();
+        builder.Services.AddSingleton<IEnrollmentHistoryService, EnrollmentHistoryService>();
 
 
         builder.Services.AddSingleton<IUserRepository, UserRepository>();
@@ -109,6 +111,7 @@ public class Program
         builder.Services.AddSingleton<IStudyProgramRepository, StudyProgramRepository>();
         builder.Services.AddSingleton<IConfigurationRepository, ConfigurationRepository>();
         builder.Services.AddSingleton<ILecturersRepository, LecturersRepository>();
+        builder.Services.AddSingleton<IEnrollmentHistoryRepository, EnrollmentHistoryRepository>();
 
         builder.Services.AddControllers();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
