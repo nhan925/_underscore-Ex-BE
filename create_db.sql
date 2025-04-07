@@ -229,3 +229,301 @@ UPDATE student_statuses SET is_referenced = TRUE WHERE id IN (1, 2, 3, 4);
 ALTER TABLE students ADD COLUMN created_at TIMESTAMP DEFAULT NOW();
 
 ALTER TABLE configurations ADD COLUMN is_active BOOLEAN DEFAULT TRUE NOT NULL;
+
+------------------------ v4.0 -------------------------
+CREATE TABLE IF NOT EXISTS years (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS semesters (
+    id SERIAL PRIMARY KEY,
+    semester_num INT NOT NULL,
+    year_id INT NOT NULL,
+    start_date TIMESTAMP,
+    end_date TIMESTAMP,
+    
+    FOREIGN KEY(year_id) 
+    REFERENCES years(id)
+    ON DELETE CASCADE,
+
+    UNIQUE (semester_num, year_id)
+);
+
+CREATE TABLE IF NOT EXISTS lecturers (
+    id VARCHAR(10) PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    date_of_birth DATE NOT NULL,
+    gender VARCHAR(10) NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    phone_number VARCHAR(15) NOT NULL,
+    faculty_id INT NOT NULL,
+    
+    FOREIGN KEY(faculty_id) 
+    REFERENCES faculties(id)
+    ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS courses (
+    id VARCHAR(10) PRIMARY KEY,
+    name TEXT NOT NULL,
+    credits INT NOT NULL CHECK (credits > 0),
+    faculty_id INT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    is_active BOOLEAN DEFAULT TRUE,
+    
+    FOREIGN KEY(faculty_id) 
+    REFERENCES faculties(id)
+    ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS course_prerequisites (
+    course_id VARCHAR(10),
+    prerequisite_id VARCHAR(10),
+    
+    PRIMARY KEY (course_id, prerequisite_id),
+    
+    FOREIGN KEY (course_id)
+    REFERENCES courses(id)
+    ON DELETE CASCADE,
+    
+    FOREIGN KEY (prerequisite_id)
+    REFERENCES courses(id)
+    ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS classes (
+    id VARCHAR(10),
+    course_id VARCHAR(10) NOT NULL,
+    semester_id INT NOT NULL,
+    lecturer_id VARCHAR(10) NOT NULL,
+    max_students INT NOT NULL CHECK (max_students > 0),
+    schedule TEXT,
+    room TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    is_active BOOLEAN DEFAULT TRUE,
+    
+    PRIMARY KEY (id, course_id, semester_id),
+    
+    FOREIGN KEY(course_id) 
+    REFERENCES courses(id)
+    ON DELETE RESTRICT,
+    
+    FOREIGN KEY(semester_id) 
+    REFERENCES semesters(id)
+    ON DELETE RESTRICT,
+    
+    FOREIGN KEY(lecturer_id) 
+    REFERENCES lecturers(id)
+    ON DELETE RESTRICT,
+
+    UNIQUE(semester_id, schedule, room)
+);
+
+CREATE TABLE IF NOT EXISTS course_enrollments (
+    student_id VARCHAR(10),
+    course_id VARCHAR(10),
+    class_id VARCHAR(10) NOT NULL,
+    semester_id INT NOT NULL,
+    grade FLOAT,
+    status TEXT DEFAULT 'enrolled' CHECK(status in ('failed', 'passed', 'enrolled')),
+    
+    PRIMARY KEY (student_id, course_id),
+    
+    FOREIGN KEY(student_id) 
+    REFERENCES students(id)
+    ON DELETE RESTRICT,
+    
+    FOREIGN KEY(course_id) 
+    REFERENCES courses(id)
+    ON DELETE RESTRICT,
+    
+    FOREIGN KEY(class_id, course_id, semester_id) 
+    REFERENCES classes(id, course_id, semester_id)
+    ON DELETE RESTRICT,
+    
+    FOREIGN KEY(semester_id) 
+    REFERENCES semesters(id)
+    ON DELETE RESTRICT,
+    
+    CHECK (grade IS NULL OR (grade BETWEEN 0 AND 10))
+);
+
+CREATE TABLE IF NOT EXISTS enrollment_history (
+    student_id VARCHAR(10),
+    created_at TIMESTAMP DEFAULT NOW(),
+    course_id VARCHAR(10) NOT NULL,
+    class_id VARCHAR(10) NOT NULL,
+    semester_id INT NOT NULL,
+    action TEXT NOT NULL CHECK(action in ('register', 'cancel')),
+    
+    PRIMARY KEY (student_id, created_at),
+    
+      FOREIGN KEY(student_id) 
+      REFERENCES students(id)
+      ON DELETE RESTRICT,
+      
+      FOREIGN KEY(class_id, course_id, semester_id) 
+      REFERENCES classes(id, course_id, semester_id)
+      ON DELETE RESTRICT
+);
+
+-- create sample data for new tables in v4.0
+
+INSERT INTO years (name) VALUES 
+('2020 - 2021'),
+('2021 - 2022'),
+('2022 - 2023'),
+('2023 - 2024'),
+('2024 - 2025');
+
+INSERT INTO semesters (semester_num, year_id, start_date, end_date) VALUES 
+(1, 1, '2020-09-01', '2021-01-15'),
+(2, 1, '2021-02-01', '2021-06-15'),
+(1, 2, '2021-09-01', '2022-01-15'),
+(2, 2, '2022-02-01', '2022-06-15'),
+(1, 3, '2022-09-01', '2023-01-15'),
+(2, 3, '2023-02-01', '2023-06-15'),
+(1, 4, '2023-09-01', '2024-01-15'),
+(2, 4, '2024-02-01', '2024-06-15'),
+(1, 5, '2024-09-01', '2025-01-15'),
+(2, 5, '2025-02-01', '2025-06-15');
+
+-- Sample data for lecturers
+INSERT INTO lecturers (id, full_name, date_of_birth, gender, email, phone_number, faculty_id) VALUES 
+('LEC001', 'Phạm Văn Minh', '1975-03-15', 'Nam', 'phamvanminh@faculty.edu.vn', '0912345678', 1), -- Khoa Luật
+('LEC002', 'Nguyễn Thị Hương', '1980-06-22', 'Nữ', 'nguyenthihuong@faculty.edu.vn', '0923456789', 1), -- Khoa Luật
+('LEC003', 'Trần Đức Thắng', '1978-11-05', 'Nam', 'tranducthang@faculty.edu.vn', '0934567890', 2), -- Khoa Tiếng Anh thương mại
+('LEC004', 'Lê Thị Mai', '1982-09-18', 'Nữ', 'lethimai@faculty.edu.vn', '0945678901', 2), -- Khoa Tiếng Anh thương mại
+('LEC005', 'Hoàng Minh Tuấn', '1976-07-30', 'Nam', 'hoangminhtuan@faculty.edu.vn', '0956789012', 3), -- Khoa Tiếng Nhật
+('LEC006', 'Đỗ Thanh Hà', '1983-04-12', 'Nữ', 'dothanhha@faculty.edu.vn', '0967890123', 3), -- Khoa Tiếng Nhật
+('LEC007', 'Vũ Quang Nam', '1979-01-25', 'Nam', 'vuquangnam@faculty.edu.vn', '0978901234', 4), -- Khoa Tiếng Pháp
+('LEC008', 'Ngô Thị Lan', '1981-08-07', 'Nữ', 'ngothilan@faculty.edu.vn', '0989012345', 4); -- Khoa Tiếng Pháp
+
+-- Sample data for courses
+INSERT INTO courses (id, name, credits, faculty_id, description, created_at, is_active) VALUES 
+-- Khoa Luật courses
+('LAW101', 'Luật Dân sự cơ bản', 3, 1, 'Giới thiệu về các nguyên tắc cơ bản của luật dân sự Việt Nam', '2025-04-07 05:20:47', TRUE),
+('LAW102', 'Luật Hình sự đại cương', 3, 1, 'Khái quát về luật hình sự và các tội phạm cơ bản', '2025-04-07 05:20:47', TRUE),
+('LAW201', 'Pháp luật thương mại', 4, 1, 'Luật áp dụng trong hoạt động thương mại và kinh doanh', '2025-04-07 05:20:47', TRUE),
+('LAW301', 'Luật Quốc tế', 4, 1, 'Nghiên cứu về luật pháp quốc tế và các hiệp ước', '2025-04-07 05:20:47', TRUE),
+
+-- Khoa Tiếng Anh thương mại courses
+('ENG101', 'Tiếng Anh thương mại cơ bản', 3, 2, 'Giới thiệu về từ vựng và ngữ pháp tiếng Anh trong môi trường kinh doanh', '2025-04-07 05:20:47', TRUE),
+('ENG102', 'Kỹ năng giao tiếp tiếng Anh', 3, 2, 'Phát triển kỹ năng giao tiếp tiếng Anh trong môi trường làm việc', '2025-04-07 05:20:47', TRUE),
+('ENG201', 'Tiếng Anh thương mại nâng cao', 4, 2, 'Nâng cao kỹ năng tiếng Anh chuyên ngành thương mại', '2025-04-07 05:20:47', TRUE),
+('ENG301', 'Tiếng Anh đàm phán kinh doanh', 4, 2, 'Kỹ năng đàm phán kinh doanh bằng tiếng Anh', '2025-04-07 05:20:47', TRUE),
+
+-- Khoa Tiếng Nhật courses
+('JPN101', 'Tiếng Nhật cơ bản 1', 3, 3, 'Nhập môn tiếng Nhật với các kỹ năng nghe, nói, đọc, viết cơ bản', '2025-04-07 05:20:47', TRUE),
+('JPN102', 'Tiếng Nhật cơ bản 2', 3, 3, 'Tiếp tục phát triển kỹ năng tiếng Nhật cơ bản', '2025-04-07 05:20:47', TRUE),
+('JPN201', 'Tiếng Nhật trung cấp', 4, 3, 'Phát triển kỹ năng tiếng Nhật ở mức độ trung cấp', '2025-04-07 05:20:47', TRUE),
+('JPN301', 'Tiếng Nhật thương mại', 4, 3, 'Tiếng Nhật chuyên ngành thương mại và kinh doanh', '2025-04-07 05:20:47', TRUE),
+
+-- Khoa Tiếng Pháp courses
+('FRE101', 'Tiếng Pháp cơ bản 1', 3, 4, 'Nhập môn tiếng Pháp với các kỹ năng nghe, nói, đọc, viết cơ bản', '2025-04-07 05:20:47', TRUE),
+('FRE102', 'Tiếng Pháp cơ bản 2', 3, 4, 'Tiếp tục phát triển kỹ năng tiếng Pháp cơ bản', '2025-04-07 05:20:47', TRUE),
+('FRE201', 'Tiếng Pháp trung cấp', 4, 4, 'Phát triển kỹ năng tiếng Pháp ở mức độ trung cấp', '2025-04-07 05:20:47', TRUE),
+('FRE301', 'Tiếng Pháp thương mại', 4, 4, 'Tiếng Pháp chuyên ngành thương mại và kinh doanh', '2025-04-07 05:20:47', TRUE);
+
+-- Sample data for course_prerequisites
+INSERT INTO course_prerequisites (course_id, prerequisite_id) VALUES 
+-- Law prerequisites
+('LAW201', 'LAW101'), -- Pháp luật thương mại requires Luật Dân sự cơ bản
+('LAW301', 'LAW201'), -- Luật Quốc tế requires Pháp luật thương mại
+
+-- English prerequisites
+('ENG102', 'ENG101'), -- Kỹ năng giao tiếp tiếng Anh requires Tiếng Anh thương mại cơ bản
+('ENG201', 'ENG102'), -- Tiếng Anh thương mại nâng cao requires Kỹ năng giao tiếp tiếng Anh
+('ENG301', 'ENG201'), -- Tiếng Anh đàm phán kinh doanh requires Tiếng Anh thương mại nâng cao
+
+-- Japanese prerequisites
+('JPN102', 'JPN101'), -- Tiếng Nhật cơ bản 2 requires Tiếng Nhật cơ bản 1
+('JPN201', 'JPN102'), -- Tiếng Nhật trung cấp requires Tiếng Nhật cơ bản 2
+('JPN301', 'JPN201'), -- Tiếng Nhật thương mại requires Tiếng Nhật trung cấp
+
+-- French prerequisites
+('FRE102', 'FRE101'), -- Tiếng Pháp cơ bản 2 requires Tiếng Pháp cơ bản 1
+('FRE201', 'FRE102'), -- Tiếng Pháp trung cấp requires Tiếng Pháp cơ bản 2
+('FRE301', 'FRE201'); -- Tiếng Pháp thương mại requires Tiếng Pháp trung cấp
+
+-- Sample data for classes
+INSERT INTO classes (id, course_id, semester_id, lecturer_id, max_students, schedule, room, created_at, is_active) VALUES 
+-- Classes for 2023-2024 academic year, semester 1 (semester_id = 7)
+('C001', 'LAW101', 7, 'LEC001', 40, 'Thứ 2, 7:30-9:30', 'A101', '2025-04-07 05:20:47', TRUE),
+('C002', 'LAW102', 7, 'LEC002', 35, 'Thứ 3, 13:30-15:30', 'A102', '2025-04-07 05:20:47', TRUE),
+('C003', 'ENG101', 7, 'LEC003', 30, 'Thứ 4, 9:30-11:30', 'B201', '2025-04-07 05:20:47', TRUE),
+('C004', 'ENG102', 7, 'LEC004', 30, 'Thứ 5, 7:30-9:30', 'B202', '2025-04-07 05:20:47', TRUE),
+('C005', 'JPN101', 7, 'LEC005', 25, 'Thứ 6, 13:30-15:30', 'C301', '2025-04-07 05:20:47', TRUE),
+('C006', 'FRE101', 7, 'LEC007', 25, 'Thứ 7, 9:30-11:30', 'C302', '2025-04-07 05:20:47', TRUE),
+
+-- Classes for 2023-2024 academic year, semester 2 (semester_id = 8)
+('C007', 'LAW201', 8, 'LEC001', 35, 'Thứ 2, 9:30-11:30', 'A103', '2025-04-07 05:20:47', TRUE),
+('C008', 'ENG201', 8, 'LEC003', 25, 'Thứ 3, 7:30-9:30', 'B203', '2025-04-07 05:20:47', TRUE),
+('C009', 'JPN102', 8, 'LEC006', 20, 'Thứ 4, 13:30-15:30', 'C303', '2025-04-07 05:20:47', TRUE),
+('C010', 'FRE102', 8, 'LEC008', 20, 'Thứ 5, 9:30-11:30', 'C304', '2025-04-07 05:20:47', TRUE),
+
+-- Classes for 2024-2025 academic year, semester 1 (semester_id = 9)
+('C011', 'LAW301', 9, 'LEC002', 30, 'Thứ 6, 7:30-9:30', 'A104', '2025-04-07 05:20:47', TRUE),
+('C012', 'ENG301', 9, 'LEC004', 25, 'Thứ 7, 13:30-15:30', 'B204', '2025-04-07 05:20:47', TRUE),
+('C013', 'JPN201', 9, 'LEC005', 20, 'Thứ 2, 15:30-17:30', 'C305', '2025-04-07 05:20:47', TRUE),
+('C014', 'FRE201', 9, 'LEC007', 20, 'Thứ 3, 15:30-17:30', 'C306', '2025-04-07 05:20:47', TRUE),
+
+-- Classes for 2024-2025 academic year, semester 2 (semester_id = 10)
+('C015', 'JPN301', 10, 'LEC006', 15, 'Thứ 4, 15:30-17:30', 'C307', '2025-04-07 05:20:47', TRUE),
+('C016', 'FRE301', 10, 'LEC008', 15, 'Thứ 5, 15:30-17:30', 'C308', '2025-04-07 05:20:47', TRUE);
+
+-- Sample data for course_enrollments
+INSERT INTO course_enrollments (student_id, course_id, class_id, semester_id, grade, status) VALUES 
+-- Student 20010001 (Nguyễn Văn An) enrollments - Law student
+('20010001', 'LAW101', 'C001', 7, 3.4, 'failed'),
+('20010001', 'LAW102', 'C002', 7, 7.8, 'passed'),
+('20010001', 'LAW201', 'C007', 8, 8.2, 'passed'),
+('20010001', 'LAW301', 'C011', 9, NULL, 'enrolled'),
+
+-- Student 20020001 (Trần Thị Bông) enrollments - English student
+('20020001', 'ENG101', 'C003', 7, 9.0, 'passed'),
+('20020001', 'ENG102', 'C004', 7, 8.7, 'passed'),
+('20020001', 'ENG201', 'C008', 8, 4.9, 'failed'),
+('20020001', 'ENG301', 'C012', 9, NULL, 'enrolled'),
+
+-- Student 21030001 (Lê Văn Cẩn) enrollments - Japanese student
+('21030001', 'JPN101', 'C005', 7, 7.5, 'passed'),
+('21030001', 'JPN102', 'C009', 8, 8.0, 'passed'),
+('21030001', 'JPN201', 'C013', 9, NULL, 'enrolled'),
+
+-- Student 21040001 (Phạm Minh Dũng) enrollments - French student
+('21040001', 'FRE101', 'C006', 7, 6.5, 'passed'),
+('21040001', 'FRE102', 'C010', 8, 7.2, 'passed'),
+
+-- Student 22010001 (Hoàng Thị Én) enrollments - Law student
+('22010001', 'LAW101', 'C001', 7, 9.5, 'passed'),
+('22010001', 'LAW102', 'C002', 7, 9.2, 'passed'),
+('22010001', 'LAW201', 'C007', 8, NULL, 'enrolled');
+
+-- Sample data for enrollment_history
+INSERT INTO enrollment_history (student_id, created_at, course_id, class_id, semester_id, action) VALUES 
+-- Student 20010001 (Nguyễn Văn An) history
+('20010001', '2023-08-15 09:30:00', 'LAW101', 'C001', 7, 'register'),
+('20010001', '2023-08-15 09:45:00', 'LAW102', 'C002', 7, 'register'),
+('20010001', '2024-01-10 14:20:00', 'LAW201', 'C007', 8, 'register'),
+('20010001', '2024-08-20 10:15:00', 'LAW301', 'C011', 9, 'register'),
+
+-- Student 20020001 (Trần Thị Bông) history
+('20020001', '2023-08-16 11:20:00', 'ENG101', 'C003', 7, 'register'),
+('20020001', '2023-08-16 11:30:00', 'ENG102', 'C004', 7, 'register'),
+('20020001', '2024-01-12 15:45:00', 'ENG201', 'C008', 8, 'register'),
+('20020001', '2024-08-18 09:30:00', 'ENG301', 'C012', 9, 'register'),
+
+-- Student 21030001 (Lê Văn Cẩn) history
+('21030001', '2023-08-17 10:10:00', 'JPN101', 'C005', 7, 'register'),
+('21030001', '2023-08-19 14:25:00', 'LAW101', 'C001', 7, 'register'), -- Registered for Law class
+('21030001', '2023-08-25 16:30:00', 'LAW101', 'C001', 7, 'cancel'), -- Cancelled Law class
+('21030001', '2024-01-15 13:40:00', 'JPN102', 'C009', 8, 'register'),
+('21030001', '2024-08-19 11:05:00', 'JPN201', 'C013', 9, 'register'),
+
+-- Student 21040001 (Phạm Minh Dũng) history
+('21040001', '2023-08-18 13:15:00', 'FRE101', 'C006', 7, 'register'),
+('21040001', '2024-01-16 10:50:00', 'FRE102', 'C010', 8, 'register'),
+('21040001', '2024-06-20 09:00:00', 'FRE102', 'C010', 8, 'register'); -- Registering again for the failed course
