@@ -267,7 +267,7 @@ CREATE TABLE IF NOT EXISTS lecturers (
 CREATE TABLE IF NOT EXISTS courses (
     id VARCHAR(10) PRIMARY KEY,
     name TEXT NOT NULL,
-    credits INT NOT NULL CHECK (credits > 0),
+    credits INT NOT NULL CHECK (credits >= 2),
     faculty_id INT NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
