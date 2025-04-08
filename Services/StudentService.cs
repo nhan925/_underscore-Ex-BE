@@ -76,14 +76,14 @@ public class StudentService: IStudentService
         await _studentRepository.AddStudents(requests);
     }
 
-    public Stream ExportToExcel()
+    public async Task<Stream> ExportToExcel()
     {
-        var students = _studentRepository.GetAllStudents().Result;
+        var students = await _studentRepository.GetAllStudents();
         var memoryStream = new MemoryStream();
 
         using (var workbook = new XLWorkbook())
         {
-            // 1️⃣ Students Sheet
+            // Students Sheet
             var studentSheet = CreateSheet(workbook, "Students",
                 "ID", "Full Name", "Date of Birth", "Gender", "Faculty ID", "Intake Year",
                 "Program ID", "Email", "Phone Number", "Status ID", "Nationality");
@@ -96,7 +96,7 @@ public class StudentService: IStudentService
                        student.Email, student.PhoneNumber, student.StatusId, student.Nationality);
             }
 
-            // 2️⃣ Addresses Sheet
+            // Addresses Sheet
             var addressSheet = CreateSheet(workbook, "Addresses",
                 "Student ID", "Type", "Other", "Village", "District", "City", "Country");
 
@@ -258,9 +258,9 @@ public class StudentService: IStudentService
     }
 
 
-    public Stream ExportToJson()
+    public async Task<Stream> ExportToJson()
     {
-        var students = _studentRepository.GetAllStudents().Result;
+        var students = await _studentRepository.GetAllStudents();
 
         var jsonOptions = new JsonSerializerOptions
         {
