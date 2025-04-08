@@ -2,8 +2,10 @@
 using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Mvc;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Models.Course;
 using student_management_api.Models.CourseEnrollment;
 using student_management_api.Models.DTO;
+using student_management_api.Models.Student;
 using System.Data;
 using System.Text;
 
@@ -186,5 +188,28 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
         var history = await _db.QueryAsync<EnrollmentHistory>(sql, new { SemesterId = semesterId });
 
         return history.ToList();
+    }
+
+    public async Task<Transcript> GetTranscriptOfStudentById(string studentId)
+    {
+        string getTranscriptSql = "SELECT c.id, c.name, c.credits, ce.grade FROM courses c JOIN course_enrollments ce ON c.id = ce.course_id " +
+            "WHERE ce.student_id = @StudentId AND ce.status = 'passed'";
+        var coursesWithGrade = await _db.QueryAsync<SimpliedCourseWithGrade>(getTranscriptSql, new { StudentId = studentId });
+
+        var totalCredits = 0;
+        var gpa = 0.0f;
+        
+        if (coursesWithGrade.Any())
+        {
+            totalCredits = coursesWithGrade.Sum(c => c.Credits);
+            gpa = coursesWithGrade.Sum(c => c.Credits * c.Grade) / totalCredits;
+        }
+        
+        return new()
+        {
+            TotalCredits = totalCredits,
+            GPA = gpa,
+            Courses = coursesWithGrade.ToList()
+        };
     }
 }

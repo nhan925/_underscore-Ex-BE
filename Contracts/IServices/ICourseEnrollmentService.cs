@@ -10,4 +10,6 @@ public interface ICourseEnrollmentService
     Task UnregisterClass(CourseEnrollmentRequest request);
 
     Task<List<EnrollmentHistory>> GetEnrollmentHistoryBySemester(int semesterId);
+
+    Stream GetTranscriptOfStudentById(string studentId);
 }
