@@ -17,9 +17,9 @@ public interface IStudentService
 
     Task AddStudents(List<AddStudentRequest> requests);
 
-    Stream ExportToExcel();
+    Task<Stream> ExportToExcel();
 
-    Stream ExportToJson();
+    Task<Stream> ExportToJson();
 
     Task<string> ImportExcelToJson(Stream fileStream);
 }

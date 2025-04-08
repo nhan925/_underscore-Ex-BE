@@ -11,5 +11,5 @@ public interface ICourseEnrollmentService
 
     Task<List<EnrollmentHistory>> GetEnrollmentHistoryBySemester(int semesterId);
 
-    Stream GetTranscriptOfStudentById(string studentId);
+    Task<Stream> GetTranscriptOfStudentById(string studentId);
 }

@@ -2,7 +2,7 @@
 
 namespace student_management_api.Models.Course;
 
-public class SimpliedCourseWithGrade
+public class SimplifiedCourseWithGrade
 {
     public string Id { get; set; }
 

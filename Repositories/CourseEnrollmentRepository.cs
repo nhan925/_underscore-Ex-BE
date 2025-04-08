@@ -78,8 +78,8 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
                     throw new Exception("Class is full");
                 }
 
-                var prequisiteSql = "SELECT prerequisite_id FROM course_prerequisites WHERE course_id = @CourseId";
-                var prerequisites = await _db.QueryAsync<string>(prequisiteSql, new { CourseId = request.CourseId });
+                var prerequisiteSql = "SELECT prerequisite_id FROM course_prerequisites WHERE course_id = @CourseId";
+                var prerequisites = await _db.QueryAsync<string>(prerequisiteSql, new { CourseId = request.CourseId });
                 
                 if (prerequisites.Any()) // have prerequisites
                 {
@@ -167,7 +167,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
                 var affectedRows = await _db.ExecuteAsync(sql, parameters, transaction);
                 if (affectedRows == 0)
                 {
-                    throw new Exception("No enrollment found to unregister or the student have completed the course");
+                    throw new Exception("No enrollment found to unregister or the student has completed the course");
                 }
 
                 await LogEnrollmentHistory(request, "cancel", transaction);
@@ -194,7 +194,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
     {
         string getTranscriptSql = "SELECT c.id, c.name, c.credits, ce.grade FROM courses c JOIN course_enrollments ce ON c.id = ce.course_id " +
             "WHERE ce.student_id = @StudentId AND ce.status = 'passed'";
-        var coursesWithGrade = await _db.QueryAsync<SimpliedCourseWithGrade>(getTranscriptSql, new { StudentId = studentId });
+        var coursesWithGrade = await _db.QueryAsync<SimplifiedCourseWithGrade>(getTranscriptSql, new { StudentId = studentId });
 
         var totalCredits = 0;
         var gpa = 0.0f;

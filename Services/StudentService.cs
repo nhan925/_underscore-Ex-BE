@@ -76,9 +76,9 @@ public class StudentService: IStudentService
         await _studentRepository.AddStudents(requests);
     }
 
-    public Stream ExportToExcel()
+    public async Task<Stream> ExportToExcel()
     {
-        var students = _studentRepository.GetAllStudents().Result;
+        var students = await _studentRepository.GetAllStudents();
         var memoryStream = new MemoryStream();
 
         using (var workbook = new XLWorkbook())
@@ -258,9 +258,9 @@ public class StudentService: IStudentService
     }
 
 
-    public Stream ExportToJson()
+    public async Task<Stream> ExportToJson()
     {
-        var students = _studentRepository.GetAllStudents().Result;
+        var students = await _studentRepository.GetAllStudents();
 
         var jsonOptions = new JsonSerializerOptions
         {

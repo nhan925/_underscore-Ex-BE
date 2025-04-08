@@ -284,7 +284,7 @@ public class StudentController : Controller
     }
 
     [HttpGet("export/{format}")]
-    public IActionResult ExportStudents(string format)
+    public async Task<IActionResult> ExportStudents(string format)
     {
         using (_logger.BeginScope("ExportStudents request, Format: {Format}", format))
         {
@@ -296,13 +296,13 @@ public class StudentController : Controller
 
             if (format.ToLower() == "json")
             {
-                fileStream = _studentService.ExportToJson();
+                fileStream = await _studentService.ExportToJson();
                 fileName = "students.json";
                 contentType = "application/json";
             }
             else if (format.ToLower() == "excel")
             {
-                fileStream = _studentService.ExportToExcel();
+                fileStream = await _studentService.ExportToExcel();
                 fileName = "students.xlsx";
                 contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             }
@@ -317,13 +317,13 @@ public class StudentController : Controller
     }
 
     [HttpGet("transcript/{student_id}")]
-    public IActionResult GetStudentTranscriptById(string student_id)
+    public async Task<IActionResult> GetStudentTranscriptById(string student_id)
     {
         using (_logger.BeginScope("GetStudentTranscriptById request for StudentId: {StudentId}", student_id))
         {
             _logger.LogInformation("Fetching transcript for student with ID: {StudentId}", student_id);
 
-            var transcriptStream = _courseEnrollmentService.GetTranscriptOfStudentById(student_id);
+            var transcriptStream = await _courseEnrollmentService.GetTranscriptOfStudentById(student_id);
             if (transcriptStream == null)
             {
                 _logger.LogWarning("Transcript not found for student with ID: {StudentId}", student_id);

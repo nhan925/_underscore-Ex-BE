@@ -24,15 +24,15 @@ public class CourseEnrollmentService : ICourseEnrollmentService
         return history;
     }
 
-    public Stream GetTranscriptOfStudentById(string studentId)
+    public async Task<Stream> GetTranscriptOfStudentById(string studentId)
     {
-        var student = _studentRepository.GetStudentById(studentId).Result;
+        var student = await _studentRepository.GetStudentById(studentId);
         if (student == null)
         {
             throw new Exception("student not found");
         }
         
-        var transcript = _courseEnrollmentRepository.GetTranscriptOfStudentById(studentId).Result;
+        var transcript = await _courseEnrollmentRepository.GetTranscriptOfStudentById(studentId);
 
         // Load HTML template
         var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "transcript_template.html");
