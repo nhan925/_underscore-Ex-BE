@@ -290,7 +290,7 @@ CREATE TABLE IF NOT EXISTS course_prerequisites (
     
     FOREIGN KEY (prerequisite_id)
     REFERENCES courses(id)
-    ON DELETE RESTRICT
+    ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS classes (

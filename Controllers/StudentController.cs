@@ -17,16 +17,19 @@ public class StudentController : Controller
 {
     private readonly IStudentService _studentService;
     private readonly IConfigurationService _configurationService;
+    private readonly ICourseEnrollmentService _courseEnrollmentService;
     private readonly ILogger<StudentController> _logger;
 
     public StudentController(
-        IStudentService studentService, 
-        IConfigurationService configurationService, 
+        IStudentService studentService,
+        IConfigurationService configurationService,
+        ICourseEnrollmentService courseEnrollmentService,
         ILogger<StudentController> logger
     )
     {
         _studentService = studentService;
         _configurationService = configurationService;
+        _courseEnrollmentService = courseEnrollmentService;
         _logger = logger;
     }
 
@@ -63,7 +66,7 @@ public class StudentController : Controller
     {
         _logger.LogInformation("Checking student status transition from {CurrentStatus} to {NextStatus}", currentStatus, nextStatus);
         var nextStatuses = await _configurationService.GetNextStatuses((int)currentStatus);
-        
+
         if (!nextStatuses.Any(s => s.Id == nextStatus))
         {
             _logger.LogWarning("Invalid student status transition from {CurrentStatus} to {NextStatus}", currentStatus, nextStatus);
@@ -137,7 +140,7 @@ public class StudentController : Controller
         {
             return (false, BadRequest(new { message = "Invalid request" }));
         }
-    } 
+    }
     #endregion
 
     [HttpGet("{id}")]
@@ -281,7 +284,7 @@ public class StudentController : Controller
     }
 
     [HttpGet("export/{format}")]
-    public IActionResult ExportStudents(string format)
+    public async Task<IActionResult> ExportStudents(string format)
     {
         using (_logger.BeginScope("ExportStudents request, Format: {Format}", format))
         {
@@ -293,13 +296,13 @@ public class StudentController : Controller
 
             if (format.ToLower() == "json")
             {
-                fileStream = _studentService.ExportToJson();
+                fileStream = await _studentService.ExportToJson();
                 fileName = "students.json";
                 contentType = "application/json";
             }
             else if (format.ToLower() == "excel")
             {
-                fileStream = _studentService.ExportToExcel();
+                fileStream = await _studentService.ExportToExcel();
                 fileName = "students.xlsx";
                 contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             }
@@ -310,6 +313,26 @@ public class StudentController : Controller
 
             _logger.LogInformation("Students exported successfully as {Format}", format);
             return File(fileStream, contentType, fileName);
+        }
+    }
+
+    [HttpGet("transcript/{student_id}")]
+    public async Task<IActionResult> GetStudentTranscriptById(string student_id)
+    {
+        using (_logger.BeginScope("GetStudentTranscriptById request for StudentId: {StudentId}", student_id))
+        {
+            _logger.LogInformation("Fetching transcript for student with ID: {StudentId}", student_id);
+
+            var transcriptStream = await _courseEnrollmentService.GetTranscriptOfStudentById(student_id);
+            if (transcriptStream == null)
+            {
+                _logger.LogWarning("Transcript not found for student with ID: {StudentId}", student_id);
+                return NotFound(new { message = "Transcript not found" }); 
+            }
+
+            _logger.LogInformation("Transcript fetched successfully for student with ID: {StudentId}", student_id);
+
+            return File(transcriptStream, "application/pdf", $"{student_id}_transcript.pdf");
         }
     }
 }

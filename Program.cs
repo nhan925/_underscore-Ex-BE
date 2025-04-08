@@ -23,6 +23,10 @@ using Serilog.Sinks.PostgreSQL;
 using student_management_api.Middlewares;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Hosting.Server;
+using student_management_api.Models.DTO;
+using DinkToPdf.Contracts;
+using DinkToPdf;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 
 namespace student_management_api;
 
@@ -99,6 +103,8 @@ public class Program
         builder.Services.AddSingleton<IStudyProgramService, StudyProgramService>();
         builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
         builder.Services.AddSingleton<ICountryPhoneCodeService, CountryPhoneCodeService>();
+        builder.Services.AddSingleton<ILecturersService, LecturersService>();
+        builder.Services.AddSingleton<ICourseEnrollmentService, CourseEnrollmentService>();
 
 
         builder.Services.AddSingleton<IUserRepository, UserRepository>();
@@ -107,6 +113,10 @@ public class Program
         builder.Services.AddSingleton<IStudentStatusRepository, StudentStatusRepository>();
         builder.Services.AddSingleton<IStudyProgramRepository, StudyProgramRepository>();
         builder.Services.AddSingleton<IConfigurationRepository, ConfigurationRepository>();
+        builder.Services.AddSingleton<ILecturersRepository, LecturersRepository>();
+        builder.Services.AddSingleton<ICourseEnrollmentRepository, CourseEnrollmentRepository>();
+
+        builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
         builder.Services.AddControllers();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
