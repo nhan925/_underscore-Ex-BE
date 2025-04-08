@@ -103,6 +103,7 @@ public class Program
         builder.Services.AddSingleton<IStudyProgramService, StudyProgramService>();
         builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
         builder.Services.AddSingleton<ICountryPhoneCodeService, CountryPhoneCodeService>();
+        builder.Services.AddSingleton<ICourseService, CourseService>();
         builder.Services.AddSingleton<IYearAndSemesterService, YearAndSemesterService>();
         builder.Services.AddSingleton<ICourseClassService, CourseClassService>();
         builder.Services.AddSingleton<ILecturersService, LecturersService>();
@@ -115,6 +116,7 @@ public class Program
         builder.Services.AddSingleton<IStudentStatusRepository, StudentStatusRepository>();
         builder.Services.AddSingleton<IStudyProgramRepository, StudyProgramRepository>();
         builder.Services.AddSingleton<IConfigurationRepository, ConfigurationRepository>();
+        builder.Services.AddSingleton<ICourseRepository, CourseRepository>();
         builder.Services.AddSingleton<IYearAndSemesterRepository, YearAndSemesterRepository>();
         builder.Services.AddSingleton<ICourseClassRepository, CourseClassRepository>();
         builder.Services.AddSingleton<ILecturersRepository, LecturersRepository>();
