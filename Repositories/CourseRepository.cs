@@ -17,9 +17,10 @@ public class CourseRepository: ICourseRepository
     {
         var sql = @"
         SELECT 
-            c.id, c.name, c.credits, c.faculty_id AS FacultyId,
-            c.description, c.created_at AS CreatedAt, c.is_active AS IsActive,
-            cp.prerequisite_id AS PrerequisiteId
+            c.id, c.name, c.credits, c.faculty_id,
+            c.description, c.created_at,
+            c.is_active,
+            cp.prerequisite_id
         FROM courses c
         LEFT JOIN course_prerequisites cp 
             ON c.id = cp.course_id;
@@ -31,7 +32,6 @@ public class CourseRepository: ICourseRepository
             sql,
             (course, prereqId) =>
             {
-                // Nếu course chưa tồn tại thì thêm mới
                 if (!courseDict.TryGetValue(course.Id, out var existing))
                 {
                     existing = course;
@@ -39,7 +39,6 @@ public class CourseRepository: ICourseRepository
                     courseDict.Add(existing.Id, existing);
                 }
 
-                // Nếu có prereqId thì thêm vào list
                 if (!string.IsNullOrEmpty(prereqId))
                 {
                     existing.PrerequisitesId.Add(prereqId);
@@ -47,7 +46,7 @@ public class CourseRepository: ICourseRepository
 
                 return existing;
             },
-            splitOn: "PrerequisiteId"
+            splitOn: "prerequisite_id"
         );
 
         return courseDict.Values.ToList();
@@ -60,18 +59,17 @@ public class CourseRepository: ICourseRepository
             c.id,
             c.name,
             c.credits,
-            c.faculty_id    AS FacultyId,
+            c.faculty_id,
             c.description,
-            c.created_at    AS CreatedAt,
-            c.is_active     AS IsActive,
-            cp.prerequisite_id AS PrerequisiteId
+            c.created_at,
+            c.is_active,
+            cp.prerequisite_id
         FROM courses c
         LEFT JOIN course_prerequisites cp 
             ON c.id = cp.course_id
         WHERE c.id = @Id;
         ";
 
-        // Dùng dictionary để gom tất cả các hàng của cùng 1 course lại
         var courseDict = new Dictionary<string, Course>();
 
         await _db.QueryAsync<Course, string, Course>(
@@ -91,20 +89,17 @@ public class CourseRepository: ICourseRepository
                 return existing;
             },
             new { Id = id },
-            splitOn: "PrerequisiteId"
+            splitOn: "prerequisite_id"
         );
 
-        // Kiểm tra xem có khóa học không, nếu không thì ném exception
         var course = courseDict.Values.FirstOrDefault();
         if (course == null)
-        {
             throw new Exception($"Course with ID {id} not found.");
-        }
 
         return course;
     }
 
-    public async Task<int> UpdateCourseById(string id, Course course)
+    public async Task<int> UpdateCourseById(Course course)
     {
         if (_db.State != ConnectionState.Open)
         {
@@ -115,44 +110,42 @@ public class CourseRepository: ICourseRepository
         {
             try
             {
-
-
-
                 // 1. Cập nhật bảng courses
                 var updateSql = @"
-                UPDATE courses
-                SET 
-                    name         = @Name,
-                    credits      = @Credits,
-                    faculty_id   = @FacultyId,
-                    description  = @Description
-                WHERE id = @Id;
-                ";
+            UPDATE courses
+            SET 
+                name         = @Name,
+                credits      = @Credits,
+                faculty_id   = @FacultyId,
+                description  = @Description
+            WHERE id = @Id;
+            ";
+
                 var updateParams = new
                 {
-                    Id = id,
+                    course.Id,
                     course.Name,
                     course.Credits,
                     course.FacultyId,
-                    course.Description,
-                    course.IsActive
+                    course.Description
                 };
+
                 var rowsAffected = await _db.ExecuteAsync(updateSql, updateParams, transaction);
 
                 // 2. Xóa hết các prerequisite cũ
                 var deleteSql = "DELETE FROM course_prerequisites WHERE course_id = @Id;";
-                await _db.ExecuteAsync(deleteSql, new { Id = id }, transaction);
+                await _db.ExecuteAsync(deleteSql, new { course.Id }, transaction);
 
                 // 3. Thêm lại các prerequisite mới (nếu có)
                 if (course.PrerequisitesId?.Any() == true)
                 {
                     var insertSql = @"
-                    INSERT INTO course_prerequisites (course_id, prerequisite_id) 
-                    VALUES (@CourseId, @PrerequisiteId);
-                    ";
-                    // Tạo list các param để batch insert
+                INSERT INTO course_prerequisites (course_id, prerequisite_id) 
+                VALUES (@CourseId, @PrerequisiteId);
+                ";
+
                     var insertParams = course.PrerequisitesId
-                        .Select(pid => new { CourseId = id, PrerequisiteId = pid });
+                        .Select(pid => new { CourseId = course.Id, PrerequisiteId = pid });
 
                     await _db.ExecuteAsync(insertSql, insertParams, transaction);
                 }
@@ -166,7 +159,6 @@ public class CourseRepository: ICourseRepository
                 throw;
             }
         }
-       
     }
 
     public async Task<int> AddCourse(Course course)

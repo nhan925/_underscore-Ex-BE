@@ -8,7 +8,7 @@ public interface ICourseRepository
 
     Task<Course> GetCourseById(string id);
 
-    Task<int> UpdateCourseById(string id, Course course);
+    Task<int> UpdateCourseById(Course course);
 
     Task<int> AddCourse(Course course);
 

@@ -57,40 +57,35 @@ public class CourseController: Controller
         }
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateCourseById(string id, [FromBody] Course course)
+    [HttpPut]
+    public async Task<IActionResult> UpdateCourseById([FromBody] Course course)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        using (_logger.BeginScope("UpdateCourseById request - CourseId: {CourseId}", id))
+        using (_logger.BeginScope("UpdateCourseById request - CourseId: {CourseId}", course.Id))
         {
-            if (id != course.Id)
-            {
-                _logger.LogWarning("Course ID in route does not match ID in body");
-                return BadRequest(new { Message = "Course ID mismatch between route and body." });
-            }
 
             // Kiểm tra nếu khóa học đã có sinh viên đăng ký
-            var hasStudents = await _courseService.CheckStudentExistFromCourse(id);
+            var hasStudents = await _courseService.CheckStudentExistFromCourse(course.Id);
             if (hasStudents)
             {
-                _logger.LogWarning("Cannot update course with ID: {CourseId} because students are enrolled.", id);
-                return BadRequest(new { Message = $"Course with ID {id} cannot be updated because students are enrolled." });
+                _logger.LogWarning("Cannot update course with ID: {CourseId} because students are enrolled.", course.Id);
+                return BadRequest(new { Message = $"Course with ID {course.Id} cannot be updated because students are enrolled." });
             }
 
-            _logger.LogInformation("Updating course with ID: {CourseId}", id);
+            _logger.LogInformation("Updating course with ID: {CourseId}", course.Id);
 
-            var affectedRows = await _courseService.UpdateCourseById(id, course);
+            var affectedRows = await _courseService.UpdateCourseById(course);
 
             if (affectedRows == 0)
             {
-                _logger.LogWarning("Update failed or course not found with ID: {CourseId}", id);
-                return NotFound(new { Message = $"Course with ID {id} not found or no change made." });
+                _logger.LogWarning("Update failed or course not found with ID: {CourseId}", course.Id);
+                return NotFound(new { Message = $"Course with ID {course.Id} not found or no change made." });
             }
 
-            _logger.LogInformation("Successfully updated course with ID: {CourseId}", id);
-            return Ok(affectedRows); // Trả về số dòng bị ảnh hưởng
+            _logger.LogInformation("Successfully updated course with ID: {CourseId}", course.Id);
+            return Ok(new {Message = $"Successfully updated course with ID: {course.Id}"});
         }
     }
 
@@ -105,7 +100,7 @@ public class CourseController: Controller
 
             _logger.LogInformation("Course {CourseId} has students: {HasStudents}", id, hasStudents);
 
-            return Ok(hasStudents); // Trả về true hoặc false
+            return Ok(new { HasStudents = hasStudents });
         }
     }
 
@@ -117,27 +112,23 @@ public class CourseController: Controller
 
         using (_logger.BeginScope("AddCourse request - CourseId: {CourseId}", course.Id))
         {
-            try
+            _logger.LogInformation("Attempting to add course with ID: {CourseId}", course.Id);
+
+            var affectedRows = await _courseService.AddCourse(course);
+
+            if (affectedRows > 0)
             {
-                _logger.LogInformation("Attempting to add course with ID: {CourseId}", course.Id);
-
-                var affectedRows = await _courseService.AddCourse(course);
-
-                if (affectedRows > 0)
+                _logger.LogInformation("Successfully added course with ID: {CourseId}", course.Id);
+                return CreatedAtAction(nameof(GetCourseById), new { id = course.Id }, new
                 {
-                    _logger.LogInformation("Successfully added course with ID: {CourseId}", course.Id);
-                    return CreatedAtAction(nameof(GetCourseById), new { id = course.Id }, course); // 201 Created
-                }
-                else
-                {
-                    _logger.LogWarning("Course creation failed for ID: {CourseId}", course.Id);
-                    return StatusCode(500, new { Message = "Failed to create course." });
-                }
+                    Message = $"Successfully added course with ID: {course.Id}",
+                    Data = course
+                });
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Error occurred while adding course with ID: {CourseId}", course.Id);
-                return BadRequest(new { Message = ex.Message });
+                _logger.LogWarning("Course creation failed for ID: {CourseId}", course.Id);
+                return StatusCode(500, new { Message = $"Failed to create course with ID: {course.Id}" });
             }
         }
     }
@@ -149,19 +140,13 @@ public class CourseController: Controller
         {
             _logger.LogInformation("Processing request to delete course with ID: {CourseId}", id);
 
-            try
-            {
-                var resultMessage = await _courseService.DeleteCourseById(id);
+            var resultMessage = await _courseService.DeleteCourseById(id);
 
-                _logger.LogInformation("Result of course deletion: {Message}", resultMessage);
+            _logger.LogInformation("Result of course deletion: {Message}", resultMessage);
 
-                return Ok(new { Message = resultMessage });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while deleting course with ID: {CourseId}", id);
-                return Ok(new { Message = "Lỗi khi xóa khóa học.", Details = ex.Message });
-            }
+            return Ok(new { Message = resultMessage });
         }
     }
+
+
 }

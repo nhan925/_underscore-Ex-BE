@@ -8,7 +8,7 @@ public interface ICourseService
 
     Task<Course> GetCourseById(string Id);
 
-    Task<int> UpdateCourseById(string id, Course course);
+    Task<int> UpdateCourseById(Course course);
 
     Task<int> AddCourse(Course course);
 

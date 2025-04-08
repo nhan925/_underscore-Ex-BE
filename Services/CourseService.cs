@@ -25,9 +25,9 @@ public class CourseService : ICourseService
         return course ?? new();
     }
 
-    public async Task<int> UpdateCourseById(string id, Course course)
+    public async Task<int> UpdateCourseById(Course course)
     {
-        return await _courseRepository.UpdateCourseById(id, course);
+        return await _courseRepository.UpdateCourseById(course);
     }
 
     public async Task<int> AddCourse(Course course)
