@@ -220,7 +220,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
         {
             StudentId = studentId,
             CourseId = courseId,
-            Grade = grade
+            Grade = Math.Round(grade, 1)
         };
 
         var affectedRows = await _db.ExecuteAsync(sql, parameters);
