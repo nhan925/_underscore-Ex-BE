@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using student_management_api.Contracts.IServices;
+using student_management_api.Models.CourseClass;
 using student_management_api.Models.DTO;
 using student_management_api.Services;
 
@@ -46,6 +47,24 @@ public class CourseClassController : Controller
 
             _logger.LogInformation("Successfully retrieved {Count} course classes for semester with ID: {SemesterId}", courseClasses.Count, semesterId);
             return Ok(courseClasses);
+        }
+    }
+
+    [HttpGet("students")]
+    public async Task<IActionResult> GetStudentsInClass([FromQuery] GetStudentsInClassRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        using (_logger.BeginScope("GetStudentsInClass request"))
+        {
+            _logger.LogInformation("Fetching students in class with ID: {ClassId}", request.ClassId);
+            var students = await _courseClassService.GetStudentsInClass(request);
+
+            _logger.LogInformation("Successfully retrieved {Count} students for class with ID: {ClassId}", students.Count, request.ClassId);
+            return Ok(students);
         }
     }
 }

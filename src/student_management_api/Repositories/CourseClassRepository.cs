@@ -73,4 +73,22 @@ public class CourseClassRepository : ICourseClassRepository
         return courseClassResults;
     }
 
+    public async Task<List<StudentInClass>> GetStudentsInClass(GetStudentsInClassRequest request)
+    {
+        string sql = @"
+            SELECT student_id, grade, status, (SELECT full_name FROM students WHERE id = student_id) full_name
+            FROM course_enrollments
+            WHERE course_id = @CourseId AND class_id = @ClassId AND semester_id = @SemesterId";
+        
+        var parameters = new
+        {
+            CourseId = request.CourseId,
+            ClassId = request.ClassId,
+            SemesterId = request.SemesterId
+        };
+
+        var students = await _db.QueryAsync<StudentInClass>(sql, parameters);
+
+        return students.ToList();
+    }
 }

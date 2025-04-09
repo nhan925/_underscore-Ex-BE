@@ -327,7 +327,7 @@ CREATE TABLE IF NOT EXISTS course_enrollments (
     class_id VARCHAR(10) NOT NULL,
     semester_id INT NOT NULL,
     grade FLOAT,
-    status TEXT DEFAULT 'enrolled' CHECK(status in ('failed', 'passed', 'enrolled')),
+    status TEXT CHECK(status in ('failed', 'passed', 'enrolled')),
     
     PRIMARY KEY (student_id, course_id),
     
@@ -368,6 +368,28 @@ CREATE TABLE IF NOT EXISTS enrollment_history (
       REFERENCES classes(id, course_id, semester_id)
       ON DELETE RESTRICT
 );
+
+-- create triggers
+
+CREATE OR REPLACE FUNCTION set_status_based_on_grade()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.grade IS NULL THEN
+        NEW.status := 'enrolled';
+    ELSIF NEW.grade < 5 THEN
+        NEW.status := 'failed';
+    ELSE
+        NEW.status := 'passed';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_set_status_based_on_grade
+BEFORE INSERT OR UPDATE ON course_enrollments
+FOR EACH ROW
+EXECUTE FUNCTION set_status_based_on_grade();
 
 -- create sample data for new tables in v4.0
 
@@ -475,32 +497,32 @@ INSERT INTO classes (id, course_id, semester_id, lecturer_id, max_students, sche
 ('C016', 'FRE301', 10, 'LEC008', 15, 'Thứ 5, 15:30-17:30', 'C308', '2025-04-07 05:20:47', TRUE);
 
 -- Sample data for course_enrollments
-INSERT INTO course_enrollments (student_id, course_id, class_id, semester_id, grade, status) VALUES 
+INSERT INTO course_enrollments (student_id, course_id, class_id, semester_id, grade) VALUES 
 -- Student 20010001 (Nguyễn Văn An) enrollments - Law student
-('20010001', 'LAW101', 'C001', 7, 3.4, 'failed'),
-('20010001', 'LAW102', 'C002', 7, 7.8, 'passed'),
-('20010001', 'LAW201', 'C007', 8, 8.2, 'passed'),
-('20010001', 'LAW301', 'C011', 9, NULL, 'enrolled'),
+('20010001', 'LAW101', 'C001', 7, 3.4),
+('20010001', 'LAW102', 'C002', 7, 7.8),
+('20010001', 'LAW201', 'C007', 8, 8.2),
+('20010001', 'LAW301', 'C011', 9, NULL),
 
 -- Student 20020001 (Trần Thị Bông) enrollments - English student
-('20020001', 'ENG101', 'C003', 7, 9.0, 'passed'),
-('20020001', 'ENG102', 'C004', 7, 8.7, 'passed'),
-('20020001', 'ENG201', 'C008', 8, 4.9, 'failed'),
-('20020001', 'ENG301', 'C012', 9, NULL, 'enrolled'),
+('20020001', 'ENG101', 'C003', 7, 9.0),
+('20020001', 'ENG102', 'C004', 7, 8.7),
+('20020001', 'ENG201', 'C008', 8, 4.9),
+('20020001', 'ENG301', 'C012', 9, NULL),
 
 -- Student 21030001 (Lê Văn Cẩn) enrollments - Japanese student
-('21030001', 'JPN101', 'C005', 7, 7.5, 'passed'),
-('21030001', 'JPN102', 'C009', 8, 8.0, 'passed'),
-('21030001', 'JPN201', 'C013', 9, NULL, 'enrolled'),
+('21030001', 'JPN101', 'C005', 7, 7.5),
+('21030001', 'JPN102', 'C009', 8, 8.0),
+('21030001', 'JPN201', 'C013', 9, NULL),
 
 -- Student 21040001 (Phạm Minh Dũng) enrollments - French student
-('21040001', 'FRE101', 'C006', 7, 6.5, 'passed'),
-('21040001', 'FRE102', 'C010', 8, 7.2, 'passed'),
+('21040001', 'FRE101', 'C006', 7, 6.5),
+('21040001', 'FRE102', 'C010', 8, 7.2),
 
 -- Student 22010001 (Hoàng Thị Én) enrollments - Law student
-('22010001', 'LAW101', 'C001', 7, 9.5, 'passed'),
-('22010001', 'LAW102', 'C002', 7, 9.2, 'passed'),
-('22010001', 'LAW201', 'C007', 8, NULL, 'enrolled');
+('22010001', 'LAW101', 'C001', 7, 9.5),
+('22010001', 'LAW102', 'C002', 7, 9.2),
+('22010001', 'LAW201', 'C007', 8, NULL);
 
 -- Sample data for enrollment_history
 INSERT INTO enrollment_history (student_id, created_at, course_id, class_id, semester_id, action) VALUES 

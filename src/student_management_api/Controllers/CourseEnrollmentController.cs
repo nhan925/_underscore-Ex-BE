@@ -84,4 +84,31 @@ public class CourseEnrollmentController : Controller
             return BadRequest(new { message = "Invalid action" });
         }
     }
+
+    [HttpPut("update-grade")]
+    public async Task<IActionResult> UpdateStudentGrade([FromBody] UpdateStudentGradeRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        using (_logger.BeginScope("UpdateStudentGrade request"))
+        {
+            _logger.LogInformation("Updating student grade with request: {@Request}", request);
+
+            try
+            {
+                await _courseEnrollmentService.UpdateStudentGrade(request.StudentId, request.CourseId, request.Grade);
+                _logger.LogInformation("Successfully updated student grade");
+
+                return Ok(new { message = "Successfully updated student grade" });
+            }
+            catch
+            {
+                _logger.LogWarning("Failed to update student grade");
+                throw;
+            }
+        }
+    }
 }

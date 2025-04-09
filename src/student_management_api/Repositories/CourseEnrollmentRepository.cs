@@ -99,7 +99,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
                 }
 
                 // begin registering
-                var tryUpdateSql = "UPDATE course_enrollments SET status = 'enrolled' " +
+                var tryUpdateSql = "UPDATE course_enrollments SET grade = null " +
                         "WHERE student_id = @StudentId AND course_id = @CourseId AND status in ('failed', 'passed')";
                 var tryUpdateParameters = new
                 {
@@ -110,8 +110,8 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
 
                 if (tryUpdateAffectedRows == 0)
                 {
-                    var insertSql = "INSERT INTO course_enrollments (student_id, course_id, class_id, semester_id, status) " +
-                        "VALUES (@StudentId, @CourseId, @ClassId, @SemesterId, 'enrolled')";
+                    var insertSql = "INSERT INTO course_enrollments (student_id, course_id, class_id, semester_id) " +
+                        "VALUES (@StudentId, @CourseId, @ClassId, @SemesterId)";
                     var insertParameters = new
                     {
                         StudentId = request.StudentId,
@@ -211,5 +211,19 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
             GPA = gpa,
             Courses = coursesWithGrade.ToList()
         };
+    }
+
+    public async Task<int> UpdateStudentGrade(string studentId, string courseId, float grade)
+    {
+        var sql = "UPDATE course_enrollments SET grade = @Grade WHERE student_id = @StudentId AND course_id = @CourseId";
+        var parameters = new
+        {
+            StudentId = studentId,
+            CourseId = courseId,
+            Grade = grade
+        };
+
+        var affectedRows = await _db.ExecuteAsync(sql, parameters);
+        return affectedRows;
     }
 }
