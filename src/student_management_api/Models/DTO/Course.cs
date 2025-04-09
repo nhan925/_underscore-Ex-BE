@@ -16,7 +16,6 @@ public class Course
     [Required]
     public int FacultyId { get; set; }
 
-    [Required]
     public string Description { get; set; }
 
     public DateTime CreatedAt { get; set; }
