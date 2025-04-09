@@ -21,5 +21,5 @@ public interface IStudentService
 
     Task<Stream> ExportToJson();
 
-    Task<string> ImportExcelToJson(Stream fileStream);
+    Task<string> ConvertExcelToJson(Stream fileStream);
 }
