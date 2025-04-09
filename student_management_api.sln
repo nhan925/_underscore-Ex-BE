@@ -3,11 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "student_management_api", "student_management_api.csproj", "{34276F0F-2E07-474E-90D5-0484C7884FE4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "student_management_api", "src\student_management_api\student_management_api.csproj", "{5D1279DE-FCD2-DAFB-3C8E-D64DBC8EAE50}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "student_management_api_tests", "..\student_management_api_tests\student_management_api_tests.csproj", "{D389A39C-C39D-4A75-ABE4-579008E35456}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "student_management_api_tests", "src\student_management_api_tests\student_management_api_tests.csproj", "{3CF1E52C-2D4D-E8F1-CE91-259F2520352E}"
 	ProjectSection(ProjectDependencies) = postProject
-		{34276F0F-2E07-474E-90D5-0484C7884FE4} = {34276F0F-2E07-474E-90D5-0484C7884FE4}
+		{5D1279DE-FCD2-DAFB-3C8E-D64DBC8EAE50} = {5D1279DE-FCD2-DAFB-3C8E-D64DBC8EAE50}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		readme.md = readme.md
 	EndProjectSection
 EndProject
 Global
@@ -16,14 +22,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{34276F0F-2E07-474E-90D5-0484C7884FE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{34276F0F-2E07-474E-90D5-0484C7884FE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{34276F0F-2E07-474E-90D5-0484C7884FE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{34276F0F-2E07-474E-90D5-0484C7884FE4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D389A39C-C39D-4A75-ABE4-579008E35456}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D389A39C-C39D-4A75-ABE4-579008E35456}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D389A39C-C39D-4A75-ABE4-579008E35456}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D389A39C-C39D-4A75-ABE4-579008E35456}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D1279DE-FCD2-DAFB-3C8E-D64DBC8EAE50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D1279DE-FCD2-DAFB-3C8E-D64DBC8EAE50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D1279DE-FCD2-DAFB-3C8E-D64DBC8EAE50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D1279DE-FCD2-DAFB-3C8E-D64DBC8EAE50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CF1E52C-2D4D-E8F1-CE91-259F2520352E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CF1E52C-2D4D-E8F1-CE91-259F2520352E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CF1E52C-2D4D-E8F1-CE91-259F2520352E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CF1E52C-2D4D-E8F1-CE91-259F2520352E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

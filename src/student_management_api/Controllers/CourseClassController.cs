@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using student_management_api.Contracts.IServices;
-using student_management_api.Models.CourseClass;
 using student_management_api.Models.DTO;
 using student_management_api.Services;
 
