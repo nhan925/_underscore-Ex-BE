@@ -8,4 +8,6 @@ public interface ICourseClassRepository
     Task<List<GetCourseClassResult>> GetAllCourseClassesBySemester(int semesterId);
 
     Task<string> AddCourseClass(CourseClass courseClass);
+
+    Task<List<StudentInClass>> GetStudentsInClass(GetStudentsInClassRequest request);
 }

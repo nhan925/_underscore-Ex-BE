@@ -34,4 +34,6 @@ public interface ICourseEnrollmentService
     /// </code>
     /// </remarks>
     Task<Stream> GetTranscriptOfStudentById(string studentId, string htmlTemplate);
+
+    Task UpdateStudentGrade(string studentId, string courseId, float grade);
 }

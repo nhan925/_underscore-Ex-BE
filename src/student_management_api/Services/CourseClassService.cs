@@ -23,4 +23,10 @@ public class CourseClassService : ICourseClassService
         var courseClasses = await _courseClassRepository.GetAllCourseClassesBySemester(semesterId);
         return courseClasses ?? new();
     }
+
+    public async Task<List<StudentInClass>> GetStudentsInClass(GetStudentsInClassRequest request)
+    {
+        var students = await _courseClassRepository.GetStudentsInClass(request);
+        return students ?? new();
+    }
 }
