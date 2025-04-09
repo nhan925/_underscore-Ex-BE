@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.Extensions.Logging;
 using student_management_api.Contracts.IServices;
 using student_management_api.Models.DTO;
@@ -249,7 +250,7 @@ public class StudentController : Controller
 
             if (format == "excel")
             {
-                jsonContent = await _studentService.ImportExcelToJson(memoryStream);
+                jsonContent = await _studentService.ConvertExcelToJson(memoryStream);
             }
             else if (format == "json")
             {
@@ -320,10 +321,14 @@ public class StudentController : Controller
     public async Task<IActionResult> GetStudentTranscriptById(string student_id)
     {
         using (_logger.BeginScope("GetStudentTranscriptById request for StudentId: {StudentId}", student_id))
-        {
-            _logger.LogInformation("Fetching transcript for student with ID: {StudentId}", student_id);
+        {           
+            // Load HTML template
+            _logger.LogInformation("Loading HTML template for transcript");
+            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "transcript_template.html");
+            var htmlTemplate = System.IO.File.ReadAllText(templatePath);
 
-            var transcriptStream = await _courseEnrollmentService.GetTranscriptOfStudentById(student_id);
+            _logger.LogInformation("Fetching transcript for student with ID: {StudentId}", student_id);
+            var transcriptStream = await _courseEnrollmentService.GetTranscriptOfStudentById(student_id, htmlTemplate);
             if (transcriptStream == null)
             {
                 _logger.LogWarning("Transcript not found for student with ID: {StudentId}", student_id);

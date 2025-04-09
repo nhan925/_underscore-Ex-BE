@@ -24,7 +24,7 @@ public class CourseEnrollmentService : ICourseEnrollmentService
         return history;
     }
 
-    public async Task<Stream> GetTranscriptOfStudentById(string studentId)
+    public async Task<Stream> GetTranscriptOfStudentById(string studentId, string htmlTemplate)
     {
         var student = await _studentRepository.GetStudentById(studentId);
         if (student == null)
@@ -33,10 +33,6 @@ public class CourseEnrollmentService : ICourseEnrollmentService
         }
         
         var transcript = await _courseEnrollmentRepository.GetTranscriptOfStudentById(studentId);
-
-        // Load HTML template
-        var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "transcript_template.html");
-        var htmlTemplate = File.ReadAllText(templatePath);
 
         // Prepare course rows
         var courseRows = string.Join("\n", transcript.Courses.Select(c =>
@@ -76,7 +72,6 @@ public class CourseEnrollmentService : ICourseEnrollmentService
 
         return new MemoryStream(pdfBytes);
     }
-
 
     public async Task RegisterClass(CourseEnrollmentRequest request) =>
         await _courseEnrollmentRepository.RegisterClass(request);

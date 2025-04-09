@@ -158,12 +158,12 @@ public class StudentService: IStudentService
         }
     }
 
-    public async Task<string> ImportExcelToJson(Stream fileStream)
+    public async Task<string> ConvertExcelToJson(Stream fileStream)
     {
         using var workbook = new XLWorkbook(fileStream);
         var students = new List<Student>();
 
-        // 1️⃣ Read Students Sheet
+        // Read Students Sheet
         var studentSheet = workbook.Worksheet("Students");
         var studentRows = studentSheet.RowsUsed().Skip(1); // Skip header
 
@@ -188,7 +188,7 @@ public class StudentService: IStudentService
             students.Add(student);
         }
 
-        // 2️⃣ Read Addresses Sheet
+        // Read Addresses Sheet
         var addressSheet = workbook.Worksheet("Addresses");
         var addressRows = addressSheet.RowsUsed().Skip(1);
 
@@ -210,7 +210,7 @@ public class StudentService: IStudentService
             }
         }
 
-        // 3️⃣ Read IdentityInfo Sheet
+        // Read IdentityInfo Sheet
         var identitySheet = workbook.Worksheet("IdentityInfo");
         var identityRows = identitySheet.RowsUsed().Skip(1);
 
