@@ -118,9 +118,8 @@ public class CourseEnrollmentController : ControllerBase
         using (_logger.BeginScope("GetStudentTranscriptById request for StudentId: {StudentId}", student_id))
         {
             // Load HTML template
-            _logger.LogInformation("Loading HTML template for transcript");
             var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "transcript_template.html");
-            var htmlTemplate = System.IO.File.ReadAllText(templatePath);
+            var htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
 
             _logger.LogInformation("Fetching transcript for student with ID: {StudentId}", student_id);
             var transcriptStream = await _courseEnrollmentService.GetTranscriptOfStudentById(student_id, htmlTemplate);
