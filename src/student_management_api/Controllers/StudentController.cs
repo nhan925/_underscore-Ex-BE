@@ -18,19 +18,16 @@ public class StudentController : ControllerBase
 {
     private readonly IStudentService _studentService;
     private readonly IConfigurationService _configurationService;
-    private readonly ICourseEnrollmentService _courseEnrollmentService;
     private readonly ILogger<StudentController> _logger;
 
     public StudentController(
         IStudentService studentService,
         IConfigurationService configurationService,
-        ICourseEnrollmentService courseEnrollmentService,
         ILogger<StudentController> logger
     )
     {
         _studentService = studentService;
         _configurationService = configurationService;
-        _courseEnrollmentService = courseEnrollmentService;
         _logger = logger;
     }
 
@@ -314,30 +311,6 @@ public class StudentController : ControllerBase
 
             _logger.LogInformation("Students exported successfully as {Format}", format);
             return File(fileStream, contentType, fileName);
-        }
-    }
-
-    [HttpGet("transcript/{student_id}")]
-    public async Task<IActionResult> GetStudentTranscriptById(string student_id)
-    {
-        using (_logger.BeginScope("GetStudentTranscriptById request for StudentId: {StudentId}", student_id))
-        {           
-            // Load HTML template
-            _logger.LogInformation("Loading HTML template for transcript");
-            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "transcript_template.html");
-            var htmlTemplate = System.IO.File.ReadAllText(templatePath);
-
-            _logger.LogInformation("Fetching transcript for student with ID: {StudentId}", student_id);
-            var transcriptStream = await _courseEnrollmentService.GetTranscriptOfStudentById(student_id, htmlTemplate);
-            if (transcriptStream == null)
-            {
-                _logger.LogWarning("Transcript not found for student with ID: {StudentId}", student_id);
-                return NotFound(new { message = "Transcript not found" }); 
-            }
-
-            _logger.LogInformation("Transcript fetched successfully for student with ID: {StudentId}", student_id);
-
-            return File(transcriptStream, "application/pdf", $"{student_id}_transcript.pdf");
         }
     }
 }

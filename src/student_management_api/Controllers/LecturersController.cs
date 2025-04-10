@@ -27,7 +27,7 @@ public class LecturersController : ControllerBase
 
             var lecturers = await _lecturersService.GetAllLecturers();
 
-            _logger.LogInformation("Successfully retrieved {Count} faculties", lecturers.Count);
+            _logger.LogInformation("Successfully retrieved {Count} lecturers", lecturers.Count);
             return Ok(lecturers);
         }
     }
