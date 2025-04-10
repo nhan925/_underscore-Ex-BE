@@ -11,7 +11,7 @@ namespace student_management_api.Controllers;
 [ApiController]
 [Route("api/phone-code")]
 [Authorize]
-public class CountryPhoneCodeController : Controller
+public class CountryPhoneCodeController : ControllerBase
 {
     private readonly ICountryPhoneCodeService _countryPhoneCodeService;
     private readonly ILogger<CountryPhoneCodeController> _logger;

@@ -11,7 +11,7 @@ namespace student_management_api.Controllers;
 [ApiController]
 [Route("api/classes")]
 [Authorize]
-public class CourseClassController : Controller
+public class CourseClassController : ControllerBase
 {
     private readonly ICourseClassService _courseClassService;
     private readonly ILogger<CourseClassController> _logger;

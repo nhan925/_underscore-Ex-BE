@@ -11,7 +11,7 @@ namespace student_management_api.Controllers;
 [ApiController]
 [Route("api/student-status")]
 [Authorize]
-public class StudentStatusController : Controller
+public class StudentStatusController : ControllerBase
 {
     private readonly IStudentStatusService _studentStatusService;
     private readonly ILogger<StudentStatusController> _logger;

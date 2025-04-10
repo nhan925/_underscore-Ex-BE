@@ -8,7 +8,7 @@ namespace student_management_api.Controllers;
 [ApiController]
 [Route("api/course-enrollments")]
 [Authorize]
-public class CourseEnrollmentController : Controller
+public class CourseEnrollmentController : ControllerBase
 {
     private readonly ICourseEnrollmentService _courseEnrollmentService;
     private readonly ILogger<CourseEnrollmentController> _logger;
@@ -28,7 +28,7 @@ public class CourseEnrollmentController : Controller
 
             var history = await _courseEnrollmentService.GetEnrollmentHistoryBySemester(semester_id);
 
-            _logger.LogInformation("Successfully retrieved {Count} histories", history.Count());
+            _logger.LogInformation("Successfully retrieved {Count} histories", history.Count);
             return Ok(history);
         }
     }
@@ -109,6 +109,29 @@ public class CourseEnrollmentController : Controller
                 _logger.LogWarning("Failed to update student grade");
                 throw;
             }
+        }
+    }
+
+    [HttpGet("transcript/{student_id}")]
+    public async Task<IActionResult> GetStudentTranscriptById(string student_id)
+    {
+        using (_logger.BeginScope("GetStudentTranscriptById request for StudentId: {StudentId}", student_id))
+        {
+            // Load HTML template
+            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "transcript_template.html");
+            var htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
+
+            _logger.LogInformation("Fetching transcript for student with ID: {StudentId}", student_id);
+            var transcriptStream = await _courseEnrollmentService.GetTranscriptOfStudentById(student_id, htmlTemplate);
+            if (transcriptStream == null)
+            {
+                _logger.LogWarning("Transcript not found for student with ID: {StudentId}", student_id);
+                return NotFound(new { message = "Transcript not found" });
+            }
+
+            _logger.LogInformation("Transcript fetched successfully for student with ID: {StudentId}", student_id);
+
+            return File(transcriptStream, "application/pdf", $"{student_id}_transcript.pdf");
         }
     }
 }

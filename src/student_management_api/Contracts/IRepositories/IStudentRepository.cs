@@ -7,7 +7,7 @@ public interface IStudentRepository
 {
     Task<Student?> GetStudentById(string id);
 
-    Task<int> UpdateStudentById(string id, UpdateStudentRequest newStudent);
+    Task<int> UpdateStudentById(string id, UpdateStudentRequest request);
 
     Task<int> DeleteStudentById(string id);
 

@@ -11,7 +11,7 @@ namespace student_management_api.Controllers;
 [ApiController]
 [Route("api/study-program")]
 [Authorize]
-public class StudyProgramController : Controller
+public class StudyProgramController : ControllerBase
 {
     private readonly IStudyProgramService _programService;
     private readonly ILogger<StudyProgramController> _logger;

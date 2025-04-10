@@ -9,7 +9,7 @@ namespace student_management_api.Controllers;
 [ApiController]
 [Route("api/faculty")]
 [Authorize]
-public class FacultyController : Controller
+public class FacultyController : ControllerBase
 {
     private readonly IFacultyService _facultyService;
     private readonly ILogger<FacultyController> _logger;
@@ -29,7 +29,7 @@ public class FacultyController : Controller
 
             var faculties = await _facultyService.GetAllFaculties();
 
-            _logger.LogInformation("Successfully retrieved {Count} faculties", faculties.Count());
+            _logger.LogInformation("Successfully retrieved {Count} faculties", faculties.Count);
             return Ok(faculties);
         }
     }

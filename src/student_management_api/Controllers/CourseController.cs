@@ -11,7 +11,7 @@ namespace student_management_api.Controllers;
 [Authorize]
 
 
-public class CourseController: Controller
+public class CourseController: ControllerBase
 {
     private readonly ICourseService _courseService;
     private readonly ILogger<CourseController> _logger;
@@ -31,7 +31,7 @@ public class CourseController: Controller
 
             var courses = await _courseService.GetAllCourses();
 
-            _logger.LogInformation("Successfully retrieved {Count} courses", courses.Count());
+            _logger.LogInformation("Successfully retrieved {Count} courses", courses.Count);
             return Ok(courses);
         }
     }
