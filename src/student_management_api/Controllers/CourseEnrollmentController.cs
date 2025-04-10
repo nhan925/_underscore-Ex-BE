@@ -8,7 +8,7 @@ namespace student_management_api.Controllers;
 [ApiController]
 [Route("api/course-enrollments")]
 [Authorize]
-public class CourseEnrollmentController : Controller
+public class CourseEnrollmentController : ControllerBase
 {
     private readonly ICourseEnrollmentService _courseEnrollmentService;
     private readonly ILogger<CourseEnrollmentController> _logger;
@@ -28,7 +28,7 @@ public class CourseEnrollmentController : Controller
 
             var history = await _courseEnrollmentService.GetEnrollmentHistoryBySemester(semester_id);
 
-            _logger.LogInformation("Successfully retrieved {Count} histories", history.Count());
+            _logger.LogInformation("Successfully retrieved {Count} histories", history.Count);
             return Ok(history);
         }
     }

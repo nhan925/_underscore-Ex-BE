@@ -8,7 +8,7 @@ namespace student_management_api.Controllers;
 [ApiController]
 [Route("api/year")]
 [Authorize]
-public class YearAndSemesterController : Controller
+public class YearAndSemesterController : ControllerBase
 {
     private readonly IYearAndSemesterService _yearAndSemesterService;
     private readonly ILogger<YearAndSemesterController> _logger;

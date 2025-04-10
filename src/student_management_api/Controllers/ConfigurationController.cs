@@ -10,7 +10,7 @@ namespace student_management_api.Controllers;
 [ApiController]
 [Route("api/config")]
 [Authorize]
-public class ConfigurationController : Controller
+public class ConfigurationController : ControllerBase
 {
     private readonly IConfigurationService _configurationService;
     private readonly ILogger<ConfigurationController> _logger;
@@ -26,7 +26,7 @@ public class ConfigurationController : Controller
     {
         using (_logger.BeginScope("GetConfig request"))
         {
-            _logger.LogInformation($"Fetching config of type {type}");
+            _logger.LogInformation("Fetching config of type {Type}", type);
 
             if (type == "email")
             {
@@ -59,7 +59,7 @@ public class ConfigurationController : Controller
     {
         using (_logger.BeginScope("CheckConfig request"))
         {
-            _logger.LogInformation($"Checking config of type {type} with value {value}");
+            _logger.LogInformation("Checking config of type {Type} with value {Value}", type, value);
 
             if (string.IsNullOrEmpty(value))
             {
@@ -70,13 +70,13 @@ public class ConfigurationController : Controller
             if (type == "email")
             {
                 var result = await _configurationService.CheckEmailDomain(value);
-                _logger.LogInformation($"Email domain check result: {result}");
+                _logger.LogInformation("Email domain check result: {Result}", result);
                 return Ok(new { result = result });
             }
             else if (type == "phone-number")
             {
                 var result = await _configurationService.CheckPhoneNumber(value);
-                _logger.LogInformation($"Phone number check result: {result}");
+                _logger.LogInformation("Phone number check result: {Result}", result);
                 return Ok(new { result = result });
             }
             else
@@ -92,7 +92,7 @@ public class ConfigurationController : Controller
     {
         using (_logger.BeginScope("GetNextStatuses request"))
         {
-            _logger.LogInformation($"Fetching next statuses for status {statusId}");
+            _logger.LogInformation("Fetching next statuses for status {StatusId}", statusId);
             var nextStatuses = await _configurationService.GetNextStatuses(statusId);
 
             _logger.LogInformation("Successfully retrieved next statuses");
@@ -168,13 +168,13 @@ public class ConfigurationController : Controller
     {
         using (_logger.BeginScope("TurnAllRulesOnOrOff request"))
         {
-            _logger.LogInformation($"Turning all rules {(isActive ? "on" : "off")}");
+            _logger.LogInformation("Turning all rules {IsActive}", (isActive ? "on" : "off"));
             var updatedCount = await _configurationService.TurnAllRulesOnOrOff(isActive);
 
             if (updatedCount > 0)
             {
                 _logger.LogInformation("All rules turned {Status}", isActive ? "on" : "off");
-                return Ok(new { Message = $"All rules turned {(isActive ? "on" : "off")}." });
+                return Ok(new { Message = $"All rules turned {(isActive ? "on" : "off")}" });
             }
             else
             {

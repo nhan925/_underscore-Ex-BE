@@ -14,7 +14,7 @@ namespace student_management_api.Controllers;
 [ApiController]
 [Route("api/student")]
 [Authorize]
-public class StudentController : Controller
+public class StudentController : ControllerBase
 {
     private readonly IStudentService _studentService;
     private readonly IConfigurationService _configurationService;
@@ -273,7 +273,7 @@ public class StudentController : Controller
                 return BadRequest(new { message = "Invalid or empty file" });
             }
 
-            if (requests.Any(r => ValidateStudentInformationsInRequest(r).Result.Item1 == false)) // If validation fails
+            if (requests.Any(r => !ValidateStudentInformationsInRequest(r).Result.Item1)) // If validation fails
             {
                 return BadRequest(new { message = "Invalid student information in file" });
             }

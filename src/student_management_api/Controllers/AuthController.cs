@@ -7,7 +7,7 @@ namespace student_management_api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController : Controller
+public class AuthController : ControllerBase
 {
     private readonly IJwtService _jwtService;
     private readonly ILogger<AuthController> _logger;
