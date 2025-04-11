@@ -76,7 +76,7 @@ public class CourseClassRepository : ICourseClassRepository
     public async Task<List<StudentInClass>> GetStudentsInClass(GetStudentsInClassRequest request)
     {
         string sql = @"
-            SELECT student_id, grade, status, (SELECT full_name FROM students WHERE id = student_id) full_name
+            SELECT student_id AS id, grade, status, (SELECT full_name FROM students WHERE id = student_id) full_name
             FROM course_enrollments
             WHERE course_id = @CourseId AND class_id = @ClassId AND semester_id = @SemesterId";
         
