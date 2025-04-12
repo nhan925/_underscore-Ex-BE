@@ -99,10 +99,12 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
                 }
 
                 // begin registering
-                var tryUpdateSql = "UPDATE course_enrollments SET grade = null " +
+                var tryUpdateSql = "UPDATE course_enrollments SET grade = null, semester_id = @SemesterId, class_id = @ClassId " +
                         "WHERE student_id = @StudentId AND course_id = @CourseId AND status in ('failed', 'passed')";
                 var tryUpdateParameters = new
                 {
+                    SemesterId = request.SemesterId,
+                    ClassId = request.ClassId,
                     StudentId = request.StudentId,
                     CourseId = request.CourseId
                 };
