@@ -122,7 +122,7 @@ public class Program
         builder.Services.AddSingleton<ILecturersRepository, LecturersRepository>();
         builder.Services.AddSingleton<ICourseEnrollmentRepository, CourseEnrollmentRepository>();
 
-        builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+        builder.Services.AddSingleton<IConverter>(new SynchronizedConverter(new PdfTools()));
 
         builder.Services.AddControllers();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
