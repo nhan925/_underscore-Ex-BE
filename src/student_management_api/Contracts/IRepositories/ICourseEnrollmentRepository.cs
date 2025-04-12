@@ -14,5 +14,5 @@ public interface ICourseEnrollmentRepository
 
     Task<Transcript> GetTranscriptOfStudentById(string studentId);
 
-    Task<int> UpdateStudentGrade(string studentId, string courseId, float grade);
+    Task<int> UpdateStudentGrade(string studentId, string courseId, float? grade);
 }

@@ -215,15 +215,14 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
         };
     }
 
-    public async Task<int> UpdateStudentGrade(string studentId, string courseId, float grade)
+    public async Task<int> UpdateStudentGrade(string studentId, string courseId, float? grade)
     {
         var sql = "UPDATE course_enrollments SET grade = @Grade WHERE student_id = @StudentId AND course_id = @CourseId";
-        var parameters = new
-        {
-            StudentId = studentId,
-            CourseId = courseId,
-            Grade = Math.Round(grade, 1)
-        };
+        var parameters = new DynamicParameters();
+
+        parameters.Add("@StudentId", studentId);
+        parameters.Add("@CourseId", courseId);
+        parameters.Add("@Grade", grade.HasValue ? Math.Round(grade.Value) : null);
 
         var affectedRows = await _db.ExecuteAsync(sql, parameters);
         return affectedRows;

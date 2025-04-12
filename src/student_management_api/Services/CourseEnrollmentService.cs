@@ -79,7 +79,7 @@ public class CourseEnrollmentService : ICourseEnrollmentService
     public async Task UnregisterClass(CourseEnrollmentRequest request) =>
         await _courseEnrollmentRepository.UnregisterClass(request);
 
-    public async Task UpdateStudentGrade(string studentId, string courseId, float grade)
+    public async Task UpdateStudentGrade(string studentId, string courseId, float? grade)
     {
         var affectedRows = await _courseEnrollmentRepository.UpdateStudentGrade(studentId, courseId, grade);
         if (affectedRows == 0)

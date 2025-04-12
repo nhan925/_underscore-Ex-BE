@@ -10,6 +10,5 @@ public class UpdateStudentGradeRequest
     [Required]
     public string CourseId { get; set; }
 
-    [Required]
-    public float Grade { get; set; }
+    public float? Grade { get; set; }
 }
