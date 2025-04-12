@@ -1,4 +1,5 @@
 ﻿using DinkToPdf;
+using DinkToPdf.Contracts;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
 using student_management_api.Models.CourseEnrollment;
@@ -12,10 +13,13 @@ public class CourseEnrollmentService : ICourseEnrollmentService
 
     private readonly IStudentRepository _studentRepository;
 
-    public CourseEnrollmentService(ICourseEnrollmentRepository courseEnrollmentRepository, IStudentRepository studentRepository)
+    private readonly IConverter _pdfConverter;
+
+    public CourseEnrollmentService(ICourseEnrollmentRepository courseEnrollmentRepository, IStudentRepository studentRepository, IConverter converter)
     {
         _courseEnrollmentRepository = courseEnrollmentRepository;
         _studentRepository = studentRepository;
+        _pdfConverter = converter;
     }
 
     public async Task<List<EnrollmentHistory>> GetEnrollmentHistoryBySemester(int semesterId)
@@ -67,8 +71,7 @@ public class CourseEnrollmentService : ICourseEnrollmentService
             }
         };
 
-        var converter = new SynchronizedConverter(new PdfTools());
-        byte[] pdfBytes = converter.Convert(pdf);
+        byte[] pdfBytes = _pdfConverter.Convert(pdf);
 
         return new MemoryStream(pdfBytes);
     }
