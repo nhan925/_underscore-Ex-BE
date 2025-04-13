@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Mvc;
 using student_management_api.Contracts.IRepositories;
@@ -222,7 +222,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
 
         parameters.Add("@StudentId", studentId);
         parameters.Add("@CourseId", courseId);
-        parameters.Add("@Grade", grade.HasValue ? Math.Round(grade.Value) : null);
+        parameters.Add("@Grade", grade.HasValue ? Math.Round(grade.Value, 1) : null);
 
         var affectedRows = await _db.ExecuteAsync(sql, parameters);
         return affectedRows;
