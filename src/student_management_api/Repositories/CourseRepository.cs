@@ -106,21 +106,31 @@ public class CourseRepository: ICourseRepository
             _db.Open();
         }
 
+        // Lấy thông tin khóa học hiện tại để kiểm tra credits
+        var currentCourseSql = "SELECT credits FROM courses WHERE id = @Id";
+        var currentCredits = await _db.ExecuteScalarAsync<int>(currentCourseSql, new { Id = course.Id });
+
+        // Kiểm tra xem có sinh viên đăng ký và credits có thay đổi không
+        var hasStudents = await CheckStudentExistFromCourse(course.Id);
+        if (hasStudents && currentCredits != course.Credits)
+        {
+            throw new InvalidOperationException("Không thể thay đổi số tín chỉ cho khóa học đã có sinh viên đăng ký");
+        }
+
         using (var transaction = _db.BeginTransaction())
         {
             try
             {
                 // 1. Cập nhật bảng courses
                 var updateSql = @"
-            UPDATE courses
-            SET 
-                name         = @Name,
-                credits      = @Credits,
-                faculty_id   = @FacultyId,
-                description  = @Description
-            WHERE id = @Id;
-            ";
-
+                UPDATE courses
+                SET 
+                    name         = @Name,
+                    credits      = @Credits,
+                    faculty_id   = @FacultyId,
+                    description  = @Description
+                WHERE id = @Id;
+                ";
                 var updateParams = new
                 {
                     course.Id,
@@ -129,7 +139,6 @@ public class CourseRepository: ICourseRepository
                     course.FacultyId,
                     course.Description
                 };
-
                 var rowsAffected = await _db.ExecuteAsync(updateSql, updateParams, transaction);
 
                 // 2. Xóa hết các prerequisite cũ
@@ -143,10 +152,8 @@ public class CourseRepository: ICourseRepository
                 INSERT INTO course_prerequisites (course_id, prerequisite_id) 
                 VALUES (@CourseId, @PrerequisiteId);
                 ";
-
                     var insertParams = course.PrerequisitesId
                         .Select(pid => new { CourseId = course.Id, PrerequisiteId = pid });
-
                     await _db.ExecuteAsync(insertSql, insertParams, transaction);
                 }
 
