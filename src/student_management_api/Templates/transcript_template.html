@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bảng điểm</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Aptos&display=swap');
+
+    body {
+      font-family: 'Aptos', sans-serif;
+      font-size: 12pt;
+      color: #1a1a1a;
+      margin: 40px;
+      line-height: 1.6;
+      background-color: #fff;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 24pt;
+      color: #003366;
+      margin: 0;
+    }
+
+    .header p {
+      font-size: 13pt;
+      color: #333;
+      margin: 4px 0 0;
+    }
+
+    .section-title {
+      font-size: 14pt;
+      font-weight: 600;
+      color: #003366;
+      border-bottom: 2px solid #003366;
+      margin: 30px 0 10px;
+      padding-bottom: 4px;
+    }
+
+    .info-table {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .info-table td {
+      padding: 6px 0;
+      vertical-align: top;
+    }
+
+    .info-table .label {
+      font-weight: bold;
+      color: #000;
+      width: 160px;
+    }
+
+    .courses-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .courses-table th,
+    .courses-table td {
+      border: 1px solid #ccc;
+      padding: 8px 6px;
+      text-align: left;
+    }
+
+    .courses-table th {
+      background-color: #e6f0ff;
+      color: #003366;
+      font-weight: 600;
+    }
+
+    .courses-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .summary {
+      margin-top: 20px;
+      font-size: 13pt;
+      text-align: right;
+      color: #003366;
+      font-weight: normal;
+    }
+
+    .summary p {
+      margin: 4px 0;
+    }
+
+    .summary .label {
+      font-weight: bold;
+      color: #000;
+    }
+
+    @media print {
+      body {
+        margin: 5mm;
+      }
+
+      .courses-table th {
+        background-color: #ddd !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact;
+      }
+
+      .courses-table tr:nth-child(even) {
+        background-color: #eee !important;
+        -webkit-print-color-adjust: exact;
+      }
+
+      .section-title {
+        color: #000;
+        border-color: #000;
+      }
+
+      .summary {
+        color: #000;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>{{school_name}}</h1>
+    <p>Bảng điểm</p>
+  </div>
+
+  <div class="section-title">Thông tin sinh viên</div>
+  <table class="info-table">
+    <tr>
+      <td class="label">Họ tên:</td>
+      <td>{{student_name}}</td>
+      <td class="label">MSSV:</td>
+      <td>{{student_id}}</td>
+    </tr>
+    <tr>
+      <td class="label">Khóa:</td>
+      <td>{{intake_year}}</td>
+      <td class="label">Ngày sinh:</td>
+      <td>{{dob}}</td>
+    </tr>
+  </table>
+
+  <div class="section-title">Các môn học đã hoàn thành</div>
+  <table class="courses-table">
+    <thead>
+      <tr>
+        <th>Mã môn</th>
+        <th>Tên môn</th>
+        <th>Số tín chỉ</th>
+        <th>Điểm</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{course_rows}}
+    </tbody>
+  </table>
+
+  <div class="summary">
+    <p><span class="label">Số tín chỉ tích lũy:</span> {{total_credits}}</p>
+    <p><span class="label">GPA tích lũy:</span> {{gpa}}</p>
+  </div>
+
+</body>
+</html>
