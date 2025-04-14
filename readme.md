@@ -3,91 +3,139 @@
 ## Cấu trúc source code
 ### Các component
 ```
-student_management_api/
+src/
 │
-├── Controllers/                  # API endpoints
-│   ├── AuthController.cs
-│   ├── ConfigurationController.cs
-│   ├── CountryPhoneCodeController.cs
-│   ├── FacultyController.cs
-│   ├── StudentController.cs
-│   ├── StudentStatusController.cs
-│   └── StudyProgramController.cs
-|	
-├── Services/                     # Business logic layer
-│   ├── FacultyService.cs
-│   ├── ConfigurationService.cs
-│   ├── CountryPhoneCodeService.cs
-│   ├── JwtService.cs
-│   ├── StudentService.cs
-│   ├── StudentStatusService.cs
-│   └── StudyProgramService.cs
+├── student_management_api_tests/	  # Project test
 │
-├── Repositories/                 # Data access layer
-│   ├── FacultyRepository.cs
-│   ├── ConfigurationRepository.cs
-│   ├── StudentRepository.cs
-│   ├── StudentStatusRepository.cs
-│   ├── StudyProgramRepository.cs
-│   └── UserRepository.cs
-│
-├── Models/                       # Data structures
-│   ├── Authentication/
-│   │   └── AuthRequest.cs
-│   │
-│   ├── Configuration/                      
-│   │   ├── Configuration.cs 
-│   │   ├── CountryPhoneCode.cs 
-│   │
-│   ├── DTO/                      
-│   │   ├── Address.cs 
-│   │   ├── Faculty.cs 
-│   │   ├── FullAddress.cs 
-│   │   ├── FullIdentityInfo.cs 
-│   │   ├── IdentityInfo.cs 
-│   │   ├── PagedResult.cs 
-│   │   ├── Student.cs 
-│   │   ├── StudentStatus.cs 
-│   │   ├── StudyProgram.cs 
-│   │   └── User.cs
-│   │
-│   └── Student/
-│       ├── AddStudentRequest.cs  
-│       ├── SimplifiedStudent.cs 
-│       ├── StudentFilter.cs 
-│       └── UpdateStudentRequest.cs 
-│
-├── Contracts/                    # Interfaces
-│   ├── IRepositories/
-│   │   ├── IFacultyRepository.cs
-│   │   ├── IConfigurationRepository.cs
-│   │   ├── IStudentRepository.cs
-│   │   ├── IStudentStatusRepository.cs
-│   │   ├── IStudyProgramRepository.cs
-│   │   └── IUserRepository.cs
-│   │
-│   └── IServices/
-│       ├── IFacultyService.cs
-│       ├── IConfigurationService.cs
-│       ├── ICountryPhoneCodeService.cs
-│       ├── IJwtService.cs
-│       ├── IStudentService.cs
-│       ├── IStudentStatusService.cs
-│       └── IStudyProgramService.cs
-│
-├── Helpers/                      # Helper classes
-│   └── JsonbTypeHandler.cs       # Custom Dapper type handler for JSON
-│
-├── Middlewares/                  # Custom middleware components
-│   ├── ExceptionHandlingMiddleware.cs
-│   └── LoggingEnrichmentMiddleware.cs
-│
-├── .env                          # Environment variables (not in repo)
-├── .env.example                  # Example environment variables template
-├── create_db.sql                 # Script to create database schema
-└── Program.cs   
+└──	student_management_api/           # Main project
+	│
+	├── Controllers/                  # API endpoints
+	│   ├── AuthController.cs
+	│   ├── ConfigurationController.cs
+	│   ├── CountryPhoneCodeController.cs
+	│   ├── CourseClassController.cs
+	│   ├── CourseController.cs
+	│   ├── CourseEnrollmentController.cs
+	│   ├── FacultyController.cs
+	│   ├── LecturersController.cs
+	│   ├── StudentController.cs
+	│   ├── StudentStatusController.cs
+	│   ├── StudyProgramController.cs
+	│   └── YearAndSemesterController.cs
+	|	
+	├── Services/                     # Business logic layer
+	│   ├── FacultyService.cs
+	│   ├── ConfigurationService.cs
+	│   ├── CountryPhoneCodeService.cs
+	│   ├── CourseClassService.cs
+	│   ├── CourseEnrollmentService.cs
+	│   ├── CourseService.cs
+	│   ├── JwtService.cs
+	│   ├── LecturersService.cs
+	│   ├── StudentService.cs
+	│   ├── StudentStatusService.cs
+	│   ├── StudyProgramService.cs
+	│   └── YearAndSemesterService.cs
+	│
+	├── Repositories/                 # Data access layer
+	│   ├── FacultyRepository.cs
+	│   ├── ConfigurationRepository.cs
+	│   ├── CourseClassRepository.cs
+	│   ├── CourseEnrollmentRepository.cs
+	│   ├── CourseRepository.cs
+	│   ├── LecturersRepository.cs
+	│   ├── StudentRepository.cs
+	│   ├── StudentStatusRepository.cs
+	│   ├── StudyProgramRepository.cs
+	│   ├── UserRepository.cs
+	│   └── YearAndSemesterRepository.cs
+	│
+	├── Models/                       # Data structures
+	│   ├── Authentication/
+	│   │   └── AuthRequest.cs
+	│   │
+	│   ├── Configuration/                      
+	│   │   ├── Configuration.cs 
+	│   │   └── CountryPhoneCode.cs 
+	│   │
+	│   ├── Course/
+	│   │   └── SimplifiedCourseWithGrade.cs
+	│   │
+	│   ├── CourseClass/                      
+	│   │   ├── GetCourseClassResult.cs 
+	│   │   ├── GetStudentsInClassRequest.cs 
+	│   │   └── StudentInClass.cs 
+	│   │
+	│   ├── CourseEnrollment/                      
+	│   │   ├── CourseEnrollmentRequest.cs 
+	│   │   └── UpdateStudentGradeRequest.cs 
+	│   │
+	│   ├── DTO/                      
+	│   │   ├── Address.cs 
+	│   │   ├── Course.cs 
+	│   │   ├── CourseClass.cs 
+	│   │   ├── EnrollmentHistory.cs 
+	│   │   ├── Faculty.cs 
+	│   │   ├── FullAddress.cs 
+	│   │   ├── FullIdentityInfo.cs 
+	│   │   ├── IdentityInfo.cs 
+	│   │   ├── Lecturer.cs 
+	│   │   ├── PagedResult.cs 
+	│   │   ├── Semester.cs 
+	│   │   ├── Student.cs 
+	│   │   ├── StudentStatus.cs 
+	│   │   ├── StudyProgram.cs 
+	│   │   ├── User.cs 
+	│   │   └── Year.cs
+	│   │
+	│   └── Student/
+	│       ├── AddStudentRequest.cs  
+	│       ├── SimplifiedStudent.cs 
+	│       ├── StudentFilter.cs 
+	│       ├── Transcript.cs 
+	│       └── UpdateStudentRequest.cs 
+	│
+	├── Contracts/                    # Interfaces
+	│   ├── IRepositories/
+	│   │   ├── IFacultyRepository.cs
+	│   │   ├── IConfigurationRepository.cs
+	│   │   ├── ICourseClassRepository.cs
+	│   │   ├── ICourseEnrollmentRepository.cs
+	│   │   ├── ICourseRepository.cs
+	│   │   ├── ILecturersRepository.cs
+	│   │   ├── IStudentRepository.cs
+	│   │   ├── IStudentStatusRepository.cs
+	│   │   ├── IStudyProgramRepository.cs
+	│   │   ├── IUserRepository.cs
+	│   │   └── IYearAndSemesterRepository.cs
+	│   │
+	│   └── IServices/
+	│       ├── IFacultyService.cs
+	│       ├── IConfigurationService.cs
+	│       ├── ICountryPhoneCodeService.cs
+	│       ├── ICourseClassService.cs
+	│       ├── ICourseEnrollmentService.cs
+	│       ├── ICourseService.cs
+	│       ├── IJwtService.cs
+	│       ├── ILeturersService.cs
+	│       ├── IStudentService.cs
+	│       ├── IStudentStatusService.cs
+	│       ├── IStudyProgramService.cs
+	│       └── IYearAndSemesterService.cs
+	│
+	├── Helpers/                      # Helper classes
+	│   └── JsonbTypeHandler.cs       # Custom Dapper type handler for JSON
+	│
+	├── Middlewares/                  # Custom middleware components
+	│   ├── ExceptionHandlingMiddleware.cs
+	│   └── LoggingEnrichmentMiddleware.cs
+	│
+	├── .env                          # Environment variables (not in repo)
+	├── .env.example                  # Example environment variables template
+	├── create_db.sql                 # Script to create database schema
+	└── Program.cs   
 ```
-### Flow hoạt động
+### Flow hoạt động - Kiến trúc
 <div align=center>
 	<img src="Documents/call_flow.svg" alt="Call Flow" width="300">
 </div>
@@ -99,6 +147,10 @@ student_management_api/
 - Thêm file `.env` vào thư mục gốc của project theo mẫu (xem file `.env.example`)
 - Cần chạy source Backend để có thể chạy được Frontend
 - Chạy source bằng cách nhấn `F5` hoặc `Ctrl + F5`
+
+## Hướng dẫn chạy Tests
+- Mở `student_management_api_tests` trong Visual Studio
+- Chọn `Test` -> `Run All Tests` hoặc nhấn `Ctrl + R, A`
 
 ## Lưu ý
 - Để test thử APIs có thể sử dụng Swagger (được tích hợp sẵn) bằng cách vào `https://localhost:7285`

@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using DinkToPdf.Contracts;
+using Moq;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Models.Course;
 using student_management_api.Models.CourseEnrollment;
@@ -17,15 +18,18 @@ public class CourseEnrollmentServiceTests
 {
     private readonly Mock<ICourseEnrollmentRepository> _mockCourseEnrollmentRepository;
     private readonly Mock<IStudentRepository> _mockStudentRepository;
+    private readonly Mock<IConverter> _mockPdfConverter;
     private readonly CourseEnrollmentService _courseEnrollmentService;
 
     public CourseEnrollmentServiceTests()
     {
         _mockCourseEnrollmentRepository = new Mock<ICourseEnrollmentRepository>();
         _mockStudentRepository = new Mock<IStudentRepository>();
+        _mockPdfConverter = new Mock<IConverter>();
         _courseEnrollmentService = new CourseEnrollmentService(
             _mockCourseEnrollmentRepository.Object,
-            _mockStudentRepository.Object
+            _mockStudentRepository.Object,
+            _mockPdfConverter.Object
         );
     }
 
