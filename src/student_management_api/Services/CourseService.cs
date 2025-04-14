@@ -37,6 +37,24 @@ public class CourseService : ICourseService
 
     public async Task<string> DeleteCourseById(string id)
     {
+        var course = await _courseRepository.GetCourseById(id);
+
+        if (!course.IsActive)
+        {
+            throw new Exception("Đã xóa rồi, bạn không thể xóa nữa!");
+        }
+
+
+        TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        var createdVietNamTime = TimeZoneInfo.ConvertTimeFromUtc(course.CreatedAt, vietnamTimeZone);
+        var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+        var timeDifference = timeNow.Subtract(createdVietNamTime).TotalMinutes;
+
+        if (timeDifference > 30)
+        {
+            throw new Exception("Đã quá 30 phút, không thể xóa!");
+        }
         return await _courseRepository.DeleteCourseById(id);
     }
 
