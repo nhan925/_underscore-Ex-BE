@@ -37,6 +37,11 @@ public class CourseService : ICourseService
 
     public async Task<string> DeleteCourseById(string id)
     {
+        var course = await _courseRepository.GetCourseById(id);
+        if (DateTime.Now.Subtract(course.CreatedAt).Minutes > 30)
+        {
+            throw new Exception("Đã quá 30 phút, không thể xóa!");
+        }
         return await _courseRepository.DeleteCourseById(id);
     }
 
