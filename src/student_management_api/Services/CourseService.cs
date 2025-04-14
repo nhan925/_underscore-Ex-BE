@@ -44,9 +44,14 @@ public class CourseService : ICourseService
             throw new Exception("Đã xóa rồi, bạn không thể xóa nữa!");
         }
 
-        var timeDifference = DateTime.Now.Subtract(course.CreatedAt).TotalHours;
 
-        if (timeDifference > 0.5)
+        TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        var createdVietNamTime = TimeZoneInfo.ConvertTimeFromUtc(course.CreatedAt, vietnamTimeZone);
+        var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+        var timeDifference = timeNow.Subtract(createdVietNamTime).TotalMinutes;
+
+        if (timeDifference > 30)
         {
             throw new Exception("Đã quá 30 phút, không thể xóa!");
         }
