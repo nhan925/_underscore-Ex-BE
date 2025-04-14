@@ -65,17 +65,6 @@ public class CourseController: ControllerBase
 
         using (_logger.BeginScope("UpdateCourseById request - CourseId: {CourseId}", course.Id))
         {
-
-            // Kiểm tra nếu khóa học đã có sinh viên đăng ký
-            var hasStudents = await _courseService.CheckStudentExistFromCourse(course.Id);
-            if (hasStudents)
-            {
-                _logger.LogWarning("Cannot update course with ID: {CourseId} because students are enrolled.", course.Id);
-                return BadRequest(new { Message = $"Course with ID {course.Id} cannot be updated because students are enrolled." });
-            }
-
-            _logger.LogInformation("Updating course with ID: {CourseId}", course.Id);
-
             var affectedRows = await _courseService.UpdateCourseById(course);
 
             if (affectedRows == 0)
