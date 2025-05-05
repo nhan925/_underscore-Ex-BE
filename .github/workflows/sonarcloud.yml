@@ -49,22 +49,25 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
 
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+      - name: Install Coverlet
+        run: dotnet tool install --global coverlet.console
 
       # Run tests and collect code coverage
       - name: Run tests and collect coverage
-        run: dotnet test --collect:"Code Coverage" --results-directory TestResults
-
-      - name: Convert coverage report to OpenCover format
-        run: reportgenerator -reports:TestResults/**/*.coverage -targetdir:coverage-report -reporttypes:opencover
-
+        run: |
+          dotnet test \
+          --collect:"XPlat Code Coverage" \
+          --results-directory TestResults \
+          /p:CollectCoverage=true \
+          /p:CoverletOutputFormat=opencover \
+          /p:CoverletOutput=TestResults/coverage.opencover.xml
+          
       # Perform SonarQube analysis
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"nhan925__underscore-Ex-BE" /o:"nhan925" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths=coverage-report/coverage.opencover.xml /d:sonar.exclusions=**/*.html,**/*.sql
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"nhan925__underscore-Ex-BE" /o:"nhan925" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths=TestResults/coverage.opencover.xml /d:sonar.exclusions=**/*.html,**/*.sql
           dotnet build
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
