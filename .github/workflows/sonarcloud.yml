@@ -38,24 +38,8 @@ jobs:
         run: |
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
-
-      # Setup .NET and restore dependencies
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 9.0.203
-          include-prerelease: true
-
-      - name: Install dependencies
-        run: dotnet restore
-
-      - name: Install Coverlet
-        run: dotnet tool install --global coverlet.console
-
-      # Run tests and collect code coverage
-      - name: Run tests and collect coverage
-        run: |
-          dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults
+      - name: Install dotnet-coverage
+        run: dotnet tool install --global dotnet-coverage
           
       # Perform SonarQube analysis
       - name: Build and analyze
@@ -63,6 +47,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"nhan925__underscore-Ex-BE" /o:"nhan925" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.cobertura.reportsPaths=TestResults/**/coverage.cobertura.xml /d:sonar.exclusions=**/*.html,**/*.sql
-          dotnet build
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"nhan925__underscore-Ex-BE" /o:"nhan925" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.exclusions=**/*.html,**/*.sql
+          dotnet build --no-incremental
+          dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
