@@ -55,12 +55,7 @@ jobs:
       # Run tests and collect code coverage
       - name: Run tests and collect coverage
         run: |
-          dotnet test \
-          --collect:"XPlat Code Coverage" \
-          --results-directory TestResults \
-          /p:CollectCoverage=true \
-          /p:CoverletOutputFormat=opencover \
-          /p:CoverletOutput=TestResults/coverage.opencover.xml
+          dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=TestResults/coverage.opencover.xml
           
       # Perform SonarQube analysis
       - name: Build and analyze
