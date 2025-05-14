@@ -2,17 +2,17 @@
 
 public class EnrollmentHistory
 {
-    public string StudentId { get; set; }
+    public string? StudentId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
-    public string CourseId { get; set; }
+    public string? CourseId { get; set; }
 
-    public string ClassId { get; set; }
+    public string? ClassId { get; set; }
 
     public int SemesterId { get; set; }
 
-    private string _action;
+    private string? _action;
     public string Action
     {
         get {

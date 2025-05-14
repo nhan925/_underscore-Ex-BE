@@ -33,7 +33,7 @@ public class CourseClassRepository : ICourseClassRepository
             throw new Exception("Failed to add course class");
         }
 
-        return courseClass.Id;
+        return courseClass.Id!;
     }
 
     public async Task<List<GetCourseClassResult>> GetAllCourseClassesBySemester(int semesterId)

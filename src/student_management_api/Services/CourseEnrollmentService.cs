@@ -39,7 +39,7 @@ public class CourseEnrollmentService : ICourseEnrollmentService
         var transcript = await _courseEnrollmentRepository.GetTranscriptOfStudentById(studentId);
 
         // Prepare course rows
-        var courseRows = string.Join("\n", transcript.Courses.Select(c =>
+        var courseRows = string.Join("\n", transcript.Courses!.Select(c =>
             $"<tr><td>{c.Id}</td><td>{c.Name}</td><td>{c.Credits}</td><td>{c.Grade}</td></tr>"
         ));
 
@@ -49,7 +49,7 @@ public class CourseEnrollmentService : ICourseEnrollmentService
             .Replace("{{student_name}}", student.FullName)
             .Replace("{{student_id}}", student.Id)
             .Replace("{{intake_year}}", student.IntakeYear.ToString())
-            .Replace("{{dob}}", student.DateOfBirth.Value.ToString("d"))
+            .Replace("{{dob}}", student.DateOfBirth!.Value.ToString("d"))
             .Replace("{{course_rows}}", courseRows)
             .Replace("{{total_credits}}", transcript.TotalCredits.ToString())
             .Replace("{{gpa}}", transcript.GPA.ToString("0.00"));

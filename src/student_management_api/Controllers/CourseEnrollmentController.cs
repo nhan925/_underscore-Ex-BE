@@ -99,7 +99,7 @@ public class CourseEnrollmentController : ControllerBase
 
             try
             {
-                await _courseEnrollmentService.UpdateStudentGrade(request.StudentId, request.CourseId, request.Grade);
+                await _courseEnrollmentService.UpdateStudentGrade(request.StudentId!, request.CourseId!, request.Grade);
                 _logger.LogInformation("Successfully updated student grade");
 
                 return Ok(new { message = "Successfully updated student grade" });

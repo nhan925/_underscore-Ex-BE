@@ -4,7 +4,7 @@ namespace student_management_api.Models.Student;
 
 public class SimplifiedStudent
 {
-    public string Id { get; set; } // 8-digit student ID (e.g., 22010001)
+    public string? Id { get; set; } // 8-digit student ID (e.g., 22010001)
 
     public string? FullName { get; set; }
 

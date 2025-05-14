@@ -21,7 +21,7 @@ public class ConfigurationService : IConfigurationService
     {
         var domainsConfig = await GetEmailDomainsConfig();
 
-        if (domainsConfig == null || (domainsConfig.Value.Count == 0 && domainsConfig.IsActive))
+        if (domainsConfig == null || (domainsConfig.Value!.Count == 0 && domainsConfig.IsActive))
         {
             return false; // No valid domains to check
         }
@@ -43,7 +43,7 @@ public class ConfigurationService : IConfigurationService
 
         var countriesConfig = await GetPhoneNumberCountryConfig(); // Get allowed country codes
 
-        if (countriesConfig == null || (countriesConfig.Value.Count == 0 && countriesConfig.IsActive))
+        if (countriesConfig == null || (countriesConfig.Value!.Count == 0 && countriesConfig.IsActive))
         {
             return false;
         }
@@ -106,7 +106,7 @@ public class ConfigurationService : IConfigurationService
         var studentStatusesConfig = await GetStudentStatusConfig();
         var allStatuses = await _studentStatusRepository.GetAllStudentStatuses();
 
-        if (studentStatusesConfig == null || (studentStatusesConfig.Value.Count == 0 && studentStatusesConfig.IsActive))
+        if (studentStatusesConfig == null || (studentStatusesConfig.Value!.Count == 0 && studentStatusesConfig.IsActive))
         {
             return allStatuses.Where(stt => stt.Id == statusId).ToList(); // No valid statuses to check
         }
@@ -153,7 +153,7 @@ public class ConfigurationService : IConfigurationService
 
     public async Task<int> UpdateStudentStatusConfig(Configuration<Dictionary<int, List<int>>> config)
     {
-        var studentStatusesIds = config.Value
+        var studentStatusesIds = config.Value!
             .SelectMany(kvp => kvp.Value)
             .Distinct()
             .ToList();

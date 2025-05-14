@@ -189,8 +189,8 @@ public class Program
             options.InvalidModelStateResponseFactory = context =>
             {
                 var errors = context.ModelState
-                    .Where(e => e.Value.Errors.Count > 0)
-                    .SelectMany(e => e.Value.Errors.Select(err => err.ErrorMessage)) // Extract only messages
+                    .Where(e => e.Value!.Errors.Count > 0)
+                    .SelectMany(e => e.Value!.Errors.Select(err => err.ErrorMessage)) // Extract only messages
                     .ToList();
 
                 var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
