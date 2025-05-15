@@ -409,7 +409,7 @@ public class StudentRepository : IStudentRepository
 
                     // Address Table
                     int addressCount = 0;
-                    foreach (var address in request.Addresses)
+                    foreach (var address in request.Addresses!)
                     {
                         addressValues.Add($"(@StudentId{index}_{addressCount}, @Other{index}_{addressCount}, @Village{index}_{addressCount}, @District{index}_{addressCount}, " +
                             $"@City{index}_{addressCount}, @Country{index}_{addressCount}, @Type{index}_{addressCount})");
@@ -429,7 +429,7 @@ public class StudentRepository : IStudentRepository
                     identityValues.Add($"(@StudentId{index}, @Number{index}, @PlaceOfIssue{index}, @DateOfIssue{index}, @ExpiryDate{index}, @AdditionalInfo{index}, @Type{index})");
 
                     identityParameters.Add(new NpgsqlParameter($"@StudentId{index}", studentId));
-                    identityParameters.Add(new NpgsqlParameter($"@Number{index}", request.IdentityInfo.Number));
+                    identityParameters.Add(new NpgsqlParameter($"@Number{index}", request.IdentityInfo!.Number));
                     identityParameters.Add(new NpgsqlParameter($"@PlaceOfIssue{index}", request.IdentityInfo.PlaceOfIssue));
                     identityParameters.Add(new NpgsqlParameter($"@DateOfIssue{index}", request.IdentityInfo.DateOfIssue));
                     identityParameters.Add(new NpgsqlParameter($"@ExpiryDate{index}", request.IdentityInfo.ExpiryDate));
@@ -515,15 +515,15 @@ public class StudentRepository : IStudentRepository
         var identityInfos = await _db.QueryAsync<FullIdentityInfo>(identityInfoQuery, new { StudentIds = studentIds });
 
         // Map addresses and identity info to students
-        var addressLookup = addresses
-            .GroupBy(a => a.StudentId)
+        var addressLookup = addresses?
+            .GroupBy(a => a.StudentId!)
             .ToDictionary(g => g.Key, g => g.Select(fa => new Address(fa)).ToList());
-        var identityLookup = identityInfos.ToDictionary(i => i.StudentId, i => new IdentityInfo(i));
+        var identityLookup = identityInfos?.ToDictionary(i => i.StudentId!, i => new IdentityInfo(i));
 
         foreach (var student in students)
         {
-            student.Addresses = addressLookup[student.Id]; 
-            student.IdentityInfo = identityLookup[student.Id]; 
+            student.Addresses = addressLookup != null ? addressLookup[student.Id!] : new(); 
+            student.IdentityInfo = identityLookup != null ? identityLookup[student.Id!] : new(); 
         }
 
         return students;

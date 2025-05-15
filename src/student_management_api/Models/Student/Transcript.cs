@@ -5,7 +5,7 @@ namespace student_management_api.Models.Student;
 
 public class Transcript
 {
-    public List<SimplifiedCourseWithGrade> Courses { get; set; }
+    public List<SimplifiedCourseWithGrade>? Courses { get; set; }
 
     public int TotalCredits { get; set; }
 

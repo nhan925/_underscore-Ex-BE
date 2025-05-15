@@ -19,7 +19,7 @@ public class ConfigurationRepository : IConfigurationRepository
         string query = "SELECT * FROM configurations WHERE type = @Type";
         var result = await _db.QueryFirstOrDefaultAsync<Configuration<T>>(query, new { Type = type });
 
-        return result;
+        return result ?? new();
     }
 
     public async Task<Configuration<List<string>>> GetEmailDomainsConfig()

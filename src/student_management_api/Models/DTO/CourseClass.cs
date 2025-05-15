@@ -5,23 +5,23 @@ namespace student_management_api.Models.DTO;
 public class CourseClass
 {
     [Required]
-    public string Id { get; set; }
+    public string? Id { get; set; }
 
     [Required]
-    public string CourseId { get; set; }
+    public string? CourseId { get; set; }
 
     [Required]
     public int SemesterId { get; set; }
 
     [Required]
-    public string LecturerId { get; set; }
+    public string? LecturerId { get; set; }
 
     [Required]
     public int MaxStudents { get; set; }
 
     [Required]
-    public string Schedule { get; set; }
+    public string? Schedule { get; set; }
 
     [Required]
-    public string Room { get; set; }
+    public string? Room { get; set; }
 }

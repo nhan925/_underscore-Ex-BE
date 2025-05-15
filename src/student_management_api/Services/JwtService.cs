@@ -24,7 +24,7 @@ public class JwtService: IJwtService
 
     public async Task<string?> AuthenticateUser(AuthRequest request)
     {
-        var user = await _userRepository.GetUser(request.Username);
+        var user = await _userRepository.GetUser(request.Username!);
         
         if (user == null)
         {
@@ -47,7 +47,7 @@ public class JwtService: IJwtService
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
+            new Claim(JwtRegisteredClaimNames.UniqueName, user.Username!),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

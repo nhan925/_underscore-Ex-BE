@@ -7,7 +7,7 @@ namespace student_management_api.Helpers;
 
 public class JsonbTypeHandler<T> : SqlMapper.TypeHandler<T>
 {
-    public override void SetValue(IDbDataParameter parameter, T value)
+    public override void SetValue(IDbDataParameter parameter, T? value)
     {
         parameter.Value = value is null ? (object)DBNull.Value : JsonSerializer.Serialize(value);
         // Ensure the correct PostgreSQL type

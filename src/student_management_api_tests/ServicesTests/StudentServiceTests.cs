@@ -412,7 +412,7 @@ public class StudentServiceTests
         memStream.Position = 0;
 
         // Act
-        var jsonResult = await _studentService.ConvertExcelToJson(memStream);
+        var jsonResult = _studentService.ConvertExcelToJson(memStream);
 
         // Assert
         Assert.NotNull(jsonResult);

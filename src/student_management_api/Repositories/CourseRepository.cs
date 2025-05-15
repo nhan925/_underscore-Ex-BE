@@ -32,16 +32,16 @@ public class CourseRepository: ICourseRepository
             sql,
             (course, prereqId) =>
             {
-                if (!courseDict.TryGetValue(course.Id, out var existing))
+                if (!courseDict.TryGetValue(course.Id!, out var existing))
                 {
                     existing = course;
                     existing.PrerequisitesId = new List<string>();
-                    courseDict.Add(existing.Id, existing);
+                    courseDict.Add(existing.Id!, existing);
                 }
 
                 if (!string.IsNullOrEmpty(prereqId))
                 {
-                    existing.PrerequisitesId.Add(prereqId);
+                    existing.PrerequisitesId!.Add(prereqId);
                 }
 
                 return existing;
@@ -76,15 +76,15 @@ public class CourseRepository: ICourseRepository
             sql,
             (course, prereqId) =>
             {
-                if (!courseDict.TryGetValue(course.Id, out var existing))
+                if (!courseDict.TryGetValue(course.Id!, out var existing))
                 {
                     existing = course;
                     existing.PrerequisitesId = new List<string>();
-                    courseDict.Add(existing.Id, existing);
+                    courseDict.Add(existing.Id!, existing);
                 }
 
                 if (!string.IsNullOrEmpty(prereqId))
-                    existing.PrerequisitesId.Add(prereqId);
+                    existing.PrerequisitesId!.Add(prereqId);
 
                 return existing;
             },
@@ -111,7 +111,7 @@ public class CourseRepository: ICourseRepository
         var currentCredits = await _db.ExecuteScalarAsync<int>(currentCourseSql, new { Id = course.Id });
 
         // Kiểm tra xem có sinh viên đăng ký và credits có thay đổi không
-        var hasStudents = await CheckStudentExistFromCourse(course.Id);
+        var hasStudents = await CheckStudentExistFromCourse(course.Id!);
         if (hasStudents && currentCredits != course.Credits)
         {
             throw new InvalidOperationException("Không thể thay đổi số tín chỉ cho khóa học đã có sinh viên đăng ký");
