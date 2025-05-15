@@ -95,32 +95,32 @@ public class Program
         });
 
         // Add services to the container.
-        builder.Services.AddSingleton<IDbConnection>(sp => new NpgsqlConnection(connectionString));
-        builder.Services.AddSingleton<IJwtService, JwtService>();
-        builder.Services.AddSingleton<IFacultyService, FacultyService>();
-        builder.Services.AddSingleton<IStudentService, StudentService>();
-        builder.Services.AddSingleton<IStudentStatusService, StudentStatusService>();
-        builder.Services.AddSingleton<IStudyProgramService, StudyProgramService>();
-        builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
-        builder.Services.AddSingleton<ICountryPhoneCodeService, CountryPhoneCodeService>();
-        builder.Services.AddSingleton<ICourseService, CourseService>();
-        builder.Services.AddSingleton<IYearAndSemesterService, YearAndSemesterService>();
-        builder.Services.AddSingleton<ICourseClassService, CourseClassService>();
-        builder.Services.AddSingleton<ILecturersService, LecturersService>();
-        builder.Services.AddSingleton<ICourseEnrollmentService, CourseEnrollmentService>();
+        builder.Services.AddTransient<IDbConnection>(sp => new NpgsqlConnection(connectionString));
+        builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddScoped<IFacultyService, FacultyService>();
+        builder.Services.AddScoped<IStudentService, StudentService>();
+        builder.Services.AddScoped<IStudentStatusService, StudentStatusService>();
+        builder.Services.AddScoped<IStudyProgramService, StudyProgramService>();
+        builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
+        builder.Services.AddScoped<ICountryPhoneCodeService, CountryPhoneCodeService>();
+        builder.Services.AddScoped<ICourseService, CourseService>();
+        builder.Services.AddScoped<IYearAndSemesterService, YearAndSemesterService>();
+        builder.Services.AddScoped<ICourseClassService, CourseClassService>();
+        builder.Services.AddScoped<ILecturersService, LecturersService>();
+        builder.Services.AddScoped<ICourseEnrollmentService, CourseEnrollmentService>();
 
 
-        builder.Services.AddSingleton<IUserRepository, UserRepository>();
-        builder.Services.AddSingleton<IStudentRepository, StudentRepository>();
-        builder.Services.AddSingleton<IFacultyRepository, FacultyRepository>();
-        builder.Services.AddSingleton<IStudentStatusRepository, StudentStatusRepository>();
-        builder.Services.AddSingleton<IStudyProgramRepository, StudyProgramRepository>();
-        builder.Services.AddSingleton<IConfigurationRepository, ConfigurationRepository>();
-        builder.Services.AddSingleton<ICourseRepository, CourseRepository>();
-        builder.Services.AddSingleton<IYearAndSemesterRepository, YearAndSemesterRepository>();
-        builder.Services.AddSingleton<ICourseClassRepository, CourseClassRepository>();
-        builder.Services.AddSingleton<ILecturersRepository, LecturersRepository>();
-        builder.Services.AddSingleton<ICourseEnrollmentRepository, CourseEnrollmentRepository>();
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+        builder.Services.AddScoped<IFacultyRepository, FacultyRepository>();
+        builder.Services.AddScoped<IStudentStatusRepository, StudentStatusRepository>();
+        builder.Services.AddScoped<IStudyProgramRepository, StudyProgramRepository>();
+        builder.Services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
+        builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+        builder.Services.AddScoped<IYearAndSemesterRepository, YearAndSemesterRepository>();
+        builder.Services.AddScoped<ICourseClassRepository, CourseClassRepository>();
+        builder.Services.AddScoped<ILecturersRepository, LecturersRepository>();
+        builder.Services.AddScoped<ICourseEnrollmentRepository, CourseEnrollmentRepository>();
 
         builder.Services.AddSingleton<IConverter>(new SynchronizedConverter(new PdfTools()));
 
