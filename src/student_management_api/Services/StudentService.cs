@@ -91,9 +91,9 @@ public class StudentService: IStudentService
             int studentRow = 2;
             foreach (var student in students)
             {
-                AddRow(studentSheet, studentRow++, student.Id, student.FullName, student.DateOfBirth?.ToString("yyyy-MM-dd"),
-                       student.Gender, student.FacultyId, student.IntakeYear, student.ProgramId,
-                       student.Email, student.PhoneNumber, student.StatusId, student.Nationality);
+                AddRow(studentSheet, studentRow++, student.Id!, student.FullName!, student.DateOfBirth?.ToString("yyyy-MM-dd")!,
+                       student.Gender!, student.FacultyId!, student.IntakeYear!, student.ProgramId!,
+                       student.Email!, student.PhoneNumber!, student.StatusId!, student.Nationality!);
             }
 
             // Addresses Sheet
@@ -103,10 +103,10 @@ public class StudentService: IStudentService
             int addressRow = 2;
             foreach (var student in students)
             {
-                foreach (var address in student.Addresses)
+                foreach (var address in student.Addresses!)
                 {
-                    AddRow(addressSheet, addressRow++, student.Id, address.Type, address.Other,
-                           address.Village, address.District, address.City, address.Country);
+                    AddRow(addressSheet, addressRow++, student.Id!, address.Type!, address.Other!,
+                           address.Village!, address.District!, address.City!, address.Country!);
                 }
             }
 
@@ -122,9 +122,9 @@ public class StudentService: IStudentService
                 if (idInfo != null)
                 {
                     idInfo.AdditionalInfo ??= new Dictionary<string, string>(); // Ensure it's not null
-                    AddRow(identitySheet, identityRow++, student.Id, idInfo.Type, idInfo.Number,
-                           idInfo.DateOfIssue?.ToString("yyyy-MM-dd"), idInfo.PlaceOfIssue,
-                           idInfo.ExpiryDate?.ToString("yyyy-MM-dd"),
+                    AddRow(identitySheet, identityRow++, student.Id!, idInfo.Type!, idInfo.Number!,
+                           idInfo.DateOfIssue?.ToString("yyyy-MM-dd")!, idInfo.PlaceOfIssue!,
+                           idInfo.ExpiryDate?.ToString("yyyy-MM-dd")!,
                            idInfo.AdditionalInfo.GetValueOrDefault("has_chip", ""),
                            idInfo.AdditionalInfo.GetValueOrDefault("note", ""),
                            idInfo.AdditionalInfo.GetValueOrDefault("country_of_issue", ""));
@@ -158,7 +158,7 @@ public class StudentService: IStudentService
         }
     }
 
-    public async Task<string> ConvertExcelToJson(Stream fileStream)
+    public string ConvertExcelToJson(Stream fileStream)
     {
         using var workbook = new XLWorkbook(fileStream);
         var students = new List<Student>();
@@ -198,7 +198,7 @@ public class StudentService: IStudentService
             var student = students.FirstOrDefault(s => s.Id == studentId);
             if (student != null)
             {
-                student.Addresses.Add(new Address
+                student.Addresses!.Add(new Address
                 {
                     Type = row.Cell(2).GetString(),
                     Other = row.Cell(3).GetString(),

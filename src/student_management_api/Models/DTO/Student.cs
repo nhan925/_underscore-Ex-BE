@@ -4,7 +4,7 @@ namespace student_management_api.Models.DTO;
 
 public class Student
 {
-    public string Id { get; set; } // 8-digit student ID (e.g., 22010001)
+    public string? Id { get; set; } // 8-digit student ID (e.g., 22010001)
 
     public string? FullName { get; set; }
 
@@ -18,9 +18,9 @@ public class Student
 
     public int? ProgramId { get; set; }
 
-    public List<Address> Addresses { get; set; }
+    public List<Address>? Addresses { get; set; }
 
-    public IdentityInfo IdentityInfo { get; set; }
+    public IdentityInfo? IdentityInfo { get; set; }
 
     [EmailAddress]
     public string? Email { get; set; }

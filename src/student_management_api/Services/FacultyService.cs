@@ -7,6 +7,7 @@ namespace student_management_api.Services;
 public class FacultyService : IFacultyService
 {
     private readonly IFacultyRepository _facultyRepository;
+
     public FacultyService(IFacultyRepository facultyRepository)
     {
         _facultyRepository = facultyRepository;

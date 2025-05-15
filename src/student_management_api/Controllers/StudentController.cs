@@ -60,7 +60,7 @@ public class StudentController : ControllerBase
         return (true, Ok());
     }
 
-    private async Task<(bool, IActionResult)> ValidateStudentStatus(int? currentStatus, int? nextStatus)
+    private async Task<(bool, IActionResult)> ValidateStudentStatus(int currentStatus, int? nextStatus)
     {
         _logger.LogInformation("Checking student status transition from {CurrentStatus} to {NextStatus}", currentStatus, nextStatus);
         var nextStatuses = await _configurationService.GetNextStatuses((int)currentStatus);
@@ -83,13 +83,13 @@ public class StudentController : ControllerBase
 
         if (request is AddStudentRequest addStudentRequest)
         {
-            var emailDomainValidationResult = await ValidateStudentEmail(addStudentRequest.Email);
+            var emailDomainValidationResult = await ValidateStudentEmail(addStudentRequest.Email!);
             if (!emailDomainValidationResult.Item1)
             {
                 return (false, emailDomainValidationResult.Item2);
             }
 
-            var phoneNumberValidationResult = await ValidateStudentPhoneNumber(addStudentRequest.PhoneNumber);
+            var phoneNumberValidationResult = await ValidateStudentPhoneNumber(addStudentRequest.PhoneNumber!);
             if (!phoneNumberValidationResult.Item1)
             {
                 return (false, phoneNumberValidationResult.Item2);
@@ -119,13 +119,13 @@ public class StudentController : ControllerBase
 
             if (updateStudentRequest.StatusId != null)
             {
-                var currentStudent = await _studentService.GetStudentById(studentId);
+                var currentStudent = await _studentService.GetStudentById(studentId!);
                 if (currentStudent == null)
                 {
                     return (false, NotFound(new { message = "Student not found" }));
                 }
 
-                var statusValidationResult = await ValidateStudentStatus(currentStudent.StatusId, updateStudentRequest.StatusId);
+                var statusValidationResult = await ValidateStudentStatus((int)currentStudent.StatusId!, updateStudentRequest.StatusId);
                 if (!statusValidationResult.Item1)
                 {
                     return (false, statusValidationResult.Item2);
@@ -247,7 +247,7 @@ public class StudentController : ControllerBase
 
             if (format == "excel")
             {
-                jsonContent = await _studentService.ConvertExcelToJson(memoryStream);
+                jsonContent = _studentService.ConvertExcelToJson(memoryStream);
             }
             else if (format == "json")
             {
