@@ -1,13 +1,15 @@
-﻿using Moq;
-using Xunit;
-using student_management_api.Services;
+﻿using Microsoft.Extensions.Localization;
+using Moq;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Exceptions;
+using student_management_api.Localization;
 using student_management_api.Models.Configuration;
+using student_management_api.Models.DTO;
+using student_management_api.Services;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using student_management_api.Models.DTO;
-using System;
-using student_management_api.Exceptions;
+using Xunit;
 
 namespace student_management_api_tests.ServicesTests;
 
@@ -16,12 +18,14 @@ public class ConfigurationServiceTests
     private readonly Mock<IConfigurationRepository> _mockConfigRepo;
     private readonly Mock<IStudentStatusRepository> _mockStatusRepo;
     private readonly ConfigurationService _service;
+    private readonly Mock<IStringLocalizer<Messages>> _mockLocalizer;
 
     public ConfigurationServiceTests()
     {
         _mockConfigRepo = new Mock<IConfigurationRepository>();
         _mockStatusRepo = new Mock<IStudentStatusRepository>();
-        _service = new ConfigurationService(_mockConfigRepo.Object, _mockStatusRepo.Object);
+        _mockLocalizer = new Mock<IStringLocalizer<Messages>>();
+        _service = new ConfigurationService(_mockConfigRepo.Object, _mockStatusRepo.Object, _mockLocalizer.Object);
     }
 
     #region CheckEmailDomain Tests
@@ -286,7 +290,7 @@ public class ConfigurationServiceTests
     }
 
     [Fact]
-    public async Task UpdateStudentStatusConfig_SomeStatusesDoNotExist_ThrowsException()
+    public async Task UpdateStudentStatusConfig_SomeStatusesDoNotExist_ThrowsNotFoundException()
     {
         // Arrange
         var config = new Configuration<Dictionary<int, List<int>>>
@@ -305,8 +309,7 @@ public class ConfigurationServiceTests
             .ReturnsAsync(2); // Only 2 statuses found, but we requested 3
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(() => _service.UpdateStudentStatusConfig(config));
-        Assert.Equal("One or more statuses are not found", exception.Message);
+        await Assert.ThrowsAsync<NotFoundException>(() => _service.UpdateStudentStatusConfig(config));
         _mockConfigRepo.Verify(repo => repo.UpdateConfig(config), Times.Never);
     }
 

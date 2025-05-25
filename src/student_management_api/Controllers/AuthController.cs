@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using student_management_api.Contracts.IServices;
 using student_management_api.Helpers;
 using student_management_api.Models.Authentication;
+using student_management_api.Localization;
 
 namespace student_management_api.Controllers;
 
@@ -13,11 +15,13 @@ public class AuthController : ControllerBase
 {
     private readonly IJwtService _jwtService;
     private readonly ILogger<AuthController> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public AuthController(IJwtService jwtService, ILogger<AuthController> logger)
+    public AuthController(IJwtService jwtService, ILogger<AuthController> logger, IStringLocalizer<Messages> localizer)
     {
         _jwtService = jwtService;
         _logger = logger;
+        _localizer = localizer; 
     }
 
     [HttpPost("login")]
@@ -32,7 +36,7 @@ public class AuthController : ControllerBase
                 if (!ModelState.IsValid)
                 {
                     _logger.LogWarning("Invalid login request data for {Username}", request.Username);
-                    return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input data", details: ModelState));
+                    return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input_data"], details: ModelState));
                 }
 
                 var token = await _jwtService.AuthenticateUser(request);
@@ -40,7 +44,7 @@ public class AuthController : ControllerBase
                 if (token == null)
                 {
                     _logger.LogWarning("Login failed for {Username}: Invalid credentials", request.Username);
-                    return Unauthorized(new ErrorResponse<string>(status: 401, message: "Invalid credentials"));
+                    return Unauthorized(new ErrorResponse<string>(status: 401, message: _localizer["invalid_credentials"]));
                 }
 
                 _logger.LogInformation("Login successful for {Username}", request.Username);
@@ -49,7 +53,7 @@ public class AuthController : ControllerBase
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogWarning(ex, "Login failed for {Username}: {Message}", request.Username, ex.Message);
-                return Unauthorized(new ErrorResponse<string>(status: 401, message: "Login failed", details: ex.Message));
+                return Unauthorized(new ErrorResponse<string>(status: 401, message: _localizer["login_failed"], details: ex.Message));
             }
         }
     }

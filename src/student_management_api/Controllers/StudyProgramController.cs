@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
 using student_management_api.Models.DTO;
 using System;
 using System.Threading.Tasks;
+using student_management_api.Localization;
 
 namespace student_management_api.Controllers;
 
@@ -15,11 +18,13 @@ public class StudyProgramController : ControllerBase
 {
     private readonly IStudyProgramService _programService;
     private readonly ILogger<StudyProgramController> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public StudyProgramController(IStudyProgramService programService, ILogger<StudyProgramController> logger)
+    public StudyProgramController(IStudyProgramService programService, ILogger<StudyProgramController> logger, IStringLocalizer<Messages> localizer)
     {
         _programService = programService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [HttpGet]
@@ -46,7 +51,7 @@ public class StudyProgramController : ControllerBase
             var count = await _programService.UpdateProgram(program);
 
             _logger.LogInformation("Study program with ID {StudyProgramId} updated successfully", program.Id);
-            return Ok(new { message = "Update program successfully" });
+            return Ok(new { message = _localizer["update_program_successfully"] });
         }
     }
 

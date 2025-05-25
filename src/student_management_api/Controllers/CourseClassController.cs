@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IServices;
 using student_management_api.Helpers;
 using student_management_api.Models.CourseClass;
 using student_management_api.Models.DTO;
 using student_management_api.Services;
+using student_management_api.Localization;
 
 namespace student_management_api.Controllers;
 
@@ -17,10 +19,13 @@ public class CourseClassController : ControllerBase
 {
     private readonly ICourseClassService _courseClassService;
     private readonly ILogger<CourseClassController> _logger;
-    public CourseClassController(ICourseClassService courseClassService, ILogger<CourseClassController> logger)
+    private readonly IStringLocalizer<Messages> _localizer;
+
+    public CourseClassController(ICourseClassService courseClassService, ILogger<CourseClassController> logger, IStringLocalizer<Messages> localizer)
     {
         _courseClassService = courseClassService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [HttpPost]
@@ -28,7 +33,7 @@ public class CourseClassController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
         }
 
         using (_logger.BeginScope("AddCourseClass request"))
@@ -59,7 +64,7 @@ public class CourseClassController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
         }
 
         using (_logger.BeginScope("GetStudentsInClass request"))

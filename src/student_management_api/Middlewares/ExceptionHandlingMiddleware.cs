@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Localization;
 using student_management_api.Exceptions;
 using student_management_api.Helpers;
 using System.Net;
 using System.Text.Json;
+using student_management_api.Localization;
 
 namespace student_management_api.Middlewares;
 
@@ -10,11 +12,13 @@ public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger, IStringLocalizer<Messages> localizer)
     {
         _next = next;
         _logger = logger;
+        _localizer = localizer;
     }
 
     public async Task Invoke(HttpContext context)
@@ -42,7 +46,7 @@ public class ExceptionHandlingMiddleware
             else
             {
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                message = "An unexpected error occurred. Please try again later.";
+                message = _localizer["an_unexpected_error_occurred_Please_try_again_later"];
                 details = ex.Message;
             }
 

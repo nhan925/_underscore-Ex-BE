@@ -1,7 +1,9 @@
 ﻿using ClosedXML.Excel;
+using Microsoft.Extensions.Localization;
 using Moq;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
+using student_management_api.Localization;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using student_management_api.Services;
@@ -19,11 +21,13 @@ public class StudentServiceTests
 {
     private readonly Mock<IStudentRepository> _mockStudentRepository;
     private readonly StudentService _studentService;
+    private readonly Mock<IStringLocalizer<Messages>> _mockLocalizer;
 
     public StudentServiceTests()
     {
         _mockStudentRepository = new Mock<IStudentRepository>();
-        _studentService = new StudentService(_mockStudentRepository.Object);
+        _mockLocalizer = new Mock<IStringLocalizer<Messages>>();
+        _studentService = new StudentService(_mockStudentRepository.Object, _mockLocalizer.Object);
     }
 
     #region AddStudent Tests
@@ -58,11 +62,8 @@ public class StudentServiceTests
             .ReturnsAsync((string)null!);
 
         // Act
-        var exception = await Assert.ThrowsAsync<Exception>(() =>
+        await Assert.ThrowsAsync<Exception>(() =>
             _studentService.AddStudent(request));
-
-        // Assert
-        Assert.Equal("failed to add student", exception.Message);
     }
 
     #endregion
@@ -89,7 +90,7 @@ public class StudentServiceTests
     }
 
     [Fact]
-    public async Task DeleteStudentById_WhenStudentNotFound_ThrowsException()
+    public async Task DeleteStudentById_WhenStudentNotFound_ThrowsNotFoundException()
     {
         // Arrange
         var studentId = "ST12345";
@@ -99,10 +100,8 @@ public class StudentServiceTests
             .ReturnsAsync(0);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
+        await Assert.ThrowsAsync<NotFoundException>(() =>
             _studentService.DeleteStudentById(studentId));
-
-        Assert.Equal("student not found", exception.Message);
     }
 
     #endregion
@@ -135,7 +134,7 @@ public class StudentServiceTests
     }
 
     [Fact]
-    public async Task GetStudentById_WhenStudentNotFound_ThrowsException()
+    public async Task GetStudentById_WhenStudentNotFound_ThrowsNotFoundException()
     {
         // Arrange
         var studentId = "ST12345";
@@ -145,10 +144,8 @@ public class StudentServiceTests
             .ReturnsAsync((Student)null!);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
+        await Assert.ThrowsAsync<NotFoundException>(() =>
             _studentService.GetStudentById(studentId));
-
-        Assert.Equal("student not found", exception.Message);
     }
 
     #endregion
@@ -216,7 +213,7 @@ public class StudentServiceTests
     }
 
     [Fact]
-    public async Task UpdateStudentById_WhenStudentNotFound_ThrowsException()
+    public async Task UpdateStudentById_WhenStudentNotFound_ThrowsNotFoundException()
     {
         // Arrange
         var studentId = "ST12345";
@@ -227,10 +224,8 @@ public class StudentServiceTests
             .ReturnsAsync(0);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
+        await Assert.ThrowsAsync<NotFoundException>(() =>
             _studentService.UpdateStudentById(studentId, request));
-
-        Assert.Equal("student not found", exception.Message);
     }
 
     #endregion

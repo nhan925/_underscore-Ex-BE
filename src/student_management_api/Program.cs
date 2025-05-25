@@ -1,32 +1,34 @@
+using Dapper;
+using DinkToPdf;
+using DinkToPdf.Contracts;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using dotenv;
 using dotenv.net;
 using dotenv.net.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Npgsql;
-using Serilog.Events;
 using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.PostgreSQL;
+using student_management_api.Contracts.IRepositories;
+using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
+using student_management_api.Middlewares;
+using student_management_api.Models.DTO;
 using student_management_api.Repositories;
 using student_management_api.Services;
 using System;
 using System.Data;
+using System.Globalization;
 using System.Text;
-using Microsoft.OpenApi.Models;
-using student_management_api.Contracts.IRepositories;
-using student_management_api.Contracts.IServices;
-using Dapper;
-using student_management_api.Helpers;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Mvc;
-using Serilog.Sinks.PostgreSQL;
-using student_management_api.Middlewares;
-using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Hosting.Server;
-using student_management_api.Models.DTO;
-using DinkToPdf.Contracts;
-using DinkToPdf;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 
 namespace student_management_api;
 
@@ -172,11 +174,36 @@ public class Program
                     new string[] {}
                 }
             });
+
+            // Add custom "language" header to all endpoints
+            options.OperationFilter<LanguageHeaderOperationFilter>();
         });
 
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
+
+        // Add localization services
+        builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+        // Set up supported cultures
+        var supportedCultures = new[] { "en", "vi" }; // English, Vietnamese
+
+        builder.Services.Configure<RequestLocalizationOptions>(options =>
+        {
+            var cultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
+            options.DefaultRequestCulture = new RequestCulture("en");
+            options.SupportedCultures = cultures;
+            options.SupportedUICultures = cultures;
+
+            // Clear default providers to control order
+            options.RequestCultureProviders.Clear();
+
+            // Priority order: 1. Query string  2. Accept-Language header
+            options.RequestCultureProviders.Add(new QueryStringRequestCultureProvider());
+            options.RequestCultureProviders.Add(new AcceptLanguageHeaderRequestCultureProvider());
+        });
+
 
         builder.Services.Configure<JsonOptions>(options =>
         {
@@ -221,6 +248,7 @@ public class Program
         
         app.UseCors(MyAllowSpecificOrigins);
         app.UseHttpsRedirection();
+        app.UseRequestLocalization();
         app.UseAuthentication();
         app.UseMiddleware<LoggingEnrichmentMiddleware>();
         app.UseSerilogRequestLogging();

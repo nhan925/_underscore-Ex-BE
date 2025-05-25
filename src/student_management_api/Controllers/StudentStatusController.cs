@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
 using student_management_api.Models.DTO;
 using System;
 using System.Threading.Tasks;
+using student_management_api.Localization;
 
 namespace student_management_api.Controllers;
 
@@ -15,11 +18,13 @@ public class StudentStatusController : ControllerBase
 {
     private readonly IStudentStatusService _studentStatusService;
     private readonly ILogger<StudentStatusController> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public StudentStatusController(IStudentStatusService studentStatusService, ILogger<StudentStatusController> logger)
+    public StudentStatusController(IStudentStatusService studentStatusService, ILogger<StudentStatusController> logger, IStringLocalizer<Messages> localizer)
     {
         _studentStatusService = studentStatusService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [HttpGet]
@@ -46,7 +51,7 @@ public class StudentStatusController : ControllerBase
             var count = await _studentStatusService.UpdateStudentStatus(studentStatus);
 
             _logger.LogInformation("Student status with ID {StudentStatusId} updated successfully", studentStatus.Id);
-            return Ok(new { message = "Update student status successfully" });
+            return Ok(new { message = _localizer["update_student_status_successfully"] });
         }
     }
 

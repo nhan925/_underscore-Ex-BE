@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing.Template;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using student_management_api.Contracts.IServices;
 using student_management_api.Helpers;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using System.Text.Json;
+using student_management_api.Localization;
 
 namespace student_management_api.Controllers;
 
@@ -21,16 +23,19 @@ public class StudentController : ControllerBase
     private readonly IStudentService _studentService;
     private readonly IConfigurationService _configurationService;
     private readonly ILogger<StudentController> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
 
     public StudentController(
         IStudentService studentService,
         IConfigurationService configurationService,
-        ILogger<StudentController> logger
+        ILogger<StudentController> logger,
+        IStringLocalizer<Messages> localizer
     )
     {
         _studentService = studentService;
         _configurationService = configurationService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     #region ValidateStudentInfomationsInRequestFunctions
@@ -42,7 +47,7 @@ public class StudentController : ControllerBase
         if (!isValidEmail)
         {
             _logger.LogWarning("Invalid email domain for {Email}", email);
-            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid email domain")));
+            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_email_domain"])));
         }
 
         return (true, Ok());
@@ -56,7 +61,7 @@ public class StudentController : ControllerBase
         if (!isValidPhoneNumber)
         {
             _logger.LogWarning("Invalid phone number for {PhoneNumber}", phoneNumber);
-            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid phone number")));
+            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_phone_number"])));
         }
 
         return (true, Ok());
@@ -70,7 +75,7 @@ public class StudentController : ControllerBase
         if (!nextStatuses.Any(s => s.Id == nextStatus))
         {
             _logger.LogWarning("Invalid student status transition from {CurrentStatus} to {NextStatus}", currentStatus, nextStatus);
-            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid student status transition")));
+            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_student_status_transition"])));
         }
 
         return (true, Ok());
@@ -80,7 +85,7 @@ public class StudentController : ControllerBase
     {
         if (request == null)
         {
-            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid request")));
+            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_request"])));
         }
 
         if (request is AddStudentRequest addStudentRequest)
@@ -124,7 +129,7 @@ public class StudentController : ControllerBase
                 var currentStudent = await _studentService.GetStudentById(studentId!);
                 if (currentStudent == null)
                 {
-                    return (false, NotFound(new ErrorResponse<string>(status: 404, message: "Student not found")));
+                    return (false, NotFound(new ErrorResponse<string>(status: 404, message: _localizer["student_not_found"])));
                 }
 
                 var statusValidationResult = await ValidateStudentStatus((int)currentStudent.StatusId!, updateStudentRequest.StatusId);
@@ -138,7 +143,7 @@ public class StudentController : ControllerBase
         }
         else
         {
-            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid request type")));
+            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_request_type"])));
         }
     }
     #endregion
@@ -171,7 +176,7 @@ public class StudentController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
         }
 
         using (_logger.BeginScope("UpdateStudentById request for StudentId: {StudentId}", id))
@@ -187,11 +192,11 @@ public class StudentController : ControllerBase
 
             if (updatedCount == 0)
             {
-                return NotFound(new ErrorResponse<string>(status: 404, message: "Student not found or no changes made"));
+                return NotFound(new ErrorResponse<string>(status: 404, message: _localizer["student_not_found_or_no_changes_made"]));
             }
 
             _logger.LogInformation("Student with ID {StudentId} updated successfully", id);
-            return Ok(new { message = "student updated successfully" });
+            return Ok(new { message = _localizer["student_updated_successfully"] });
         }
     }
 
@@ -205,11 +210,11 @@ public class StudentController : ControllerBase
 
             if (deletedCount == 0)
             {
-                return NotFound(new ErrorResponse<string>(status: 404, message: "Student not found or already deleted"));
+                return NotFound(new ErrorResponse<string>(status: 404, message: _localizer["student_not_found_or_already_deleted"]));
             }
 
             _logger.LogInformation("Student with ID {StudentId} deleted successfully", id);
-            return Ok(new { message = "student deleted successfully" });
+            return Ok(new { message = _localizer["student_deleted_successfully"] });
         }
     }
 
@@ -218,7 +223,7 @@ public class StudentController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
         }
 
         using (_logger.BeginScope("AddStudent request"))
@@ -242,7 +247,7 @@ public class StudentController : ControllerBase
     {
         if (file == null || file.Length == 0)
         {
-            return BadRequest(new ErrorResponse<string>(status: 400, message: "No file uploaded"));
+            return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["no_file_uploaded"]));
         }
 
         using (_logger.BeginScope("AddStudentsFromFile request, Format: {Format}", format))
@@ -269,7 +274,7 @@ public class StudentController : ControllerBase
             }
             else
             {
-                return BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid format. Supported formats are 'json' and 'excel'"));
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_format_Supported_formats_are_json_and_excel"]));
             }
 
             var requests = JsonSerializer.Deserialize<List<AddStudentRequest>>(jsonContent, new JsonSerializerOptions
@@ -279,7 +284,7 @@ public class StudentController : ControllerBase
 
             if (requests == null || !requests.Any())
             {
-                return BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid or empty file"));
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_or_empty_file"]));
             }
 
             var errors = new List<int>();
@@ -297,7 +302,7 @@ public class StudentController : ControllerBase
             {
                 return BadRequest(new ErrorResponse<object>(
                     status: 400,
-                    message: "Invalid student information found",
+                    message: _localizer["invalid_student_information_found"],
                     details: new
                     {
                         InvalidEntries = errors.Select(e => new { Index = e, Request = requests[e] })
@@ -307,7 +312,7 @@ public class StudentController : ControllerBase
 
             await _studentService.AddStudents(requests);
             _logger.LogInformation("Students added successfully from file: {FileName}", file.FileName);
-            return Ok(new { message = "Students added successfully" });
+            return Ok(new { message = _localizer["students_added_successfully"] });
         }
     }
 
@@ -336,7 +341,7 @@ public class StudentController : ControllerBase
             }
             else
             {
-                return BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid format. Supported formats are 'json' and 'excel'"));
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_format_Supported_formats_are_json_and_excel"]));
             }
 
             _logger.LogInformation("Students exported successfully as {Format}", format);

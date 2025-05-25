@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using student_management_api.Contracts.IServices;
 using student_management_api.Helpers;
 using student_management_api.Models.Configuration;
 using student_management_api.Models.DTO;
+using student_management_api.Localization;
 
 namespace student_management_api.Controllers;
 
@@ -15,11 +17,13 @@ public class ConfigurationController : ControllerBase
 {
     private readonly IConfigurationService _configurationService;
     private readonly ILogger<ConfigurationController> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public ConfigurationController(IConfigurationService configurationService, ILogger<ConfigurationController> logger)
+    public ConfigurationController(IConfigurationService configurationService, ILogger<ConfigurationController> logger, IStringLocalizer<Messages> localizer)
     {
         _configurationService = configurationService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [HttpGet("{type}")]
@@ -50,7 +54,7 @@ public class ConfigurationController : ControllerBase
             else
             {
                 _logger.LogWarning("Invalid config type");
-                return BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid config type"));
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_config_type"]));
             }
         }
     }
@@ -65,7 +69,7 @@ public class ConfigurationController : ControllerBase
             if (string.IsNullOrEmpty(value))
             {
                 _logger.LogWarning("Value is empty");
-                return BadRequest(new ErrorResponse<string>(status: 400, message: "Value is empty"));
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["value_is_empty"]));
             }
 
             if (type == "email")
@@ -83,7 +87,7 @@ public class ConfigurationController : ControllerBase
             else
             {
                 _logger.LogWarning("Invalid config type");
-                return BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid config type"));
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_config_type"]));
             }
         }
     }
@@ -112,12 +116,12 @@ public class ConfigurationController : ControllerBase
             if (updatedCount > 0)
             {
                 _logger.LogInformation("Email domains config updated successfully");
-                return Ok(new { message = "Email domains config updated successfully" });
+                return Ok(new { message = _localizer["email_domains_config_updated_successfully"] });
             }
             else
             {
                 _logger.LogWarning("No changes applied");
-                return NotFound(new ErrorResponse<string>(status: 404, message: "No changes applied"));
+                return NotFound(new ErrorResponse<string>(status: 404, message: _localizer["no_changes_applied"]));
             }
         }
     }
@@ -133,12 +137,12 @@ public class ConfigurationController : ControllerBase
             if (updatedCount > 0)
             {
                 _logger.LogInformation("Phone number country config updated successfully");
-                return Ok(new { message = "Phone number country config updated successfully" });
+                return Ok(new { message = _localizer["phone_number_country_config_updated_successfully"] });
             }
             else
             {
                 _logger.LogWarning("No changes applied");
-                return NotFound(new ErrorResponse<string>(status: 404, message: "No changes applied"));
+                return NotFound(new ErrorResponse<string>(status: 404, message: _localizer["no_changes_applied"]));
             }
         }
     }
@@ -154,12 +158,12 @@ public class ConfigurationController : ControllerBase
             if (updatedCount > 0)
             {
                 _logger.LogInformation("Student status rules config updated successfully");
-                return Ok(new { message = "Student status rules config updated successfully" });
+                return Ok(new { message = _localizer["student_status_rules_config_updated_successfully"] });
             }
             else
             {
                 _logger.LogWarning("No changes applied");
-                return NotFound(new ErrorResponse<string>(status: 404, message: "No changes applied"));
+                return NotFound(new ErrorResponse<string>(status: 404, message: _localizer["no_changes_applied"]));
             }
         }
     }
@@ -175,12 +179,12 @@ public class ConfigurationController : ControllerBase
             if (updatedCount > 0)
             {
                 _logger.LogInformation("All rules turned {Status}", isActive ? "on" : "off");
-                return Ok(new { Message = $"All rules turned {(isActive ? "on" : "off")}" });
+                return Ok(new { Message = isActive ? _localizer["all_rules_turned_on"] : _localizer["all_rules_turned_off"] });
             }
             else
             {
                 _logger.LogWarning("No rules found or no changes applied");
-                return NotFound(new ErrorResponse<string>(status: 404, message: "No rules found or no changes applied"));
+                return NotFound(new ErrorResponse<string>(status: 404, message: _localizer["no_rules_found_or_no_changes_applied"]));
             }
         }
     }

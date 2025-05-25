@@ -1,17 +1,23 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Helpers;
 using student_management_api.Models.CourseClass;
 using student_management_api.Models.DTO;
 using System.Data;
+using student_management_api.Localization;
 
 namespace student_management_api.Repositories;
 
 public class CourseClassRepository : ICourseClassRepository
 {
     private readonly IDbConnection _db;
-    public CourseClassRepository(IDbConnection db)
+    private readonly IStringLocalizer<Messages> _localizer;
+
+    public CourseClassRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
     {
         _db = db;
+        _localizer = localizer;
     }
     public async Task<string> AddCourseClass(CourseClass courseClass)
     {
@@ -30,7 +36,7 @@ public class CourseClassRepository : ICourseClassRepository
         var courseClassCount = await _db.ExecuteAsync(query, parameters);
         if (courseClassCount == 0)
         {
-            throw new Exception("Failed to add course class");
+            throw new Exception(_localizer["failed_to_add_class"]);
         }
 
         return courseClass.Id!;

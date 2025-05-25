@@ -1,17 +1,23 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
+using student_management_api.Helpers;
 using student_management_api.Models.DTO;
 using System.Data;
+using student_management_api.Localization;
 
 namespace student_management_api.Repositories;
 
 public class StudyProgramRepository : IStudyProgramRepository
 {
     private readonly IDbConnection _db;
-    public StudyProgramRepository(IDbConnection db)
+    private readonly IStringLocalizer<Messages> _localizer;
+
+    public StudyProgramRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
     {
         _db = db;
+        _localizer = localizer;
     }
 
     public async Task<List<StudyProgram>> GetAllPrograms()
@@ -27,7 +33,7 @@ public class StudyProgramRepository : IStudyProgramRepository
         var count = await _db.ExecuteAsync(query, program);
         if (count == 0)
         {
-            throw new NotFoundException("program not found");
+            throw new NotFoundException(_localizer["program_not_found"]);
         }
 
         return count;
@@ -40,7 +46,7 @@ public class StudyProgramRepository : IStudyProgramRepository
 
         if (id == 0)
         {
-            throw new Exception("failed to add program");
+            throw new Exception(_localizer["failed_to_add_program"]);
         }
 
         return id;

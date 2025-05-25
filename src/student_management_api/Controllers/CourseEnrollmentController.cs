@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IServices;
 using student_management_api.Helpers;
 using student_management_api.Models.CourseEnrollment;
+using System.Globalization;
+using student_management_api.Localization;
 
 namespace student_management_api.Controllers;
 
@@ -14,11 +17,13 @@ public class CourseEnrollmentController : ControllerBase
 {
     private readonly ICourseEnrollmentService _courseEnrollmentService;
     private readonly ILogger<CourseEnrollmentController> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public CourseEnrollmentController(ICourseEnrollmentService courseEnrollmentService, ILogger<CourseEnrollmentController> logger)
+    public CourseEnrollmentController(ICourseEnrollmentService courseEnrollmentService, ILogger<CourseEnrollmentController> logger, IStringLocalizer<Messages> localizer)
     {
         _courseEnrollmentService = courseEnrollmentService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [HttpGet("history/{semester_id}")]
@@ -40,7 +45,7 @@ public class CourseEnrollmentController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
         }
 
         if (action == "register")
@@ -53,7 +58,7 @@ public class CourseEnrollmentController : ControllerBase
                     await _courseEnrollmentService.RegisterClass(request);
                     _logger.LogInformation("Successfully registered class");
 
-                    return Ok(new { message = "Successfully registered class" });
+                    return Ok(new { message = _localizer["successfully_registered_class"] });
                 }
                 catch
                 {
@@ -72,7 +77,7 @@ public class CourseEnrollmentController : ControllerBase
                     await _courseEnrollmentService.UnregisterClass(request);
                     _logger.LogInformation("Successfully unregistered class");
 
-                    return Ok(new { message = "Successfully unregistered class" });
+                    return Ok(new { message = _localizer["successfully_unregistered_class"] });
                 }
                 catch
                 {
@@ -83,7 +88,7 @@ public class CourseEnrollmentController : ControllerBase
         }
         else
         {
-            return BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid action specified. Use 'register' or 'unregister'."));
+            return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_action_specified_Use_register_or_unregister"]));
         }
     }
 
@@ -92,7 +97,7 @@ public class CourseEnrollmentController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
         }
 
         using (_logger.BeginScope("UpdateStudentGrade request"))
@@ -104,7 +109,7 @@ public class CourseEnrollmentController : ControllerBase
                 await _courseEnrollmentService.UpdateStudentGrade(request.StudentId!, request.CourseId!, request.Grade);
                 _logger.LogInformation("Successfully updated student grade");
 
-                return Ok(new { message = "Successfully updated student grade" });
+                return Ok(new { message = _localizer["successfully_updated_student_grade"] });
             }
             catch
             {
@@ -120,7 +125,8 @@ public class CourseEnrollmentController : ControllerBase
         using (_logger.BeginScope("GetStudentTranscriptById request for StudentId: {StudentId}", student_id))
         {
             // Load HTML template
-            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "transcript_template.html");
+            var culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", $"transcript_template-{culture}.html");
             var htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
 
             _logger.LogInformation("Fetching transcript for student with ID: {StudentId}", student_id);
@@ -128,7 +134,7 @@ public class CourseEnrollmentController : ControllerBase
             if (transcriptStream == null)
             {
                 _logger.LogWarning("Transcript not found for student with ID: {StudentId}", student_id);
-                return NotFound(new ErrorResponse<string>(status: 404, message: $"Transcript for student with ID {student_id} not found."));
+                return NotFound(new ErrorResponse<string>(status: 404, message: $"{_localizer["transcript_not_found"]}, ID: {student_id}"));
             }
 
             _logger.LogInformation("Transcript fetched successfully for student with ID: {StudentId}", student_id);

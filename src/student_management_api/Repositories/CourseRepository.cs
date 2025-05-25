@@ -1,17 +1,23 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
+using student_management_api.Helpers;
 using student_management_api.Models.DTO;
 using System.Data;
+using student_management_api.Localization;
 
 namespace student_management_api.Repositories;
 
 public class CourseRepository: ICourseRepository
 {
     private readonly IDbConnection _db;
-    public CourseRepository(IDbConnection db)
+    private readonly IStringLocalizer<Messages> _localizer;
+
+    public CourseRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
     {
         _db = db;
+        _localizer = localizer;
     }
 
     public async Task<List<Course>> GetAllCourses()
@@ -95,7 +101,9 @@ public class CourseRepository: ICourseRepository
 
         var course = courseDict.Values.FirstOrDefault();
         if (course == null)
-            throw new NotFoundException($"Course with ID {id} not found.");
+        {
+            throw new NotFoundException($"{_localizer["course_not_found"]}, ID: {id}");
+        }
 
         return course;
     }
@@ -115,7 +123,7 @@ public class CourseRepository: ICourseRepository
         var hasStudents = await CheckStudentExistFromCourse(course.Id!);
         if (hasStudents && currentCredits != course.Credits)
         {
-            throw new InvalidOperationException("Cannot change credits for a course that has students enrolled");
+            throw new InvalidOperationException(_localizer["cannot_change_credits_for_a_course_that_has_students_enrolled"]);
         }
 
         using (var transaction = _db.BeginTransaction())
@@ -191,7 +199,7 @@ public class CourseRepository: ICourseRepository
 
                         if (exists == 0)
                         {
-                            throw new NotFoundException($"Prerequisite course ID {prerequisiteId} does not exist.");
+                            throw new NotFoundException(_localizer["prerequisite_course_not_exists"]);
                         }
                     }
                 }
@@ -258,7 +266,7 @@ public class CourseRepository: ICourseRepository
                 await _db.ExecuteAsync(deactivateSql, new { Id = id }, transaction);
 
                 transaction.Commit();
-                return "Classes exist for this course. The course has been marked as inactive";
+                return _localizer["classes_exist_for_this_course_The_course_has_been_marked_as_inactive"];
             }
 
             // 2. Kiểm tra nếu có học sinh đã đăng ký học lớp thuộc course này
@@ -271,7 +279,7 @@ public class CourseRepository: ICourseRepository
                 await _db.ExecuteAsync(deactivateSql, new { Id = id }, transaction);
 
                 transaction.Commit();
-                return "Classes exist for this course. The course has been marked as inactive";
+                return _localizer["classes_exist_for_this_course_The_course_has_been_marked_as_inactive"];
             }
 
             // 3. Xóa khóa học
@@ -279,12 +287,12 @@ public class CourseRepository: ICourseRepository
             await _db.ExecuteAsync(deleteCourseSql, new { Id = id }, transaction);
 
             transaction.Commit();
-            return "Course deleted successfully";
+            return _localizer["course_deleted_successfully"];
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             transaction.Rollback();
-            throw new Exception("Error to delete this course " + ex.Message);
+            throw;
         }
     }
 

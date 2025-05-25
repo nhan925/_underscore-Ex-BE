@@ -1,15 +1,18 @@
 ﻿using Dapper;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging.Console;
 using Npgsql;
 using NpgsqlTypes;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
+using student_management_api.Helpers;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using System.Data;
 using System.Text;
 using System.Text.Json;
+using student_management_api.Localization;
 
 namespace student_management_api.Repositories;
 
@@ -17,9 +20,12 @@ public class StudentRepository : IStudentRepository
 {
     private readonly IDbConnection _db;
 
-    public StudentRepository(IDbConnection db)
+    private readonly IStringLocalizer<Messages> _localizer;
+
+    public StudentRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
     {
         _db = db;
+        _localizer = localizer;
     }
 
     public async Task<int> DeleteStudentById(string id)
@@ -181,7 +187,7 @@ public class StudentRepository : IStudentRepository
 
                 if (studentCount == 0)
                 {
-                    throw new Exception("update student failed");
+                    throw new Exception(_localizer["update_student_failed"]);
                 }
 
                 if (request.Addresses != null && request.Addresses.Any())
@@ -310,7 +316,7 @@ public class StudentRepository : IStudentRepository
 
                 if (studentCount == 0)
                 {
-                    throw new Exception("add student failed");
+                    throw new Exception(_localizer["add_student_failed"]);
                 }
 
                 if (request.Addresses != null && request.Addresses.Any())
@@ -507,8 +513,10 @@ public class StudentRepository : IStudentRepository
 
         var students = (await _db.QueryAsync<Student>(studentQuery)).ToList();
         
-        if (!students.Any()) 
-            throw new NotFoundException("no students found");
+        if (!students.Any())
+        {
+            return new(); // Return empty list if no students found
+        }
 
         var studentIds = students.Select(s => s.Id).ToArray();
 

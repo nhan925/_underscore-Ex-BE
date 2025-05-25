@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IServices;
 using student_management_api.Helpers;
 using student_management_api.Models.DTO;
+using student_management_api.Localization;
 using student_management_api.Services;
 
 namespace student_management_api.Controllers;
@@ -18,11 +20,13 @@ public class CourseController: ControllerBase
 {
     private readonly ICourseService _courseService;
     private readonly ILogger<CourseController> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public CourseController(ICourseService courseService, ILogger<CourseController> logger)
+    public CourseController(ICourseService courseService, ILogger<CourseController> logger, IStringLocalizer<Messages> localizer)
     {
         _courseService = courseService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [HttpGet]
@@ -52,7 +56,7 @@ public class CourseController: ControllerBase
             if (course == null || string.IsNullOrEmpty(course.Id))
             {
                 _logger.LogWarning("Course not found with ID: {CourseId}", id);
-                return NotFound(new ErrorResponse<string>(status: 404, message: $"Course with ID {id} not found"));
+                return NotFound(new ErrorResponse<string>(status: 404, message: $"{_localizer["course_not_found"]}, ID: {id}"));
             }
 
             _logger.LogInformation("Successfully retrieved course with ID: {CourseId}", id);
@@ -65,7 +69,7 @@ public class CourseController: ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
         }
 
         using (_logger.BeginScope("UpdateCourseById request - CourseId: {CourseId}", course.Id))
@@ -75,11 +79,11 @@ public class CourseController: ControllerBase
             if (affectedRows == 0)
             {
                 _logger.LogWarning("Update failed or course not found with ID: {CourseId}", course.Id);
-                return NotFound(new ErrorResponse<string>(status: 404, message: $"Course with ID {course.Id} not found or no change made"));
+                return NotFound(new ErrorResponse<string>(status: 404, message: $"{_localizer["course_not_found_or_no_changes_made"]}, ID: {course.Id}"));
             }
 
             _logger.LogInformation("Successfully updated course with ID: {CourseId}", course.Id);
-            return Ok(new {Message = $"Successfully updated course with ID: {course.Id}"});
+            return Ok(new {Message = $"{_localizer["update_course_successfully"]}, ID: {course.Id}"});
         }
     }
 
@@ -103,7 +107,7 @@ public class CourseController: ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
         }
 
         using (_logger.BeginScope("AddCourse request - CourseId: {CourseId}", course.Id))
@@ -117,14 +121,14 @@ public class CourseController: ControllerBase
                 _logger.LogInformation("Successfully added course with ID: {CourseId}", course.Id);
                 return CreatedAtAction(nameof(GetCourseById), new { id = course.Id }, new
                 {
-                    Message = $"Successfully added course with ID: {course.Id}",
+                    Message = $"{_localizer["course_added_successfully"]}, ID: {course.Id}",
                     Data = course
                 });
             }
             else
             {
                 _logger.LogWarning("Course creation failed for ID: {CourseId}", course.Id);
-                return StatusCode(500, new ErrorResponse<string>(status: 500, message: $"Failed to create course with ID: {course.Id}"));
+                return StatusCode(500, new ErrorResponse<string>(status: 500, message: $"{_localizer["failed_to_create_course"]}, ID: {course.Id}"));
             }
         }
     }

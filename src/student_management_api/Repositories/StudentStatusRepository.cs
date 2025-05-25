@@ -1,17 +1,23 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
+using student_management_api.Helpers;
 using student_management_api.Models.DTO;
 using System.Data;
+using student_management_api.Localization;
 
 namespace student_management_api.Repositories;
 
 public class StudentStatusRepository : IStudentStatusRepository
 {
     private readonly IDbConnection _db;
-    public StudentStatusRepository(IDbConnection db)
+    private readonly IStringLocalizer<Messages> _localizer;
+
+    public StudentStatusRepository(IDbConnection db,IStringLocalizer<Messages> localizer)
     {
         _db = db;
+        _localizer = localizer;
     }
 
     public async Task<List<StudentStatus>> GetAllStudentStatuses()
@@ -27,7 +33,7 @@ public class StudentStatusRepository : IStudentStatusRepository
         var count = await _db.ExecuteAsync(query, studentStatus);
         if (count == 0)
         {
-            throw new NotFoundException("student status not found");
+            throw new NotFoundException(_localizer["student_status_not_found"]);
         }
 
         return count;
@@ -40,7 +46,7 @@ public class StudentStatusRepository : IStudentStatusRepository
 
         if (id == 0)
         {
-            throw new Exception("failed to add student status");
+            throw new Exception(_localizer["failed_to_add_student_status"]);
         }
 
         return id;

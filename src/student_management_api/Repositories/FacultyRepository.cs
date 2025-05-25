@@ -1,17 +1,23 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
+using student_management_api.Helpers;
 using student_management_api.Models.DTO;
 using System.Data;
+using student_management_api.Localization;
 
 namespace student_management_api.Repositories;
 
 public class FacultyRepository : IFacultyRepository
 {
     private readonly IDbConnection _db;
-    public FacultyRepository(IDbConnection db)
+    private readonly IStringLocalizer<Messages> _localizer;
+
+    public FacultyRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
     {
         _db = db;
+        _localizer = localizer; 
     }
 
     public async Task<List<Faculty>> GetAllFaculties()
@@ -27,7 +33,7 @@ public class FacultyRepository : IFacultyRepository
         var count = await _db.ExecuteAsync(query, faculty);
         if (count == 0)
         {
-            throw new NotFoundException("faculty not found");
+            throw new NotFoundException(_localizer["faculty_not_found"]);
         }
 
         return count;
@@ -40,7 +46,7 @@ public class FacultyRepository : IFacultyRepository
 
         if (id == 0)
         {
-            throw new Exception("Failed to add faculty");
+            throw new Exception(_localizer["failed_to_add_faculty"]);
         }
 
         return id;

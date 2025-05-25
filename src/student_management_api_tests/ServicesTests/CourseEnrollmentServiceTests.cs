@@ -1,7 +1,9 @@
 ﻿using DinkToPdf.Contracts;
+using Microsoft.Extensions.Localization;
 using Moq;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
+using student_management_api.Localization;
 using student_management_api.Models.Course;
 using student_management_api.Models.CourseEnrollment;
 using student_management_api.Models.DTO;
@@ -21,16 +23,19 @@ public class CourseEnrollmentServiceTests
     private readonly Mock<IStudentRepository> _mockStudentRepository;
     private readonly Mock<IConverter> _mockPdfConverter;
     private readonly CourseEnrollmentService _courseEnrollmentService;
+    private readonly Mock<IStringLocalizer<Messages>> _mockLocalizer;
 
     public CourseEnrollmentServiceTests()
     {
         _mockCourseEnrollmentRepository = new Mock<ICourseEnrollmentRepository>();
         _mockStudentRepository = new Mock<IStudentRepository>();
         _mockPdfConverter = new Mock<IConverter>();
+        _mockLocalizer = new Mock<IStringLocalizer<Messages>>();
         _courseEnrollmentService = new CourseEnrollmentService(
             _mockCourseEnrollmentRepository.Object,
             _mockStudentRepository.Object,
-            _mockPdfConverter.Object
+            _mockPdfConverter.Object,
+            _mockLocalizer.Object
         );
     }
 
@@ -67,7 +72,7 @@ public class CourseEnrollmentServiceTests
 
     #region GetTranscriptOfStudentById Tests
     [Fact]
-    public async Task GetTranscriptOfStudentById_StudentNotFound_ThrowsException()
+    public async Task GetTranscriptOfStudentById_StudentNotFound_ThrowsNotFoundException()
     {
         // Arrange
         string studentId = "ST12345";
@@ -78,10 +83,8 @@ public class CourseEnrollmentServiceTests
             .ReturnsAsync((Student)null!);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
+        await Assert.ThrowsAsync<NotFoundException>(() =>
             _courseEnrollmentService.GetTranscriptOfStudentById(studentId, htmlTemplate));
-
-        Assert.Equal("student not found", exception.Message);
     }
 
     [Fact]

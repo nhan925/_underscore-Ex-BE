@@ -1,24 +1,29 @@
 using Dapper;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
+using student_management_api.Helpers;
 using student_management_api.Models.Course;
 using student_management_api.Models.CourseEnrollment;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using System.Data;
 using System.Text;
+using student_management_api.Localization;
 
 namespace student_management_api.Repositories;
 
 public class CourseEnrollmentRepository : ICourseEnrollmentRepository
 {
     private readonly IDbConnection _db;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public CourseEnrollmentRepository(IDbConnection db)
+    public CourseEnrollmentRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
     {
         _db = db;
+        _localizer = localizer;
     }
 
     private async Task LogEnrollmentHistory(CourseEnrollmentRequest request, string action, IDbTransaction transaction)
@@ -36,7 +41,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
         var historyAffectedRows = await _db.ExecuteAsync(historySql, historyParameters, transaction);
         if (historyAffectedRows == 0)
         {
-            throw new Exception("Failed to log enrollment history");
+            throw new Exception(_localizer["failed_to_log_enrollment_history"]);
         }
     }
 
@@ -55,7 +60,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
                 var endDate = await _db.QueryFirstOrDefaultAsync<DateTime>(endDateSql, new { SemesterId = request.SemesterId });
                 if (DateTime.Now > endDate)
                 {
-                    throw new Exception("Cannot register after the semester has ended");
+                    throw new Exception(_localizer["cannot_register_after_the_semester_has_ended"]);
                 }
 
                 var maxStudents = "SELECT max_students FROM classes WHERE id = @ClassId AND course_id = @CourseId AND semester_id = @SemesterId";
@@ -76,7 +81,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
 
                 if (currentStudentsCount >= maxStudentsCount)
                 {
-                    throw new Exception("Class is full");
+                    throw new Exception(_localizer["class_is_full"]);
                 }
 
                 var prerequisiteSql = "SELECT prerequisite_id FROM course_prerequisites WHERE course_id = @CourseId";
@@ -95,7 +100,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
                     
                     if (passedPrerequisitesCount != prerequisites.Count())
                     {
-                        throw new ForbiddenException("Student has not passed all prerequisites");
+                        throw new ForbiddenException(_localizer["student_has_not_passed_all_prerequisites"]);
                     }
                 }
 
@@ -125,7 +130,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
                     var insertAffectedRows = await _db.ExecuteAsync(insertSql, insertParameters, transaction);
                     if (insertAffectedRows == 0)
                     {
-                        throw new Exception("Failed to register for the course");
+                        throw new Exception(_localizer["failed_to_register_for_the_course"]);
                     }
                 }
 
@@ -158,7 +163,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
 
                 if (DateTime.Now > startDate)
                 {
-                    throw new ForbiddenException("Cannot unregister after the semester has started");
+                    throw new ForbiddenException(_localizer["cannot_unregister_after_the_semester_has_started"]);
                 }
 
                 var sql = "DELETE FROM course_enrollments WHERE student_id = @StudentId AND course_id = @CourseId AND status = 'enrolled'";
@@ -170,7 +175,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
                 var affectedRows = await _db.ExecuteAsync(sql, parameters, transaction);
                 if (affectedRows == 0)
                 {
-                    throw new NotFoundException("No enrollment found to unregister or the student has completed the course");
+                    throw new NotFoundException(_localizer["no_enrollment_found_to_unregister_or_the_student_has_completed_the_course"]);
                 }
 
                 await LogEnrollmentHistory(request, "cancel", transaction);

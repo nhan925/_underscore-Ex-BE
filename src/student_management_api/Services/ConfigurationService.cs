@@ -1,9 +1,12 @@
-﻿using PhoneNumbers;
+﻿using Microsoft.Extensions.Localization;
+using PhoneNumbers;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
 using student_management_api.Exceptions;
+using student_management_api.Helpers;
 using student_management_api.Models.Configuration;
 using student_management_api.Models.DTO;
+using student_management_api.Localization;
 
 namespace student_management_api.Services;
 
@@ -11,11 +14,13 @@ public class ConfigurationService : IConfigurationService
 {
     private readonly IConfigurationRepository _configurationRepository;
     private readonly IStudentStatusRepository _studentStatusRepository;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public ConfigurationService(IConfigurationRepository configurationRepository, IStudentStatusRepository studentStatusRepository)
+    public ConfigurationService(IConfigurationRepository configurationRepository, IStudentStatusRepository studentStatusRepository, IStringLocalizer<Messages> localizer)
     {
         _configurationRepository = configurationRepository;
         _studentStatusRepository = studentStatusRepository;
+        _localizer = localizer;
     }
 
     public async Task<bool> CheckEmailDomain(string email)
@@ -162,7 +167,7 @@ public class ConfigurationService : IConfigurationService
 
         if (referenceStatusesCount != studentStatusesIds.Count)
         {
-            throw new NotFoundException("One or more statuses are not found");
+            throw new NotFoundException(_localizer["one_or_more_statuses_are_not_found"]);
         }
 
         var result = await _configurationRepository.UpdateConfig(config);

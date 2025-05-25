@@ -1,6 +1,8 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Extensions.Localization;
+using Microsoft.IdentityModel.Tokens;
 using Moq;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Localization;
 using student_management_api.Models.Authentication;
 using student_management_api.Models.DTO;
 using student_management_api.Services;
@@ -17,6 +19,7 @@ public class JwtServiceTests
 {
     private readonly Mock<IUserRepository> _mockUserRepository;
     private readonly JwtService _jwtService;
+    private readonly Mock<IStringLocalizer<Messages>> _mockLocalizer;
 
     // Testing values
     private const string TestSecret = "testsecretkeywithenoughlengthforhmacsha256signature";
@@ -29,7 +32,8 @@ public class JwtServiceTests
         Environment.SetEnvironmentVariable("JWT_EXPIRATION_HOURS", TestExpirationHours.ToString());
 
         _mockUserRepository = new Mock<IUserRepository>();
-        _jwtService = new JwtService(_mockUserRepository.Object);
+        _mockLocalizer = new Mock<IStringLocalizer<Messages>>();
+        _jwtService = new JwtService(_mockUserRepository.Object, _mockLocalizer.Object);
     }
 
     #region AuthenticateUser Tests
@@ -86,10 +90,8 @@ public class JwtServiceTests
             .ReturnsAsync((User)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             _jwtService.AuthenticateUser(authRequest));
-
-        Assert.Equal("user not found", exception.Message);
     }
 
     [Fact]
@@ -115,10 +117,8 @@ public class JwtServiceTests
             .ReturnsAsync(user);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             _jwtService.AuthenticateUser(authRequest));
-
-        Assert.Equal("invalid password", exception.Message);
     }
     #endregion
 
