@@ -1,5 +1,6 @@
 ﻿using Moq;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Exceptions;
 using student_management_api.Models.DTO;
 using student_management_api.Services;
 using System;
@@ -256,10 +257,10 @@ public class CourseServiceTests
             .ReturnsAsync(course);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Exception>(() =>
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(() =>
             _courseService.DeleteCourseById(courseId));
 
-        Assert.Equal("Đã xóa rồi, bạn không thể xóa nữa!", exception.Message);
+        Assert.Equal("The course has been deleted, you cannot delete it again", exception.Message);
         _mockCourseRepository.Verify(
             repo => repo.DeleteCourseById(courseId),
             Times.Never()
@@ -287,10 +288,10 @@ public class CourseServiceTests
             .ReturnsAsync(course);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Exception>(() =>
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(() =>
             _courseService.DeleteCourseById(courseId));
 
-        Assert.Equal("Đã quá 30 phút, không thể xóa!", exception.Message);
+        Assert.Equal("Exceeded 30 minutes, cannot delete", exception.Message);
         _mockCourseRepository.Verify(
             repo => repo.DeleteCourseById(courseId),
             Times.Never()

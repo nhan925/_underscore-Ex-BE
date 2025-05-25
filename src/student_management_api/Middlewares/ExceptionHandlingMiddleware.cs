@@ -1,4 +1,7 @@
-﻿using System.Net;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using student_management_api.Exceptions;
+using student_management_api.Helpers;
+using System.Net;
 using System.Text.Json;
 
 namespace student_management_api.Middlewares;
@@ -24,14 +27,30 @@ public class ExceptionHandlingMiddleware
         {
             _logger.LogError(ex, "Exception occurred in {Path}", context.Request.Path);
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-            var errorResponse = new
+            var message = ex.Message;
+            string? details = null;
+
+            if (ex is NotFoundException)
             {
-                status = context.Response.StatusCode,
-                message = "An unexpected error occurred. Please try again later.",
-                details = ex.Message
-            };
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            }
+            else if (ex is ForbiddenException)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            }
+            else
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                message = "An unexpected error occurred. Please try again later.";
+                details = ex.Message;
+            }
+
+            var errorResponse = new ErrorResponse<string>(
+                context.Response.StatusCode,
+                message,
+                details
+            );
 
             var jsonResponse = JsonSerializer.Serialize(errorResponse);
             await context.Response.WriteAsync(jsonResponse);

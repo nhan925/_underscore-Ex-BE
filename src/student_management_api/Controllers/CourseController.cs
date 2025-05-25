@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
 using student_management_api.Models.DTO;
 using student_management_api.Services;
 
@@ -49,7 +52,7 @@ public class CourseController: ControllerBase
             if (course == null || string.IsNullOrEmpty(course.Id))
             {
                 _logger.LogWarning("Course not found with ID: {CourseId}", id);
-                return NotFound(new { Message = $"Course with ID {id} not found." });
+                return NotFound(new ErrorResponse<string>(status: 404, message: $"Course with ID {id} not found"));
             }
 
             _logger.LogInformation("Successfully retrieved course with ID: {CourseId}", id);
@@ -61,7 +64,9 @@ public class CourseController: ControllerBase
     public async Task<IActionResult> UpdateCourseById([FromBody] Course course)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        {
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
+        }
 
         using (_logger.BeginScope("UpdateCourseById request - CourseId: {CourseId}", course.Id))
         {
@@ -70,7 +75,7 @@ public class CourseController: ControllerBase
             if (affectedRows == 0)
             {
                 _logger.LogWarning("Update failed or course not found with ID: {CourseId}", course.Id);
-                return NotFound(new { Message = $"Course with ID {course.Id} not found or no change made." });
+                return NotFound(new ErrorResponse<string>(status: 404, message: $"Course with ID {course.Id} not found or no change made"));
             }
 
             _logger.LogInformation("Successfully updated course with ID: {CourseId}", course.Id);
@@ -97,7 +102,9 @@ public class CourseController: ControllerBase
     public async Task<IActionResult> AddCourse([FromBody] Course course)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        {
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
+        }
 
         using (_logger.BeginScope("AddCourse request - CourseId: {CourseId}", course.Id))
         {
@@ -117,7 +124,7 @@ public class CourseController: ControllerBase
             else
             {
                 _logger.LogWarning("Course creation failed for ID: {CourseId}", course.Id);
-                return StatusCode(500, new { Message = $"Failed to create course with ID: {course.Id}" });
+                return StatusCode(500, new ErrorResponse<string>(status: 500, message: $"Failed to create course with ID: {course.Id}"));
             }
         }
     }

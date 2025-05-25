@@ -196,12 +196,12 @@ public class Program
                 var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
                 logger.LogWarning("Validation failed: {Errors}", string.Join("; ", errors));
 
-                return new BadRequestObjectResult(new
-                {
-                    title = "One or more validation errors occurred.",
-                    status = 400,
-                    errors = context.ModelState
-                });
+                return new BadRequestObjectResult(new ErrorResponse<List<string>>
+                (
+                    status: 400,
+                    message: "Invalid input data",
+                    details: errors
+                ));
             };
         });
 

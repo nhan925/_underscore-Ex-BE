@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging.Console;
 using Npgsql;
 using NpgsqlTypes;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Exceptions;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using System.Data;
@@ -507,7 +508,7 @@ public class StudentRepository : IStudentRepository
         var students = (await _db.QueryAsync<Student>(studentQuery)).ToList();
         
         if (!students.Any()) 
-            throw new Exception("no students found");
+            throw new NotFoundException("no students found");
 
         var studentIds = students.Select(s => s.Id).ToArray();
 

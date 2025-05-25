@@ -1,6 +1,7 @@
 ﻿using PhoneNumbers;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
+using student_management_api.Exceptions;
 using student_management_api.Models.Configuration;
 using student_management_api.Models.DTO;
 
@@ -161,7 +162,7 @@ public class ConfigurationService : IConfigurationService
 
         if (referenceStatusesCount != studentStatusesIds.Count)
         {
-            throw new Exception("One or more statuses are not found");
+            throw new NotFoundException("One or more statuses are not found");
         }
 
         var result = await _configurationRepository.UpdateConfig(config);

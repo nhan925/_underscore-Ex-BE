@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Exceptions;
 using student_management_api.Models.DTO;
 using System.Data;
 
@@ -26,7 +27,7 @@ public class StudentStatusRepository : IStudentStatusRepository
         var count = await _db.ExecuteAsync(query, studentStatus);
         if (count == 0)
         {
-            throw new Exception("student status not found");
+            throw new NotFoundException("student status not found");
         }
 
         return count;

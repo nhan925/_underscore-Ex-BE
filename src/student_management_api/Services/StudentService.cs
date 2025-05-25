@@ -3,6 +3,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
+using student_management_api.Exceptions;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using System.Formats.Asn1;
@@ -37,7 +38,7 @@ public class StudentService: IStudentService
         var count = await _studentRepository.DeleteStudentById(id);
         if (count == 0)
         {
-            throw new Exception("student not found");
+            throw new NotFoundException("student not found");
         }
 
         return count;
@@ -48,7 +49,7 @@ public class StudentService: IStudentService
         var student = await _studentRepository.GetStudentById(id);
         if (student == null)
         {
-            throw new Exception("student not found");
+            throw new NotFoundException("student not found");
         }
 
         return student;
@@ -65,7 +66,7 @@ public class StudentService: IStudentService
         var count = await _studentRepository.UpdateStudentById(id, request);
         if (count == 0)
         {
-            throw new Exception("student not found");
+            throw new NotFoundException("student not found");
         }
 
         return count;

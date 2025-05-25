@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
 using student_management_api.Models.Configuration;
 using student_management_api.Models.DTO;
 
@@ -49,7 +50,7 @@ public class ConfigurationController : ControllerBase
             else
             {
                 _logger.LogWarning("Invalid config type");
-                return BadRequest(new { message = "Invalid config type" });
+                return BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid config type"));
             }
         }
     }
@@ -64,7 +65,7 @@ public class ConfigurationController : ControllerBase
             if (string.IsNullOrEmpty(value))
             {
                 _logger.LogWarning("Value is empty");
-                return BadRequest(new { message = "Value is empty" });
+                return BadRequest(new ErrorResponse<string>(status: 400, message: "Value is empty"));
             }
 
             if (type == "email")
@@ -82,7 +83,7 @@ public class ConfigurationController : ControllerBase
             else
             {
                 _logger.LogWarning("Invalid config type");
-                return BadRequest(new { message = "Invalid config type" });
+                return BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid config type"));
             }
         }
     }
@@ -116,7 +117,7 @@ public class ConfigurationController : ControllerBase
             else
             {
                 _logger.LogWarning("No changes applied");
-                return NotFound(new { message = "No changes applied" });
+                return NotFound(new ErrorResponse<string>(status: 404, message: "No changes applied"));
             }
         }
     }
@@ -137,7 +138,7 @@ public class ConfigurationController : ControllerBase
             else
             {
                 _logger.LogWarning("No changes applied");
-                return NotFound(new { message = "No changes applied" });
+                return NotFound(new ErrorResponse<string>(status: 404, message: "No changes applied"));
             }
         }
     }
@@ -158,7 +159,7 @@ public class ConfigurationController : ControllerBase
             else
             {
                 _logger.LogWarning("No changes applied");
-                return NotFound(new { message = "No changes applied" });
+                return NotFound(new ErrorResponse<string>(status: 404, message: "No changes applied"));
             }
         }
     }
@@ -179,7 +180,7 @@ public class ConfigurationController : ControllerBase
             else
             {
                 _logger.LogWarning("No rules found or no changes applied");
-                return NotFound(new { Message = "No rules found or no changes applied." });
+                return NotFound(new ErrorResponse<string>(status: 404, message: "No rules found or no changes applied"));
             }
         }
     }

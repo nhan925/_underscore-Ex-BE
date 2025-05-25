@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Exceptions;
 using student_management_api.Models.DTO;
 using System.Data;
 
@@ -94,7 +95,7 @@ public class CourseRepository: ICourseRepository
 
         var course = courseDict.Values.FirstOrDefault();
         if (course == null)
-            throw new Exception($"Course with ID {id} not found.");
+            throw new NotFoundException($"Course with ID {id} not found.");
 
         return course;
     }
@@ -114,7 +115,7 @@ public class CourseRepository: ICourseRepository
         var hasStudents = await CheckStudentExistFromCourse(course.Id!);
         if (hasStudents && currentCredits != course.Credits)
         {
-            throw new InvalidOperationException("Không thể thay đổi số tín chỉ cho khóa học đã có sinh viên đăng ký");
+            throw new InvalidOperationException("Cannot change credits for a course that has students enrolled");
         }
 
         using (var transaction = _db.BeginTransaction())
@@ -190,7 +191,7 @@ public class CourseRepository: ICourseRepository
 
                         if (exists == 0)
                         {
-                            throw new Exception($"Prerequisite course ID {prerequisiteId} does not exist.");
+                            throw new NotFoundException($"Prerequisite course ID {prerequisiteId} does not exist.");
                         }
                     }
                 }
@@ -257,7 +258,7 @@ public class CourseRepository: ICourseRepository
                 await _db.ExecuteAsync(deactivateSql, new { Id = id }, transaction);
 
                 transaction.Commit();
-                return "Đã có lớp học thuộc khóa học này. Khóa học được đánh dấu dừng hoạt động";
+                return "Classes exist for this course. The course has been marked as inactive";
             }
 
             // 2. Kiểm tra nếu có học sinh đã đăng ký học lớp thuộc course này
@@ -270,7 +271,7 @@ public class CourseRepository: ICourseRepository
                 await _db.ExecuteAsync(deactivateSql, new { Id = id }, transaction);
 
                 transaction.Commit();
-                return "Đã có học sinh học lớp học này. Khóa học được đánh dấu dừng hoạt động";
+                return "Classes exist for this course. The course has been marked as inactive";
             }
 
             // 3. Xóa khóa học
@@ -278,7 +279,7 @@ public class CourseRepository: ICourseRepository
             await _db.ExecuteAsync(deleteCourseSql, new { Id = id }, transaction);
 
             transaction.Commit();
-            return "Xóa khóa học thành công";
+            return "Course deleted successfully";
         }
         catch (Exception ex)
         {

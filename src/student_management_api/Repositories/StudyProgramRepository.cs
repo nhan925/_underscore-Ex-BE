@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Exceptions;
 using student_management_api.Models.DTO;
 using System.Data;
 
@@ -26,7 +27,7 @@ public class StudyProgramRepository : IStudyProgramRepository
         var count = await _db.ExecuteAsync(query, program);
         if (count == 0)
         {
-            throw new Exception("program not found");
+            throw new NotFoundException("program not found");
         }
 
         return count;

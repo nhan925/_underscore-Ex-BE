@@ -1,6 +1,7 @@
 ﻿using ClosedXML.Excel;
 using Moq;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Exceptions;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using student_management_api.Services;
@@ -98,7 +99,7 @@ public class StudentServiceTests
             .ReturnsAsync(0);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Exception>(() =>
+        var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
             _studentService.DeleteStudentById(studentId));
 
         Assert.Equal("student not found", exception.Message);
@@ -144,7 +145,7 @@ public class StudentServiceTests
             .ReturnsAsync((Student)null!);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Exception>(() =>
+        var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
             _studentService.GetStudentById(studentId));
 
         Assert.Equal("student not found", exception.Message);
@@ -226,7 +227,7 @@ public class StudentServiceTests
             .ReturnsAsync(0);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Exception>(() =>
+        var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
             _studentService.UpdateStudentById(studentId, request));
 
         Assert.Equal("student not found", exception.Message);

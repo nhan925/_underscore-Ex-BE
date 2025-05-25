@@ -1,7 +1,9 @@
 ﻿using DinkToPdf;
 using DinkToPdf.Contracts;
+using Microsoft.AspNetCore.Http.HttpResults;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
+using student_management_api.Exceptions;
 using student_management_api.Models.CourseEnrollment;
 using student_management_api.Models.DTO;
 
@@ -33,7 +35,7 @@ public class CourseEnrollmentService : ICourseEnrollmentService
         var student = await _studentRepository.GetStudentById(studentId);
         if (student == null)
         {
-            throw new Exception("student not found");
+            throw new NotFoundException("student not found");
         }
         
         var transcript = await _courseEnrollmentRepository.GetTranscriptOfStudentById(studentId);
@@ -87,7 +89,7 @@ public class CourseEnrollmentService : ICourseEnrollmentService
         var affectedRows = await _courseEnrollmentRepository.UpdateStudentGrade(studentId, courseId, grade);
         if (affectedRows == 0)
         {
-            throw new Exception("Failed to update student grade or Student not found");
+            throw new NotFoundException("Failed to update student grade or Student not found");
         }
     }
 }

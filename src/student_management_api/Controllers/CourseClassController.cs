@@ -1,7 +1,9 @@
 ﻿using DocumentFormat.OpenXml.Office2016.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
 using student_management_api.Models.CourseClass;
 using student_management_api.Models.DTO;
 using student_management_api.Services;
@@ -25,7 +27,9 @@ public class CourseClassController : ControllerBase
     public async Task<IActionResult> AddCourseClass([FromBody] CourseClass courseClass)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        {
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
+        }
 
         using (_logger.BeginScope("AddCourseClass request"))
         {
@@ -55,7 +59,7 @@ public class CourseClassController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
         }
 
         using (_logger.BeginScope("GetStudentsInClass request"))

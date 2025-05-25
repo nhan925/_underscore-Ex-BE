@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using student_management_api.Models.DTO;
 using System;
+using student_management_api.Exceptions;
 
 namespace student_management_api_tests.ServicesTests;
 
@@ -304,7 +305,7 @@ public class ConfigurationServiceTests
             .ReturnsAsync(2); // Only 2 statuses found, but we requested 3
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Exception>(() => _service.UpdateStudentStatusConfig(config));
+        var exception = await Assert.ThrowsAsync<NotFoundException>(() => _service.UpdateStudentStatusConfig(config));
         Assert.Equal("One or more statuses are not found", exception.Message);
         _mockConfigRepo.Verify(repo => repo.UpdateConfig(config), Times.Never);
     }

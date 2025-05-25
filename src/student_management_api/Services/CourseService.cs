@@ -1,5 +1,6 @@
 ﻿using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
+using student_management_api.Exceptions;
 using student_management_api.Models.DTO;
 
 namespace student_management_api.Services;
@@ -41,7 +42,7 @@ public class CourseService : ICourseService
 
         if (!course.IsActive)
         {
-            throw new Exception("Đã xóa rồi, bạn không thể xóa nữa!");
+            throw new ForbiddenException("The course has been deleted, you cannot delete it again");
         }
 
 
@@ -53,8 +54,9 @@ public class CourseService : ICourseService
 
         if (timeDifference > 30)
         {
-            throw new Exception("Đã quá 30 phút, không thể xóa!");
+            throw new ForbiddenException("Exceeded 30 minutes, cannot delete");
         }
+
         return await _courseRepository.DeleteCourseById(id);
     }
 

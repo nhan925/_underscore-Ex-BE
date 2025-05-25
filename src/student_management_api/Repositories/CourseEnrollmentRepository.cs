@@ -2,6 +2,7 @@ using Dapper;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Mvc;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Exceptions;
 using student_management_api.Models.Course;
 using student_management_api.Models.CourseEnrollment;
 using student_management_api.Models.DTO;
@@ -94,7 +95,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
                     
                     if (passedPrerequisitesCount != prerequisites.Count())
                     {
-                        throw new Exception("Student has not passed all prerequisites");
+                        throw new ForbiddenException("Student has not passed all prerequisites");
                     }
                 }
 
@@ -157,7 +158,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
 
                 if (DateTime.Now > startDate)
                 {
-                    throw new Exception("Cannot unregister after the semester has started");
+                    throw new ForbiddenException("Cannot unregister after the semester has started");
                 }
 
                 var sql = "DELETE FROM course_enrollments WHERE student_id = @StudentId AND course_id = @CourseId AND status = 'enrolled'";
@@ -169,7 +170,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
                 var affectedRows = await _db.ExecuteAsync(sql, parameters, transaction);
                 if (affectedRows == 0)
                 {
-                    throw new Exception("No enrollment found to unregister or the student has completed the course");
+                    throw new NotFoundException("No enrollment found to unregister or the student has completed the course");
                 }
 
                 await LogEnrollmentHistory(request, "cancel", transaction);

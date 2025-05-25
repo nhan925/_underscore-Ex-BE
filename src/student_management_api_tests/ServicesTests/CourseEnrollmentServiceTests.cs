@@ -1,6 +1,7 @@
 ﻿using DinkToPdf.Contracts;
 using Moq;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Exceptions;
 using student_management_api.Models.Course;
 using student_management_api.Models.CourseEnrollment;
 using student_management_api.Models.DTO;
@@ -77,7 +78,7 @@ public class CourseEnrollmentServiceTests
             .ReturnsAsync((Student)null!);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Exception>(() =>
+        var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
             _courseEnrollmentService.GetTranscriptOfStudentById(studentId, htmlTemplate));
 
         Assert.Equal("student not found", exception.Message);

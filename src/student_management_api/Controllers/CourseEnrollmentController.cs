@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
 using student_management_api.Models.CourseEnrollment;
 
 namespace student_management_api.Controllers;
@@ -38,7 +40,7 @@ public class CourseEnrollmentController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
         }
 
         if (action == "register")
@@ -81,7 +83,7 @@ public class CourseEnrollmentController : ControllerBase
         }
         else
         {
-            return BadRequest(new { message = "Invalid action" });
+            return BadRequest(new ErrorResponse<string>(status: 400, message: "Invalid action specified. Use 'register' or 'unregister'."));
         }
     }
 
@@ -90,7 +92,7 @@ public class CourseEnrollmentController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: "Invalid input", details: ModelState));
         }
 
         using (_logger.BeginScope("UpdateStudentGrade request"))
@@ -126,7 +128,7 @@ public class CourseEnrollmentController : ControllerBase
             if (transcriptStream == null)
             {
                 _logger.LogWarning("Transcript not found for student with ID: {StudentId}", student_id);
-                return NotFound(new { message = "Transcript not found" });
+                return NotFound(new ErrorResponse<string>(status: 404, message: $"Transcript for student with ID {student_id} not found."));
             }
 
             _logger.LogInformation("Transcript fetched successfully for student with ID: {StudentId}", student_id);
