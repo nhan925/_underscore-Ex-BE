@@ -29,7 +29,7 @@ CREATE TABLE students (
     id VARCHAR(10) PRIMARY KEY,  -- Mã số sinh viên
     full_name TEXT NOT NULL,  -- Họ tên
     date_of_birth DATE NOT NULL,  -- Ngày tháng năm sinh
-    gender VARCHAR(10) CHECK (gender IN ('Nam', 'Nữ', 'Khác')),  -- Giới tính
+    gender VARCHAR(10) CHECK (gender IN ('Male', 'Female', 'Other')),  -- Giới tính
     faculty_id INT NOT NULL,  -- Khoa (Foreign Key)
     intake_year INT NOT NULL,  -- Khóa (Year of Enrollment)
     program TEXT NOT NULL,  -- Chương trình
@@ -48,17 +48,17 @@ VALUES (uuid_generate_v4(), 'admin', crypt('admin', gen_salt('bf')));
 
 -- Insert faculties
 INSERT INTO faculties (name) VALUES 
-('Khoa Luật'),
-('Khoa Tiếng Anh thương mại'),
-('Khoa Tiếng Nhật'),
-('Khoa Tiếng Pháp');
+('Law Faculty'),
+('Business English Faculty'),
+('Japanese Language Faculty'),
+('French Language Faculty');
 
 -- Insert student statuses
 INSERT INTO student_statuses (name) VALUES 
-('Đang học'),
-('Đã tốt nghiệp'),
-('Đã thôi học'),
-('Tạm dừng học');
+('Currently Studying'),
+('Graduated'),
+('Withdrawn'),
+('On Leave');
 
 -- Insert 20 students with different intake years
 --INSERT INTO students (id, full_name, date_of_birth, gender, faculty_id, intake_year, program, address, email, phone_number, status_id) VALUES 
@@ -91,10 +91,10 @@ CREATE TABLE programs (
 );
 
 INSERT INTO programs (name) VALUES
-    ('Chính quy'),
-    ('CLC'),
-    ('Liên thông'),
-    ('Tiên tiến');
+    ('Standard'),
+    ('High Quality'),
+    ('Transfer Program'),
+    ('Advanced');
 
 CREATE TABLE addresses (
     student_id VARCHAR(10) NOT NULL,
@@ -135,75 +135,61 @@ ALTER TABLE students
 ADD nationality TEXT NOT NULL; 
 
 INSERT INTO students (id, full_name, date_of_birth, gender, faculty_id, intake_year, program_id, email, phone_number, status_id, nationality) VALUES 
-('20010001', 'Nguyễn Văn An', '2002-05-10', 'Nam', 1, 2020, 1, 'nguyenvana@student.com', '0987654321', 1, 'Việt Nam'),
-('20020001', 'Trần Thị Bông', '2001-09-15', 'Nữ', 2, 2020, 2, 'tranthib@student.com', '0971234567', 1, 'Việt Nam'),
-('21030001', 'Lê Văn Cẩn', '2003-02-20', 'Nam', 3, 2021, 1, 'levanc@student.com', '0969876543', 1, 'Việt Nam'),
-('21040001', 'Phạm Minh Dũng', '2000-07-25', 'Nam', 4, 2021, 3, 'phamminhd@student.com', '0951112233', 2, 'Việt Nam'),
-('22010001', 'Hoàng Thị Én', '1999-12-05', 'Nữ', 1, 2022, 1, 'hoangthie@student.com', '0942223344', 2, 'Việt Nam'),
-('22020001', 'Đặng Quốc Phương', '2002-03-18', 'Nam', 2, 2022, 2, 'dangquocf@student.com', '0933334455', 1, 'Việt Nam'),
-('22030001', 'Lý Thu Giang', '2001-08-22', 'Nữ', 3, 2022, 3, 'lythug@student.com', '0924445566', 3, 'Việt Nam'),
-('22040001', 'Bùi Minh Huy', '2000-06-30', 'Nam', 4, 2022, 4, 'buiminhh@student.com', '0915556677', 3, 'Việt Nam'),
-('23010001', 'Đỗ Hồng Lĩnh', '2003-11-12', 'Nữ', 1, 2023, 1, 'dohongi@student.com', '0906667788', 1, 'Việt Nam'),
-('23020001', 'Vũ Thanh Hoa', '2002-04-08', 'Nữ', 2, 2023, 2, 'vuthanhj@student.com', '0897778899', 1, 'Việt Nam'),
-('23030001', 'Ngô Phúc Kiến', '2001-10-27', 'Nam', 3, 2023, 3, 'ngophuck@student.com', '0888889900', 4, 'Việt Nam'),
-('23040001', 'Trịnh Minh Lân', '2000-05-15', 'Nam', 4, 2023, 4, 'trinhminhl@student.com', '0879990011', 2, 'Việt Nam'),
-('22010002', 'Cao Thanh Mai', '2003-07-03', 'Nữ', 1, 2022, 1, 'caothanhm@student.com', '0860001122', 1, 'Việt Nam'),
-('22020002', 'Đinh Trọng Nam', '2002-01-17', 'Nam', 2, 2022, 2, 'dinhtrongn@student.com', '0851112233', 3, 'Việt Nam'),
-('22030002', 'Hà Quốc Tuấn', '2001-09-21', 'Nam', 3, 2022, 3, 'haquoco@student.com', '0842223344', 1, 'Việt Nam');
+('20010001', 'Nguyễn Văn An', '2002-05-10', 'Male', 1, 2020, 1, 'nguyenvana@student.com', '0987654321', 1, 'Vietnam'),
+('20020001', 'Trần Thị Bông', '2001-09-15', 'Female', 2, 2020, 2, 'tranthib@student.com', '0971234567', 1, 'Vietnam'),
+('21030001', 'Lê Văn Cẩn', '2003-02-20', 'Male', 3, 2021, 1, 'levanc@student.com', '0969876543', 1, 'Vietnam'),
+('21040001', 'Phạm Minh Dũng', '2000-07-25', 'Male', 4, 2021, 3, 'phamminhd@student.com', '0951112233', 2, 'Vietnam'),
+('22010001', 'Hoàng Thị Én', '1999-12-05', 'Female', 1, 2022, 1, 'hoangthie@student.com', '0942223344', 2, 'Vietnam'),
+('22020001', 'Đặng Quốc Phương', '2002-03-18', 'Male', 2, 2022, 2, 'dangquocf@student.com', '0933334455', 1, 'Vietnam'),
+('22030001', 'Lý Thu Giang', '2001-08-22', 'Female', 3, 2022, 3, 'lythug@student.com', '0924445566', 3, 'Vietnam'),
+('22040001', 'Bùi Minh Huy', '2000-06-30', 'Male', 4, 2022, 4, 'buiminhh@student.com', '0915556677', 3, 'Vietnam'),
+('23010001', 'Đỗ Hồng Lĩnh', '2003-11-12', 'Female', 1, 2023, 1, 'dohongi@student.com', '0906667788', 1, 'Vietnam'),
+('23020001', 'Vũ Thanh Hoa', '2002-04-08', 'Female', 2, 2023, 2, 'vuthanhj@student.com', '0897778899', 1, 'Vietnam'),
+('23030001', 'Ngô Phúc Kiến', '2001-10-27', 'Male', 3, 2023, 3, 'ngophuck@student.com', '0888889900', 4, 'Vietnam'),
+('23040001', 'Trịnh Minh Lân', '2000-05-15', 'Male', 4, 2023, 4, 'trinhminhl@student.com', '0879990011', 2, 'Vietnam'),
+('22010002', 'Cao Thanh Mai', '2003-07-03', 'Female', 1, 2022, 1, 'caothanhm@student.com', '0860001122', 1, 'Vietnam'),
+('22020002', 'Đinh Trọng Nam', '2002-01-17', 'Male', 2, 2022, 2, 'dinhtrongn@student.com', '0851112233', 3, 'Vietnam'),
+('22030002', 'Hà Quốc Tuấn', '2001-09-21', 'Male', 3, 2022, 3, 'haquoco@student.com', '0842223344', 1, 'Vietnam');
 
 INSERT INTO identity_info (student_id, number, place_of_issue, date_of_issue, expiry_date, additional_info, type) VALUES 
-('20010001', '012345678901', 'Công an Hà Nội', '2018-06-15', '2028-06-15', '{"has_chip": "yes"}', 'cccd'),
-('20020001', '987654321098', 'Công an TP.HCM', '2019-09-10', '2029-09-10', '{"has_chip": "no"}', 'cccd'),
-('21030001', 'A12345678', 'Cục Quản lý Xuất nhập cảnh', '2020-02-01', '2030-02-01', '{"country_of_issue": "Việt Nam", "note": "Dùng cho du học"}', 'passport'),
-('21040001', 'B87654321', 'Cục Quản lý Xuất nhập cảnh', '2017-05-20', '2027-05-20', '{"country_of_issue": "Việt Nam"}', 'passport'),
-('22010001', '112233445566', 'Công an Đà Nẵng', '2018-08-30', '2028-08-30', '{"has_chip": "yes"}', 'cccd'),
-('22020001', '2233445566', 'Công an Hà Nội', '2019-03-18', '2029-03-18', null, 'cmnd'),
-('22030001', '334455667788', 'Công an TP.HCM', '2020-08-22', '2030-08-22', '{"has_chip": "yes"}', 'cccd'),
-('22040001', '445566778899', 'Công an Đà Nẵng', '2017-06-30', '2027-06-30', '{"has_chip": "no"}', 'cccd'),
-('23010001', '556677889900', 'Công an Hà Nội', '2023-11-12', '2033-11-12', '{"has_chip": "yes"}', 'cccd'),
-('23020001', '667788990011', 'Công an TP.HCM', '2022-04-08', '2032-04-08', '{"has_chip": "no"}', 'cccd'),
-('23030001', '778899001122', 'Cục Quản lý Xuất nhập cảnh', '2021-10-27', '2031-10-27', '{"country_of_issue": "Việt Nam"}', 'passport'),
-('23040001', '889900112233', 'Cục Quản lý Xuất nhập cảnh', '2020-05-15', '2030-05-15', '{"country_of_issue": "Việt Nam"}', 'passport'),
-('22010002', '990011223344', 'Công an Đà Nẵng', '2022-07-03', '2032-07-03', '{"has_chip": "yes"}', 'cccd'),
-('22020002', '001122334455', 'Công an Hà Nội', '2021-01-17', '2031-01-17', '{"has_chip": "no"}', 'cccd'),
-('22030002', '112233445567', 'Công an TP.HCM', '2020-09-21', '2030-09-21', '{"has_chip": "yes"}', 'cccd');
+('20010001', '012345678901', 'Hanoi Police Department', '2018-06-15', '2028-06-15', '{"has_chip": "yes"}', 'cccd'),
+('20020001', '987654321098', 'Ho Chi Minh City Police Department', '2019-09-10', '2029-09-10', '{"has_chip": "no"}', 'cccd'),
+('21030001', 'A12345678', 'Immigration Department', '2020-02-01', '2030-02-01', '{"country_of_issue": "Vietnam", "note": "For studying abroad"}', 'passport'),
+('21040001', 'B87654321', 'Immigration Department', '2017-05-20', '2027-05-20', '{"country_of_issue": "Vietnam"}', 'passport'),
+('22010001', '112233445566', 'Da Nang Police Department', '2018-08-30', '2028-08-30', '{"has_chip": "yes"}', 'cccd'),
+('22020001', '2233445566', 'Hanoi Police Department', '2019-03-18', '2029-03-18', null, 'cmnd'),
+('22030001', '334455667788', 'Ho Chi Minh City Police Department', '2020-08-22', '2030-08-22', '{"has_chip": "yes"}', 'cccd'),
+('22040001', '445566778899', 'Da Nang Police Department', '2017-06-30', '2027-06-30', '{"has_chip": "no"}', 'cccd'),
+('23010001', '556677889900', 'Hanoi Police Department', '2023-11-12', '2033-11-12', '{"has_chip": "yes"}', 'cccd'),
+('23020001', '667788990011', 'Ho Chi Minh City Police Department', '2022-04-08', '2032-04-08', '{"has_chip": "no"}', 'cccd'),
+('23030001', '778899001122', 'Immigration Department', '2021-10-27', '2031-10-27', '{"country_of_issue": "Vietnam"}', 'passport'),
+('23040001', '889900112233', 'Immigration Department', '2020-05-15', '2030-05-15', '{"country_of_issue": "Vietnam"}', 'passport'),
+('22010002', '990011223344', 'Da Nang Police Department', '2022-07-03', '2032-07-03', '{"has_chip": "yes"}', 'cccd'),
+('22020002', '001122334455', 'Hanoi Police Department', '2021-01-17', '2031-01-17', '{"has_chip": "no"}', 'cccd'),
+('22030002', '112233445567', 'Ho Chi Minh City Police Department', '2020-09-21', '2030-09-21', '{"has_chip": "yes"}', 'cccd');
 
 INSERT INTO addresses (student_id, other, village, district, city, country, type) VALUES 
-('20010001', '123 Trần Hưng Đạo', 'Phường 1', 'Quận 1', 'Hà Nội', 'Việt Nam', 'thuong_tru'),
-('20010001', '456 Lê Lợi', 'Phường 2', 'Quận 2', 'Hà Nội', 'Việt Nam', 'tam_tru'),
-('20010001', '789 Nguyễn Huệ', 'Phường 3', 'Quận 3', 'Hà Nội', 'Việt Nam', 'nhan_thu'),
-
-('20020001', '456 Nguyễn Huệ', 'Phường 4', 'Quận 4', 'TP. HCM', 'Việt Nam', 'thuong_tru'),
-('20020001', '789 Lê Lợi', 'Phường 5', 'Quận 5', 'TP. HCM', 'Việt Nam', 'tam_tru'),
-
-('21030001', '789 Lê Lợi', 'Phường 6', 'Quận 6', 'Đà Nẵng', 'Việt Nam', 'thuong_tru'),
-('21030001', '123 Trần Hưng Đạo', 'Phường 7', 'Quận 7', 'Đà Nẵng', 'Việt Nam', 'nhan_thu'),
-
-('21040001', '321 Bạch Đằng', 'Phường 8', 'Quận 8', 'Hải Phòng', 'Việt Nam', 'thuong_tru'),
-
-('22010001', '654 Lê Thánh Tông', 'Phường 9', 'Quận 9', 'Cần Thơ', 'Việt Nam', 'thuong_tru'),
-('22010001', '987 Hai Bà Trưng', 'Phường 10', 'Quận 10', 'Cần Thơ', 'Việt Nam', 'tam_tru'),
-
-('22020001', '987 Hai Bà Trưng', 'Phường 11', 'Quận 11', 'Hà Nội', 'Việt Nam', 'thuong_tru'),
-
-('22030001', '135 Võ Văn Kiệt', 'Phường 12', 'Quận 12', 'TP. HCM', 'Việt Nam', 'thuong_tru'),
-('22030001', '246 Nguyễn Trãi', 'Phường 13', 'Quận 13', 'TP. HCM', 'Việt Nam', 'nhan_thu'),
-
-('22040001', '246 Nguyễn Trãi', 'Phường 14', 'Quận 14', 'Đà Nẵng', 'Việt Nam', 'thuong_tru'),
-
-('23010001', '369 Hoàng Văn Thụ', 'Phường 15', 'Quận 15', 'Hải Phòng', 'Việt Nam', 'thuong_tru'),
-
-('23020001', '741 Nguyễn Văn Linh', 'Phường 16', 'Quận 16', 'Cần Thơ', 'Việt Nam', 'thuong_tru'),
-
-('23030001', '852 Trường Chinh', 'Phường 17', 'Quận 17', 'Hà Nội', 'Việt Nam', 'thuong_tru'),
-
-('23040001', '963 Điện Biên Phủ', 'Phường 18', 'Quận 18', 'TP. HCM', 'Việt Nam', 'thuong_tru'),
-
-('22010002', '159 Lạc Long Quân', 'Phường 19', 'Quận 19', 'Đà Nẵng', 'Việt Nam', 'thuong_tru'),
-
-('22020002', '357 Nguyễn Văn Cừ', 'Phường 20', 'Quận 20', 'Hải Phòng', 'Việt Nam', 'thuong_tru'),
-
-('22030002', '468 Lê Quang Định', 'Phường 21', 'Quận 21', 'Cần Thơ', 'Việt Nam', 'thuong_tru');
+('20010001', '123 Tran Hung Dao', 'Ward 1', 'District 1', 'Hanoi', 'Vietnam', 'thuong_tru'),
+('20010001', '456 Le Loi', 'Ward 2', 'District 2', 'Hanoi', 'Vietnam', 'tam_tru'),
+('20010001', '789 Nguyen Hue', 'Ward 3', 'District 3', 'Hanoi', 'Vietnam', 'nhan_thu'),
+('20020001', '456 Nguyen Hue', 'Ward 4', 'District 4', 'Ho Chi Minh City', 'Vietnam', 'thuong_tru'),
+('20020001', '789 Le Loi', 'Ward 5', 'District 5', 'Ho Chi Minh City', 'Vietnam', 'tam_tru'),
+('21030001', '789 Le Loi', 'Ward 6', 'District 6', 'Da Nang', 'Vietnam', 'thuong_tru'),
+('21030001', '123 Tran Hung Dao', 'Ward 7', 'District 7', 'Da Nang', 'Vietnam', 'nhan_thu'),
+('21040001', '321 Bach Dang', 'Ward 8', 'District 8', 'Hai Phong', 'Vietnam', 'thuong_tru'),
+('22010001', '654 Le Thanh Tong', 'Ward 9', 'District 9', 'Can Tho', 'Vietnam', 'thuong_tru'),
+('22010001', '987 Hai Ba Trung', 'Ward 10', 'District 10', 'Can Tho', 'Vietnam', 'tam_tru'),
+('22020001', '987 Hai Ba Trung', 'Ward 11', 'District 11', 'Hanoi', 'Vietnam', 'thuong_tru'),
+('22030001', '135 Vo Van Kiet', 'Ward 12', 'District 12', 'Ho Chi Minh City', 'Vietnam', 'thuong_tru'),
+('22030001', '246 Nguyen Trai', 'Ward 13', 'District 13', 'Ho Chi Minh City', 'Vietnam', 'nhan_thu'),
+('22040001', '246 Nguyen Trai', 'Ward 14', 'District 14', 'Da Nang', 'Vietnam', 'thuong_tru'),
+('23010001', '369 Hoang Van Thu', 'Ward 15', 'District 15', 'Hai Phong', 'Vietnam', 'thuong_tru'),
+('23020001', '741 Nguyen Van Linh', 'Ward 16', 'District 16', 'Can Tho', 'Vietnam', 'thuong_tru'),
+('23030001', '852 Truong Chinh', 'Ward 17', 'District 17', 'Hanoi', 'Vietnam', 'thuong_tru'),
+('23040001', '963 Dien Bien Phu', 'Ward 18', 'District 18', 'Ho Chi Minh City', 'Vietnam', 'thuong_tru'),
+('22010002', '159 Lac Long Quan', 'Ward 19', 'District 19', 'Da Nang', 'Vietnam', 'thuong_tru'),
+('22020002', '357 Nguyen Van Cu', 'Ward 20', 'District 20', 'Hai Phong', 'Vietnam', 'thuong_tru'),
+('22030002', '468 Le Quang Dinh', 'Ward 21', 'District 21', 'Can Tho', 'Vietnam', 'thuong_tru');
 
 ------------------------ v3.0 -------------------------
 CREATE TABLE configurations (
@@ -369,27 +355,27 @@ CREATE TABLE IF NOT EXISTS enrollment_history (
       ON DELETE RESTRICT
 );
 
--- create triggers
+---- create triggers
 
-CREATE OR REPLACE FUNCTION set_status_based_on_grade()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF NEW.grade IS NULL THEN
-        NEW.status := 'enrolled';
-    ELSIF NEW.grade < 5 THEN
-        NEW.status := 'failed';
-    ELSE
-        NEW.status := 'passed';
-    END IF;
+--CREATE OR REPLACE FUNCTION set_status_based_on_grade()
+--RETURNS TRIGGER AS $$
+--BEGIN
+--    IF NEW.grade IS NULL THEN
+--        NEW.status := 'enrolled';
+--    ELSIF NEW.grade < 5 THEN
+--        NEW.status := 'failed';
+--    ELSE
+--        NEW.status := 'passed';
+--    END IF;
 
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+--    RETURN NEW;
+--END;
+--$$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_set_status_based_on_grade
-BEFORE INSERT OR UPDATE ON course_enrollments
-FOR EACH ROW
-EXECUTE FUNCTION set_status_based_on_grade();
+--CREATE TRIGGER trg_set_status_based_on_grade
+--BEFORE INSERT OR UPDATE ON course_enrollments
+--FOR EACH ROW
+--EXECUTE FUNCTION set_status_based_on_grade();
 
 -- create sample data for new tables in v4.0
 
@@ -414,40 +400,40 @@ INSERT INTO semesters (semester_num, year_id, start_date, end_date) VALUES
 
 -- Sample data for lecturers
 INSERT INTO lecturers (id, full_name, date_of_birth, gender, email, phone_number, faculty_id) VALUES 
-('LEC001', 'Phạm Văn Minh', '1975-03-15', 'Nam', 'phamvanminh@faculty.edu.vn', '0912345678', 1), -- Khoa Luật
-('LEC002', 'Nguyễn Thị Hương', '1980-06-22', 'Nữ', 'nguyenthihuong@faculty.edu.vn', '0923456789', 1), -- Khoa Luật
-('LEC003', 'Trần Đức Thắng', '1978-11-05', 'Nam', 'tranducthang@faculty.edu.vn', '0934567890', 2), -- Khoa Tiếng Anh thương mại
-('LEC004', 'Lê Thị Mai', '1982-09-18', 'Nữ', 'lethimai@faculty.edu.vn', '0945678901', 2), -- Khoa Tiếng Anh thương mại
-('LEC005', 'Hoàng Minh Tuấn', '1976-07-30', 'Nam', 'hoangminhtuan@faculty.edu.vn', '0956789012', 3), -- Khoa Tiếng Nhật
-('LEC006', 'Đỗ Thanh Hà', '1983-04-12', 'Nữ', 'dothanhha@faculty.edu.vn', '0967890123', 3), -- Khoa Tiếng Nhật
-('LEC007', 'Vũ Quang Nam', '1979-01-25', 'Nam', 'vuquangnam@faculty.edu.vn', '0978901234', 4), -- Khoa Tiếng Pháp
-('LEC008', 'Ngô Thị Lan', '1981-08-07', 'Nữ', 'ngothilan@faculty.edu.vn', '0989012345', 4); -- Khoa Tiếng Pháp
+('LEC001', 'Phạm Văn Minh', '1975-03-15', 'Male', 'phamvanminh@faculty.edu.vn', '0912345678', 1), -- Khoa Luật
+('LEC002', 'Nguyễn Thị Hương', '1980-06-22', 'Female', 'nguyenthihuong@faculty.edu.vn', '0923456789', 1), -- Khoa Luật
+('LEC003', 'Trần Đức Thắng', '1978-11-05', 'Male', 'tranducthang@faculty.edu.vn', '0934567890', 2), -- Khoa Tiếng Anh thương mại
+('LEC004', 'Lê Thị Mai', '1982-09-18', 'Female', 'lethimai@faculty.edu.vn', '0945678901', 2), -- Khoa Tiếng Anh thương mại
+('LEC005', 'Hoàng Minh Tuấn', '1976-07-30', 'Male', 'hoangminhtuan@faculty.edu.vn', '0956789012', 3), -- Khoa Tiếng Nhật
+('LEC006', 'Đỗ Thanh Hà', '1983-04-12', 'Female', 'dothanhha@faculty.edu.vn', '0967890123', 3), -- Khoa Tiếng Nhật
+('LEC007', 'Vũ Quang Nam', '1979-01-25', 'Male', 'vuquangnam@faculty.edu.vn', '0978901234', 4), -- Khoa Tiếng Pháp
+('LEC008', 'Ngô Thị Lan', '1981-08-07', 'Female', 'ngothilan@faculty.edu.vn', '0989012345', 4); -- Khoa Tiếng Pháp
 
 -- Sample data for courses
 INSERT INTO courses (id, name, credits, faculty_id, description, created_at, is_active) VALUES 
--- Khoa Luật courses
-('LAW101', 'Luật Dân sự cơ bản', 3, 1, 'Giới thiệu về các nguyên tắc cơ bản của luật dân sự Việt Nam', '2025-04-07 05:20:47', TRUE),
-('LAW102', 'Luật Hình sự đại cương', 3, 1, 'Khái quát về luật hình sự và các tội phạm cơ bản', '2025-04-07 05:20:47', TRUE),
-('LAW201', 'Pháp luật thương mại', 4, 1, 'Luật áp dụng trong hoạt động thương mại và kinh doanh', '2025-04-07 05:20:47', TRUE),
-('LAW301', 'Luật Quốc tế', 4, 1, 'Nghiên cứu về luật pháp quốc tế và các hiệp ước', '2025-04-07 05:20:47', TRUE),
+-- Law Faculty courses
+('LAW101', 'Basic Civil Law', 3, 1, 'Introduction to the basic principles of Vietnamese civil law', '2025-04-07 05:20:47', TRUE),
+('LAW102', 'Introduction to Criminal Law', 3, 1, 'Overview of criminal law and basic crimes', '2025-04-07 05:20:47', TRUE),
+('LAW201', 'Commercial Law', 4, 1, 'Laws applicable to commercial and business activities', '2025-04-07 05:20:47', TRUE),
+('LAW301', 'International Law', 4, 1, 'Study of international law and treaties', '2025-04-07 05:20:47', TRUE),
 
--- Khoa Tiếng Anh thương mại courses
-('ENG101', 'Tiếng Anh thương mại cơ bản', 3, 2, 'Giới thiệu về từ vựng và ngữ pháp tiếng Anh trong môi trường kinh doanh', '2025-04-07 05:20:47', TRUE),
-('ENG102', 'Kỹ năng giao tiếp tiếng Anh', 3, 2, 'Phát triển kỹ năng giao tiếp tiếng Anh trong môi trường làm việc', '2025-04-07 05:20:47', TRUE),
-('ENG201', 'Tiếng Anh thương mại nâng cao', 4, 2, 'Nâng cao kỹ năng tiếng Anh chuyên ngành thương mại', '2025-04-07 05:20:47', TRUE),
-('ENG301', 'Tiếng Anh đàm phán kinh doanh', 4, 2, 'Kỹ năng đàm phán kinh doanh bằng tiếng Anh', '2025-04-07 05:20:47', TRUE),
+-- Business English Faculty courses
+('ENG101', 'Basic Business English', 3, 2, 'Introduction to English vocabulary and grammar in a business environment', '2025-04-07 05:20:47', TRUE),
+('ENG102', 'English Communication Skills', 3, 2, 'Developing English communication skills in the workplace', '2025-04-07 05:20:47', TRUE),
+('ENG201', 'Advanced Business English', 4, 2, 'Enhancing specialized English skills for commerce', '2025-04-07 05:20:47', TRUE),
+('ENG301', 'Business Negotiation English', 4, 2, 'Business negotiation skills in English', '2025-04-07 05:20:47', TRUE),
 
--- Khoa Tiếng Nhật courses
-('JPN101', 'Tiếng Nhật cơ bản 1', 3, 3, 'Nhập môn tiếng Nhật với các kỹ năng nghe, nói, đọc, viết cơ bản', '2025-04-07 05:20:47', TRUE),
-('JPN102', 'Tiếng Nhật cơ bản 2', 3, 3, 'Tiếp tục phát triển kỹ năng tiếng Nhật cơ bản', '2025-04-07 05:20:47', TRUE),
-('JPN201', 'Tiếng Nhật trung cấp', 4, 3, 'Phát triển kỹ năng tiếng Nhật ở mức độ trung cấp', '2025-04-07 05:20:47', TRUE),
-('JPN301', 'Tiếng Nhật thương mại', 4, 3, 'Tiếng Nhật chuyên ngành thương mại và kinh doanh', '2025-04-07 05:20:47', TRUE),
+-- Japanese Faculty courses
+('JPN101', 'Basic Japanese 1', 3, 3, 'Introduction to Japanese with basic listening, speaking, reading, and writing skills', '2025-04-07 05:20:47', TRUE),
+('JPN102', 'Basic Japanese 2', 3, 3, 'Continued development of basic Japanese skills', '2025-04-07 05:20:47', TRUE),
+('JPN201', 'Intermediate Japanese', 4, 3, 'Development of Japanese skills at the intermediate level', '2025-04-07 05:20:47', TRUE),
+('JPN301', 'Business Japanese', 4, 3, 'Specialized Japanese for commerce and business', '2025-04-07 05:20:47', TRUE),
 
--- Khoa Tiếng Pháp courses
-('FRE101', 'Tiếng Pháp cơ bản 1', 3, 4, 'Nhập môn tiếng Pháp với các kỹ năng nghe, nói, đọc, viết cơ bản', '2025-04-07 05:20:47', TRUE),
-('FRE102', 'Tiếng Pháp cơ bản 2', 3, 4, 'Tiếp tục phát triển kỹ năng tiếng Pháp cơ bản', '2025-04-07 05:20:47', TRUE),
-('FRE201', 'Tiếng Pháp trung cấp', 4, 4, 'Phát triển kỹ năng tiếng Pháp ở mức độ trung cấp', '2025-04-07 05:20:47', TRUE),
-('FRE301', 'Tiếng Pháp thương mại', 4, 4, 'Tiếng Pháp chuyên ngành thương mại và kinh doanh', '2025-04-07 05:20:47', TRUE);
+-- French Faculty courses
+('FRE101', 'Basic French 1', 3, 4, 'Introduction to French with basic listening, speaking, reading, and writing skills', '2025-04-07 05:20:47', TRUE),
+('FRE102', 'Basic French 2', 3, 4, 'Continued development of basic French skills', '2025-04-07 05:20:47', TRUE),
+('FRE201', 'Intermediate French', 4, 4, 'Development of French skills at the intermediate level', '2025-04-07 05:20:47', TRUE),
+('FRE301', 'Business French', 4, 4, 'Specialized French for commerce and business', '2025-04-07 05:20:47', TRUE);
 
 -- Sample data for course_prerequisites
 INSERT INTO course_prerequisites (course_id, prerequisite_id) VALUES 
@@ -470,31 +456,178 @@ INSERT INTO course_prerequisites (course_id, prerequisite_id) VALUES
 ('FRE201', 'FRE102'), -- Tiếng Pháp trung cấp requires Tiếng Pháp cơ bản 2
 ('FRE301', 'FRE201'); -- Tiếng Pháp thương mại requires Tiếng Pháp trung cấp
 
--- Sample data for classes
+-- Sample data for classes with English schedule translations
 INSERT INTO classes (id, course_id, semester_id, lecturer_id, max_students, schedule, room, created_at, is_active) VALUES 
 -- Classes for 2023-2024 academic year, semester 1 (semester_id = 7)
-('C001', 'LAW101', 7, 'LEC001', 40, 'Thứ 2, 7:30-9:30', 'A101', '2025-04-07 05:20:47', TRUE),
-('C002', 'LAW102', 7, 'LEC002', 35, 'Thứ 3, 13:30-15:30', 'A102', '2025-04-07 05:20:47', TRUE),
-('C003', 'ENG101', 7, 'LEC003', 30, 'Thứ 4, 9:30-11:30', 'B201', '2025-04-07 05:20:47', TRUE),
-('C004', 'ENG102', 7, 'LEC004', 30, 'Thứ 5, 7:30-9:30', 'B202', '2025-04-07 05:20:47', TRUE),
-('C005', 'JPN101', 7, 'LEC005', 25, 'Thứ 6, 13:30-15:30', 'C301', '2025-04-07 05:20:47', TRUE),
-('C006', 'FRE101', 7, 'LEC007', 25, 'Thứ 7, 9:30-11:30', 'C302', '2025-04-07 05:20:47', TRUE),
+('C001', 'LAW101', 7, 'LEC001', 40, 'Monday, 7:30-9:30', 'A101', '2025-04-07 05:20:47', TRUE),
+('C002', 'LAW102', 7, 'LEC002', 35, 'Tuesday, 13:30-15:30', 'A102', '2025-04-07 05:20:47', TRUE),
+('C003', 'ENG101', 7, 'LEC003', 30, 'Wednesday, 9:30-11:30', 'B201', '2025-04-07 05:20:47', TRUE),
+('C004', 'ENG102', 7, 'LEC004', 30, 'Thursday, 7:30-9:30', 'B202', '2025-04-07 05:20:47', TRUE),
+('C005', 'JPN101', 7, 'LEC005', 25, 'Friday, 13:30-15:30', 'C301', '2025-04-07 05:20:47', TRUE),
+('C006', 'FRE101', 7, 'LEC007', 25, 'Saturday, 9:30-11:30', 'C302', '2025-04-07 05:20:47', TRUE),
 
 -- Classes for 2023-2024 academic year, semester 2 (semester_id = 8)
-('C007', 'LAW201', 8, 'LEC001', 35, 'Thứ 2, 9:30-11:30', 'A103', '2025-04-07 05:20:47', TRUE),
-('C008', 'ENG201', 8, 'LEC003', 25, 'Thứ 3, 7:30-9:30', 'B203', '2025-04-07 05:20:47', TRUE),
-('C009', 'JPN102', 8, 'LEC006', 20, 'Thứ 4, 13:30-15:30', 'C303', '2025-04-07 05:20:47', TRUE),
-('C010', 'FRE102', 8, 'LEC008', 20, 'Thứ 5, 9:30-11:30', 'C304', '2025-04-07 05:20:47', TRUE),
+('C007', 'LAW201', 8, 'LEC001', 35, 'Monday, 9:30-11:30', 'A103', '2025-04-07 05:20:47', TRUE),
+('C008', 'ENG201', 8, 'LEC003', 25, 'Tuesday, 7:30-9:30', 'B203', '2025-04-07 05:20:47', TRUE),
+('C009', 'JPN102', 8, 'LEC006', 20, 'Wednesday, 13:30-15:30', 'C303', '2025-04-07 05:20:47', TRUE),
+('C010', 'FRE102', 8, 'LEC008', 20, 'Thursday, 9:30-11:30', 'C304', '2025-04-07 05:20:47', TRUE),
 
 -- Classes for 2024-2025 academic year, semester 1 (semester_id = 9)
-('C011', 'LAW301', 9, 'LEC002', 30, 'Thứ 6, 7:30-9:30', 'A104', '2025-04-07 05:20:47', TRUE),
-('C012', 'ENG301', 9, 'LEC004', 25, 'Thứ 7, 13:30-15:30', 'B204', '2025-04-07 05:20:47', TRUE),
-('C013', 'JPN201', 9, 'LEC005', 20, 'Thứ 2, 15:30-17:30', 'C305', '2025-04-07 05:20:47', TRUE),
-('C014', 'FRE201', 9, 'LEC007', 20, 'Thứ 3, 15:30-17:30', 'C306', '2025-04-07 05:20:47', TRUE),
+('C011', 'LAW301', 9, 'LEC002', 30, 'Friday, 7:30-9:30', 'A104', '2025-04-07 05:20:47', TRUE),
+('C012', 'ENG301', 9, 'LEC004', 25, 'Saturday, 13:30-15:30', 'B204', '2025-04-07 05:20:47', TRUE),
+('C013', 'JPN201', 9, 'LEC005', 20, 'Monday, 15:30-17:30', 'C305', '2025-04-07 05:20:47', TRUE),
+('C014', 'FRE201', 9, 'LEC007', 20, 'Tuesday, 15:30-17:30', 'C306', '2025-04-07 05:20:47', TRUE),
 
 -- Classes for 2024-2025 academic year, semester 2 (semester_id = 10)
-('C015', 'JPN301', 10, 'LEC006', 15, 'Thứ 4, 15:30-17:30', 'C307', '2025-04-07 05:20:47', TRUE),
-('C016', 'FRE301', 10, 'LEC008', 15, 'Thứ 5, 15:30-17:30', 'C308', '2025-04-07 05:20:47', TRUE);
+('C015', 'JPN301', 10, 'LEC006', 15, 'Wednesday, 15:30-17:30', 'C307', '2025-04-07 05:20:47', TRUE),
+('C016', 'FRE301', 10, 'LEC008', 15, 'Thursday, 15:30-17:30', 'C308', '2025-04-07 05:20:47', TRUE);
+
+---- Sample data for course_enrollments
+--INSERT INTO course_enrollments (student_id, course_id, class_id, semester_id, grade) VALUES 
+---- Student 20010001 (Nguyễn Văn An) enrollments - Law student
+--('20010001', 'LAW101', 'C001', 7, 3.4),
+--('20010001', 'LAW102', 'C002', 7, 7.8),
+--('20010001', 'LAW201', 'C007', 8, 8.2),
+--('20010001', 'LAW301', 'C011', 9, NULL),
+
+---- Student 20020001 (Trần Thị Bông) enrollments - English student
+--('20020001', 'ENG101', 'C003', 7, 9.0),
+--('20020001', 'ENG102', 'C004', 7, 8.7),
+--('20020001', 'ENG201', 'C008', 8, 4.9),
+--('20020001', 'ENG301', 'C012', 9, NULL),
+
+---- Student 21030001 (Lê Văn Cẩn) enrollments - Japanese student
+--('21030001', 'JPN101', 'C005', 7, 7.5),
+--('21030001', 'JPN102', 'C009', 8, 8.0),
+--('21030001', 'JPN201', 'C013', 9, NULL),
+
+---- Student 21040001 (Phạm Minh Dũng) enrollments - French student
+--('21040001', 'FRE101', 'C006', 7, 6.5),
+--('21040001', 'FRE102', 'C010', 8, 7.2),
+
+---- Student 22010001 (Hoàng Thị Én) enrollments - Law student
+--('22010001', 'LAW101', 'C001', 7, 9.5),
+--('22010001', 'LAW102', 'C002', 7, 9.2),
+--('22010001', 'LAW201', 'C007', 8, NULL);
+
+---- Sample data for enrollment_history
+--INSERT INTO enrollment_history (student_id, created_at, course_id, class_id, semester_id, action) VALUES 
+---- Student 20010001 (Nguyễn Văn An) history
+--('20010001', '2023-08-15 09:30:00', 'LAW101', 'C001', 7, 'register'),
+--('20010001', '2023-08-15 09:45:00', 'LAW102', 'C002', 7, 'register'),
+--('20010001', '2024-01-10 14:20:00', 'LAW201', 'C007', 8, 'register'),
+--('20010001', '2024-08-20 10:15:00', 'LAW301', 'C011', 9, 'register'),
+
+---- Student 20020001 (Trần Thị Bông) history
+--('20020001', '2023-08-16 11:20:00', 'ENG101', 'C003', 7, 'register'),
+--('20020001', '2023-08-16 11:30:00', 'ENG102', 'C004', 7, 'register'),
+--('20020001', '2024-01-12 15:45:00', 'ENG201', 'C008', 8, 'register'),
+--('20020001', '2024-08-18 09:30:00', 'ENG301', 'C012', 9, 'register'),
+
+---- Student 21030001 (Lê Văn Cẩn) history
+--('21030001', '2023-08-17 10:10:00', 'JPN101', 'C005', 7, 'register'),
+--('21030001', '2023-08-19 14:25:00', 'LAW101', 'C001', 7, 'register'), -- Registered for Law class
+--('21030001', '2023-08-25 16:30:00', 'LAW101', 'C001', 7, 'cancel'), -- Cancelled Law class
+--('21030001', '2024-01-15 13:40:00', 'JPN102', 'C009', 8, 'register'),
+--('21030001', '2024-08-19 11:05:00', 'JPN201', 'C013', 9, 'register'),
+
+---- Student 21040001 (Phạm Minh Dũng) history
+--('21040001', '2023-08-18 13:15:00', 'FRE101', 'C006', 7, 'register'),
+--('21040001', '2024-01-16 10:50:00', 'FRE102', 'C010', 8, 'register'),
+--('21040001', '2024-06-20 09:00:00', 'FRE102', 'C010', 8, 'register'); -- Registering again for the failed course
+
+------------------------ v5.0 -------------------------
+ALTER TABLE addresses 
+ADD COLUMN other_vi text,
+ADD COLUMN village_vi text,
+ADD COLUMN district_vi text,
+ADD COLUMN city_vi text,
+ADD COLUMN country_vi text,
+ADD COLUMN need_to_review boolean;
+
+ALTER TABLE classes
+ADD COLUMN schedule_vi text,
+ADD COLUMN need_to_review boolean;
+
+ALTER TABLE course_enrollments
+ADD COLUMN status_vi text CHECK(status_vi in ('đã đăng ký', 'rớt', 'đã qua môn'));
+
+ALTER TABLE courses
+ADD COLUMN name_vi text,
+ADD COLUMN description_vi text,
+ADD COLUMN need_to_review boolean;
+
+ALTER TABLE enrollment_history
+ADD COLUMN action_vi text CHECK(action_vi in ('đăng ký', 'hủy đăng ký'));
+
+ALTER TABLE faculties
+ADD COLUMN name_vi text,
+ADD COLUMN need_to_review boolean;
+
+ALTER TABLE identity_info
+ADD COLUMN place_of_issue_vi text,
+ADD COLUMN additional_info_vi jsonb,
+ADD COLUMN need_to_review boolean;
+
+ALTER TABLE lecturers
+ADD COLUMN gender_vi text,
+ADD COLUMN need_to_review boolean;
+
+ALTER TABLE programs
+ADD COLUMN name_vi text,
+ADD COLUMN need_to_review boolean;
+
+ALTER TABLE student_statuses
+ADD COLUMN name_vi text,
+ADD COLUMN need_to_review boolean;
+
+ALTER TABLE students
+ADD COLUMN gender_vi text,
+ADD COLUMN nationality_vi text,
+ADD COLUMN need_to_review boolean;
+
+-- create triggers
+
+CREATE OR REPLACE FUNCTION set_status_based_on_grade()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.grade IS NULL THEN
+        NEW.status := 'enrolled';
+        NEW.status_vi := 'đã đăng ký';
+    ELSIF NEW.grade < 5 THEN
+        NEW.status := 'failed';
+        NEW.status_vi := 'rớt';
+    ELSE
+        NEW.status := 'passed';
+        NEW.status_vi := 'đã qua môn';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_set_status_based_on_grade
+BEFORE INSERT OR UPDATE ON course_enrollments
+FOR EACH ROW
+EXECUTE FUNCTION set_status_based_on_grade();
+--
+
+CREATE OR REPLACE FUNCTION set_action_based_on_enrollment()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.action = 'register' THEN
+        NEW.action_vi := 'đăng ký';
+    ELSIF NEW.action = 'cancel' THEN
+        NEW.action_vi := 'hủy đăng ký';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_set_action_based_on_enrollment
+BEFORE INSERT OR UPDATE ON enrollment_history
+FOR EACH ROW
+EXECUTE FUNCTION set_action_based_on_enrollment();
 
 -- Sample data for course_enrollments
 INSERT INTO course_enrollments (student_id, course_id, class_id, semester_id, grade) VALUES 
@@ -549,3 +682,208 @@ INSERT INTO enrollment_history (student_id, created_at, course_id, class_id, sem
 ('21040001', '2023-08-18 13:15:00', 'FRE101', 'C006', 7, 'register'),
 ('21040001', '2024-01-16 10:50:00', 'FRE102', 'C010', 8, 'register'),
 ('21040001', '2024-06-20 09:00:00', 'FRE102', 'C010', 8, 'register'); -- Registering again for the failed course
+
+-- Update addresses with Vietnamese translations and set need_to_review to FALSE
+UPDATE addresses
+SET 
+    other_vi = CASE 
+        WHEN other = '123 Tran Hung Dao' THEN '123 Trần Hưng Đạo'
+        WHEN other = '456 Le Loi' THEN '456 Lê Lợi'
+        WHEN other = '789 Nguyen Hue' THEN '789 Nguyễn Huệ'
+        WHEN other = '321 Bach Dang' THEN '321 Bạch Đằng'
+        WHEN other = '654 Le Thanh Tong' THEN '654 Lê Thánh Tông'
+        WHEN other = '987 Hai Ba Trung' THEN '987 Hai Bà Trưng'
+        WHEN other = '135 Vo Van Kiet' THEN '135 Võ Văn Kiệt'
+        WHEN other = '246 Nguyen Trai' THEN '246 Nguyễn Trãi'
+        WHEN other = '369 Hoang Van Thu' THEN '369 Hoàng Văn Thụ'
+        WHEN other = '741 Nguyen Van Linh' THEN '741 Nguyễn Văn Linh'
+        WHEN other = '852 Truong Chinh' THEN '852 Trường Chinh'
+        WHEN other = '963 Dien Bien Phu' THEN '963 Điện Biên Phủ'
+        WHEN other = '159 Lac Long Quan' THEN '159 Lạc Long Quân'
+        WHEN other = '357 Nguyen Van Cu' THEN '357 Nguyễn Văn Cừ'
+        WHEN other = '468 Le Quang Dinh' THEN '468 Lê Quang Định'
+        ELSE other
+    END,
+    village_vi = CASE 
+        WHEN village LIKE 'Ward %' THEN 'Phường ' || SUBSTRING(village FROM 6)
+        ELSE village
+    END,
+    district_vi = CASE 
+        WHEN district LIKE 'District %' THEN 'Quận ' || SUBSTRING(district FROM 10)
+        ELSE district
+    END,
+    city_vi = CASE 
+        WHEN city = 'Hanoi' THEN 'Hà Nội'
+        WHEN city = 'Ho Chi Minh City' THEN 'TP. HCM'
+        WHEN city = 'Da Nang' THEN 'Đà Nẵng'
+        WHEN city = 'Hai Phong' THEN 'Hải Phòng'
+        WHEN city = 'Can Tho' THEN 'Cần Thơ'
+        ELSE city
+    END,
+    country_vi = CASE 
+        WHEN country = 'Vietnam' THEN 'Việt Nam'
+        ELSE country
+    END,
+    need_to_review = FALSE;
+
+-- Update classes with Vietnamese schedule translations and set need_to_review to FALSE
+UPDATE classes
+SET 
+    schedule_vi = CASE
+        WHEN schedule = 'Monday, 7:30-9:30' THEN 'Thứ 2, 7:30-9:30'
+        WHEN schedule = 'Monday, 9:30-11:30' THEN 'Thứ 2, 9:30-11:30'
+        WHEN schedule = 'Monday, 15:30-17:30' THEN 'Thứ 2, 15:30-17:30'
+        WHEN schedule = 'Tuesday, 7:30-9:30' THEN 'Thứ 3, 7:30-9:30'
+        WHEN schedule = 'Tuesday, 13:30-15:30' THEN 'Thứ 3, 13:30-15:30'
+        WHEN schedule = 'Tuesday, 15:30-17:30' THEN 'Thứ 3, 15:30-17:30'
+        WHEN schedule = 'Wednesday, 9:30-11:30' THEN 'Thứ 4, 9:30-11:30'
+        WHEN schedule = 'Wednesday, 13:30-15:30' THEN 'Thứ 4, 13:30-15:30'
+        WHEN schedule = 'Wednesday, 15:30-17:30' THEN 'Thứ 4, 15:30-17:30'
+        WHEN schedule = 'Thursday, 7:30-9:30' THEN 'Thứ 5, 7:30-9:30'
+        WHEN schedule = 'Thursday, 9:30-11:30' THEN 'Thứ 5, 9:30-11:30'
+        WHEN schedule = 'Thursday, 15:30-17:30' THEN 'Thứ 5, 15:30-17:30'
+        WHEN schedule = 'Friday, 7:30-9:30' THEN 'Thứ 6, 7:30-9:30'
+        WHEN schedule = 'Friday, 13:30-15:30' THEN 'Thứ 6, 13:30-15:30'
+        WHEN schedule = 'Saturday, 9:30-11:30' THEN 'Thứ 7, 9:30-11:30'
+        WHEN schedule = 'Saturday, 13:30-15:30' THEN 'Thứ 7, 13:30-15:30'
+        ELSE schedule
+    END,
+    need_to_review = FALSE;
+
+-- Update courses with Vietnamese translations and set need_to_review to FALSE
+UPDATE courses
+SET
+    name_vi = CASE 
+        WHEN id = 'LAW101' THEN 'Luật Dân sự cơ bản'
+        WHEN id = 'LAW102' THEN 'Luật Hình sự đại cương'
+        WHEN id = 'LAW201' THEN 'Pháp luật thương mại'
+        WHEN id = 'LAW301' THEN 'Luật Quốc tế'
+        WHEN id = 'ENG101' THEN 'Tiếng Anh thương mại cơ bản'
+        WHEN id = 'ENG102' THEN 'Kỹ năng giao tiếp tiếng Anh'
+        WHEN id = 'ENG201' THEN 'Tiếng Anh thương mại nâng cao'
+        WHEN id = 'ENG301' THEN 'Tiếng Anh đàm phán kinh doanh'
+        WHEN id = 'JPN101' THEN 'Tiếng Nhật cơ bản 1'
+        WHEN id = 'JPN102' THEN 'Tiếng Nhật cơ bản 2'
+        WHEN id = 'JPN201' THEN 'Tiếng Nhật trung cấp'
+        WHEN id = 'JPN301' THEN 'Tiếng Nhật thương mại'
+        WHEN id = 'FRE101' THEN 'Tiếng Pháp cơ bản 1'
+        WHEN id = 'FRE102' THEN 'Tiếng Pháp cơ bản 2'
+        WHEN id = 'FRE201' THEN 'Tiếng Pháp trung cấp'
+        WHEN id = 'FRE301' THEN 'Tiếng Pháp thương mại'
+        ELSE name
+    END,
+    description_vi = CASE
+        WHEN id = 'LAW101' THEN 'Giới thiệu về các nguyên tắc cơ bản của luật dân sự Việt Nam'
+        WHEN id = 'LAW102' THEN 'Khái quát về luật hình sự và các tội phạm cơ bản'
+        WHEN id = 'LAW201' THEN 'Luật áp dụng trong hoạt động thương mại và kinh doanh'
+        WHEN id = 'LAW301' THEN 'Nghiên cứu về luật pháp quốc tế và các hiệp ước'
+        WHEN id = 'ENG101' THEN 'Giới thiệu về từ vựng và ngữ pháp tiếng Anh trong môi trường kinh doanh'
+        WHEN id = 'ENG102' THEN 'Phát triển kỹ năng giao tiếp tiếng Anh trong môi trường làm việc'
+        WHEN id = 'ENG201' THEN 'Nâng cao kỹ năng tiếng Anh chuyên ngành thương mại'
+        WHEN id = 'ENG301' THEN 'Kỹ năng đàm phán kinh doanh bằng tiếng Anh'
+        WHEN id = 'JPN101' THEN 'Nhập môn tiếng Nhật với các kỹ năng nghe, nói, đọc, viết cơ bản'
+        WHEN id = 'JPN102' THEN 'Tiếp tục phát triển kỹ năng tiếng Nhật cơ bản'
+        WHEN id = 'JPN201' THEN 'Phát triển kỹ năng tiếng Nhật ở mức độ trung cấp'
+        WHEN id = 'JPN301' THEN 'Tiếng Nhật chuyên ngành thương mại và kinh doanh'
+        WHEN id = 'FRE101' THEN 'Nhập môn tiếng Pháp với các kỹ năng nghe, nói, đọc, viết cơ bản'
+        WHEN id = 'FRE102' THEN 'Tiếp tục phát triển kỹ năng tiếng Pháp cơ bản'
+        WHEN id = 'FRE201' THEN 'Phát triển kỹ năng tiếng Pháp ở mức độ trung cấp'
+        WHEN id = 'FRE301' THEN 'Tiếng Pháp chuyên ngành thương mại và kinh doanh'
+        ELSE description
+    END,
+    need_to_review = FALSE;
+
+-- Update faculties with Vietnamese names and set need_to_review to FALSE
+UPDATE faculties
+SET
+    name_vi = CASE 
+        WHEN name = 'Law Faculty' THEN 'Khoa Luật'
+        WHEN name = 'Business English Faculty' THEN 'Khoa Tiếng Anh thương mại'
+        WHEN name = 'Japanese Language Faculty' THEN 'Khoa Tiếng Nhật'
+        WHEN name = 'French Language Faculty' THEN 'Khoa Tiếng Pháp'
+        ELSE name
+    END,
+    need_to_review = FALSE;
+
+-- Update identity_info with Vietnamese translations and set need_to_review to FALSE
+UPDATE identity_info
+SET
+    place_of_issue_vi = CASE
+        WHEN place_of_issue = 'Hanoi Police Department' THEN 'Công an Hà Nội'
+        WHEN place_of_issue = 'Ho Chi Minh City Police Department' THEN 'Công an TP.HCM'
+        WHEN place_of_issue = 'Da Nang Police Department' THEN 'Công an Đà Nẵng'
+        WHEN place_of_issue = 'Immigration Department' THEN 'Cục Quản lý Xuất nhập cảnh'
+        ELSE place_of_issue
+    END,
+    additional_info_vi = CASE
+        WHEN additional_info::text LIKE '%"country_of_issue": "Vietnam", "note": "For studying abroad"%' 
+        THEN '{"country_of_issue": "Việt Nam", "note": "Dùng cho du học"}'::jsonb
+        WHEN additional_info::text LIKE '%"country_of_issue": "Vietnam"%' 
+        THEN '{"country_of_issue": "Việt Nam"}'::jsonb
+        ELSE additional_info
+    END,
+    need_to_review = FALSE
+WHERE additional_info IS NOT NULL;
+
+-- Update lecturers with Vietnamese gender and set need_to_review to FALSE
+UPDATE lecturers
+SET
+    gender_vi = CASE
+        WHEN gender = 'Male' THEN 'Nam'
+        WHEN gender = 'Female' THEN 'Nữ'
+        WHEN gender = 'Other' THEN 'Khác'
+        ELSE gender
+    END,
+    need_to_review = FALSE;
+
+-- Update programs with Vietnamese names and set need_to_review to FALSE
+UPDATE programs
+SET
+    name_vi = CASE
+        WHEN name = 'Standard' THEN 'Chính quy'
+        WHEN name = 'High Quality' THEN 'CLC'
+        WHEN name = 'Transfer Program' THEN 'Liên thông'
+        WHEN name = 'Advanced' THEN 'Tiên tiến'
+        ELSE name
+    END,
+    need_to_review = FALSE;
+
+-- Update student_statuses with Vietnamese names and set need_to_review to FALSE
+UPDATE student_statuses
+SET
+    name_vi = CASE
+        WHEN name = 'Currently Studying' THEN 'Đang học'
+        WHEN name = 'Graduated' THEN 'Đã tốt nghiệp'
+        WHEN name = 'Withdrawn' THEN 'Đã thôi học'
+        WHEN name = 'On Leave' THEN 'Tạm dừng học'
+        ELSE name
+    END,
+    need_to_review = FALSE;
+
+-- Update students with Vietnamese gender, nationality and set need_to_review to FALSE
+UPDATE students
+SET
+    gender_vi = CASE
+        WHEN gender = 'Male' THEN 'Nam'
+        WHEN gender = 'Female' THEN 'Nữ'
+        WHEN gender = 'Other' THEN 'Khác'
+        ELSE gender
+    END,
+    nationality_vi = CASE
+        WHEN nationality = 'Vietnam' THEN 'Việt Nam'
+        ELSE nationality
+    END,
+    need_to_review = FALSE;
+
+-- Update identity_info records where additional_info is NULL
+UPDATE identity_info
+SET
+    place_of_issue_vi = CASE
+        WHEN place_of_issue = 'Hanoi Police Department' THEN 'Công an Hà Nội'
+        WHEN place_of_issue = 'Ho Chi Minh City Police Department' THEN 'Công an TP.HCM'
+        WHEN place_of_issue = 'Da Nang Police Department' THEN 'Công an Đà Nẵng'
+        WHEN place_of_issue = 'Immigration Department' THEN 'Cục Quản lý Xuất nhập cảnh'
+        ELSE place_of_issue
+    END,
+    need_to_review = FALSE
+WHERE additional_info IS NULL;
