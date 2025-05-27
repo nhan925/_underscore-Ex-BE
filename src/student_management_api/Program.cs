@@ -20,6 +20,7 @@ using Serilog.Sinks.PostgreSQL;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
 using student_management_api.Helpers;
+using student_management_api.Localization.AiTranslation;
 using student_management_api.Middlewares;
 using student_management_api.Models.DTO;
 using student_management_api.Repositories;
@@ -45,6 +46,10 @@ public class Program
         var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION");
         var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
             ?? throw new Exception("JWT_SECRET is missing");
+        var AiServiceUrl = Environment.GetEnvironmentVariable("AI_SERVICE_URL")
+            ?? throw new Exception("AI_SERVICE_URL is missing");
+        var AiModel = Environment.GetEnvironmentVariable("AI_MODEL")
+            ?? throw new Exception("AI_MODEL is missing");
 
         // Register custom type handlers
         SqlMapper.AddTypeHandler(new JsonbTypeHandler<Dictionary<string, string>>());
@@ -125,6 +130,7 @@ public class Program
         builder.Services.AddScoped<ICourseEnrollmentRepository, CourseEnrollmentRepository>();
 
         builder.Services.AddSingleton<IConverter>(new SynchronizedConverter(new PdfTools()));
+        builder.Services.AddSingleton<IExternalTranslationService>(new ExternalTranslationService(AiServiceUrl, AiModel));
 
         builder.Services.AddControllers();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

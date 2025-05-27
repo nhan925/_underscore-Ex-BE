@@ -816,7 +816,7 @@ SET
         ELSE place_of_issue
     END,
     additional_info_vi = CASE
-        WHEN additional_info::text LIKE '%"country_of_issue": "Vietnam", "note": "For studying abroad"%' 
+        WHEN additional_info::text LIKE '%"note": "For studying abroad"%' 
         THEN '{"country_of_issue": "Việt Nam", "note": "Dùng cho du học"}'::jsonb
         WHEN additional_info::text LIKE '%"country_of_issue": "Vietnam"%' 
         THEN '{"country_of_issue": "Việt Nam"}'::jsonb
