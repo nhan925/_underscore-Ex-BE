@@ -7,25 +7,27 @@ using NpgsqlTypes;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
 using student_management_api.Helpers;
+using student_management_api.Localization;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using System.Data;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
-using student_management_api.Localization;
 
 namespace student_management_api.Repositories;
 
 public class StudentRepository : IStudentRepository
 {
     private readonly IDbConnection _db;
-
     private readonly IStringLocalizer<Messages> _localizer;
+    private readonly string _cultureSuffix;
 
     public StudentRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
     {
         _db = db;
         _localizer = localizer;
+        _cultureSuffix = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : $"_{CultureInfo.CurrentUICulture.TwoLetterISOLanguageName}";
     }
 
     public async Task<int> DeleteStudentById(string id)
@@ -36,9 +38,12 @@ public class StudentRepository : IStudentRepository
 
     public async Task<Student?> GetStudentById(string id)
     {
-        string studentQuery = "SELECT * FROM students WHERE id = @Id";
-        string addressQuery = "SELECT * FROM addresses WHERE student_id = @Id";
-        string identityInfoQuery = "SELECT * FROM identity_info WHERE student_id = @Id";
+        string studentQuery = $"SELECT id, full_name, date_of_birth, gender{_cultureSuffix} AS gender, faculty_id, intake_year, email, phone_number, status_id, program_id, nationality{_cultureSuffix} AS nationality, created_at " +
+                              $"FROM students WHERE id = @Id";
+        string addressQuery = $"SELECT student_id, other{_cultureSuffix} AS other, village{_cultureSuffix} AS village, district{_cultureSuffix} AS district, city{_cultureSuffix} AS city, country{_cultureSuffix} AS country, type " +
+                              $"FROM addresses WHERE student_id = @Id";
+        string identityInfoQuery = $"SELECT student_id, number, place_of_issue{_cultureSuffix} AS place_of_issue, date_of_issue, expiry_date, additional_info{_cultureSuffix} AS additional_info, type " +
+                              $"FROM identity_info WHERE student_id = @Id";
 
         var student = await _db.QueryFirstOrDefaultAsync<Student>(studentQuery, new { Id = id });
         if (student != null)
@@ -55,7 +60,7 @@ public class StudentRepository : IStudentRepository
 
     public async Task<PagedResult<SimplifiedStudent>> GetStudents(int page, int pageSize, string? search, StudentFilter? filter)
     {
-        StringBuilder queryBuilder = new StringBuilder("SELECT id, full_name, date_of_birth, gender, faculty_id, intake_year, program_id, status_id FROM students");
+        StringBuilder queryBuilder = new StringBuilder($"SELECT id, full_name, date_of_birth, gender{_cultureSuffix} AS gender, faculty_id, intake_year, program_id, status_id FROM students");
         StringBuilder countQueryBuilder = new StringBuilder("SELECT COUNT(*) FROM students");
 
         var hasWhere = false;
@@ -128,7 +133,7 @@ public class StudentRepository : IStudentRepository
 
                 if (!string.IsNullOrEmpty(request.Gender))
                 {
-                    sqlBuilder.Append("gender = @Gender, ");
+                    sqlBuilder.Append($"gender{_cultureSuffix} = @Gender, ");
                     parameters.Add("Gender", request.Gender);
                 }
 
@@ -170,7 +175,7 @@ public class StudentRepository : IStudentRepository
 
                 if (!string.IsNullOrEmpty(request.Nationality))
                 {
-                    sqlBuilder.Append("nationality = @Nationality, ");
+                    sqlBuilder.Append($"nationality{_cultureSuffix} = @Nationality, ");
                     parameters.Add("Nationality", request.Nationality);
                 }
 
@@ -195,8 +200,8 @@ public class StudentRepository : IStudentRepository
                     string deleteAddressQuery = "DELETE FROM addresses WHERE student_id = @StudentId";
                     await _db.ExecuteAsync(deleteAddressQuery, new { StudentId = id }, transaction);
 
-                    string addressQuery = @"
-                INSERT INTO addresses (student_id, other, village, district, city, country, type) 
+                    string addressQuery = @$"
+                INSERT INTO addresses (student_id, other{_cultureSuffix}, village{_cultureSuffix}, district{_cultureSuffix}, city{_cultureSuffix}, country{_cultureSuffix}, type) 
                 VALUES (@StudentId, @Other, @Village, @District, @City, @Country, @Type)";
 
                     foreach (var address in request.Addresses)
@@ -221,8 +226,8 @@ public class StudentRepository : IStudentRepository
                     string deleteIdentityInfoQuery = "DELETE FROM identity_info WHERE student_id = @StudentId";
                     await _db.ExecuteAsync(deleteIdentityInfoQuery, new { StudentId = id }, transaction);
 
-                    string identityInfoQuery = @"
-                INSERT INTO identity_info (student_id, number, place_of_issue, date_of_issue, expiry_date, additional_info, type) 
+                    string identityInfoQuery = @$"
+                INSERT INTO identity_info (student_id, number, place_of_issue{_cultureSuffix}, date_of_issue, expiry_date, additional_info{_cultureSuffix}, type) 
                 VALUES (@StudentId, @Number, @PlaceOfIssue, @DateOfIssue, @ExpiryDate, @AdditionalInfo, @Type)";
 
                     var identityInfoParameters = new
@@ -293,8 +298,8 @@ public class StudentRepository : IStudentRepository
         {
             try
             {
-                string studentQuery = @"
-                INSERT INTO students (id, full_name, date_of_birth, gender, faculty_id, intake_year, program_id, email, phone_number, status_id, nationality) 
+                string studentQuery = @$"
+                INSERT INTO students (id, full_name, date_of_birth, gender{_cultureSuffix}, faculty_id, intake_year, program_id, email, phone_number, status_id, nationality{_cultureSuffix}) 
                 VALUES (@Id, @FullName, @DateOfBirth, @Gender, @FacultyId, @IntakeYear, @ProgramId, @Email, @PhoneNumber, @StatusId, @Nationality)";
 
                 var studentParameters = new
@@ -321,8 +326,8 @@ public class StudentRepository : IStudentRepository
 
                 if (request.Addresses != null && request.Addresses.Any())
                 {
-                    string addressQuery = @"
-                    INSERT INTO addresses (student_id, other, village, district, city, country, type) 
+                    string addressQuery = @$"
+                    INSERT INTO addresses (student_id, other{_cultureSuffix}, village{_cultureSuffix}, district{_cultureSuffix}, city{_cultureSuffix}, country{_cultureSuffix}, type) 
                     VALUES (@StudentId, @Other, @Village, @District, @City, @Country, @Type)";
 
                     foreach (var address in request.Addresses)
@@ -344,8 +349,8 @@ public class StudentRepository : IStudentRepository
 
                 if (request.IdentityInfo != null)
                 {
-                    string identityInfoQuery = @"
-                    INSERT INTO identity_info (student_id, number, place_of_issue, date_of_issue, expiry_date, additional_info, type) 
+                    string identityInfoQuery = @$"
+                    INSERT INTO identity_info (student_id, number, place_of_issue{_cultureSuffix}, date_of_issue, expiry_date, additional_info{_cultureSuffix}, type) 
                     VALUES (@StudentId, @Number, @PlaceOfIssue, @DateOfIssue, @ExpiryDate, @AdditionalInfo, @Type)";
 
                     var identityInfoParameters = new
@@ -456,7 +461,7 @@ public class StudentRepository : IStudentRepository
                 if (studentValues.Count > 0)
                 {
                     string studentQuery = $@"
-                    INSERT INTO students (id, full_name, date_of_birth, gender, faculty_id, intake_year, program_id, email, phone_number, status_id, nationality) 
+                    INSERT INTO students (id, full_name, date_of_birth, gender{_cultureSuffix}, faculty_id, intake_year, program_id, email, phone_number, status_id, nationality{_cultureSuffix}) 
                     VALUES {string.Join(", ", studentValues)}";
 
                     using (var studentCmd = new NpgsqlCommand(studentQuery, (NpgsqlConnection?)_db, (NpgsqlTransaction?)transaction))
@@ -470,7 +475,7 @@ public class StudentRepository : IStudentRepository
                 if (addressValues.Count > 0)
                 {
                     string addressQuery = $@"
-                    INSERT INTO addresses (student_id, other, village, district, city, country, type)  
+                    INSERT INTO addresses (student_id, other{_cultureSuffix}, village{_cultureSuffix}, district{_cultureSuffix}, city{_cultureSuffix}, country{_cultureSuffix}, type)  
                     VALUES {string.Join(", ", addressValues)}";
 
                     using (var addressCmd = new NpgsqlCommand(addressQuery, (NpgsqlConnection?)_db, (NpgsqlTransaction?)transaction))
@@ -484,7 +489,7 @@ public class StudentRepository : IStudentRepository
                 if (identityValues.Count > 0)
                 {
                     string identityQuery = $@"
-                    INSERT INTO identity_info (student_id, number, place_of_issue, date_of_issue, expiry_date, additional_info, type)  
+                    INSERT INTO identity_info (student_id, number, place_of_issue{_cultureSuffix}, date_of_issue, expiry_date, additional_info{_cultureSuffix}, type)  
                     VALUES {string.Join(", ", identityValues)}";
 
                     using (var identityCmd = new NpgsqlCommand(identityQuery, (NpgsqlConnection?)_db, (NpgsqlTransaction?)transaction))
@@ -507,9 +512,12 @@ public class StudentRepository : IStudentRepository
 
     public async Task<List<Student>> GetAllStudents()
     {
-        string studentQuery = "SELECT * FROM students";
-        string addressQuery = "SELECT * FROM addresses WHERE student_id = ANY(@StudentIds)";
-        string identityInfoQuery = "SELECT * FROM identity_info WHERE student_id = ANY(@StudentIds)";
+        string studentQuery = $"SELECT id, full_name, date_of_birth, gender{_cultureSuffix} AS gender, faculty_id, intake_year, email, phone_number, status_id, program_id, nationality{_cultureSuffix} AS nationality, created_at " +
+                              $"FROM students";
+        string addressQuery = $"SELECT student_id, other{_cultureSuffix} AS other, village{_cultureSuffix} AS village, district{_cultureSuffix} AS district, city{_cultureSuffix} AS city, country{_cultureSuffix} AS country, type " +
+                              $"FROM addresses WHERE student_id = ANY(@StudentIds)";
+        string identityInfoQuery = $"SELECT student_id, number, place_of_issue{_cultureSuffix} AS place_of_issue, date_of_issue, expiry_date, additional_info{_cultureSuffix} AS additional_info, type " +
+                              $"FROM identity_info WHERE student_id = ANY(@StudentIds)";
 
         var students = (await _db.QueryAsync<Student>(studentQuery)).ToList();
         

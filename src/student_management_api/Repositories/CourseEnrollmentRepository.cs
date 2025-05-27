@@ -5,13 +5,14 @@ using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
 using student_management_api.Helpers;
+using student_management_api.Localization;
 using student_management_api.Models.Course;
 using student_management_api.Models.CourseEnrollment;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using System.Data;
+using System.Globalization;
 using System.Text;
-using student_management_api.Localization;
 
 namespace student_management_api.Repositories;
 
@@ -19,11 +20,13 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
 {
     private readonly IDbConnection _db;
     private readonly IStringLocalizer<Messages> _localizer;
+    private readonly string _cultureSuffix;
 
     public CourseEnrollmentRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
     {
         _db = db;
         _localizer = localizer;
+        _cultureSuffix = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : $"_{CultureInfo.CurrentUICulture.TwoLetterISOLanguageName}";
     }
 
     private async Task LogEnrollmentHistory(CourseEnrollmentRequest request, string action, IDbTransaction transaction)
@@ -192,7 +195,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
 
     public async Task<List<EnrollmentHistory>> GetEnrollmentHistoryBySemester(int semesterId)
     {
-        string sql = "SELECT * FROM enrollment_history WHERE semester_id = @SemesterId";
+        string sql = $"SELECT student_id, created_at, course_id, class_id, semester_id, action{_cultureSuffix} AS action FROM enrollment_history WHERE semester_id = @SemesterId";
         var history = await _db.QueryAsync<EnrollmentHistory>(sql, new { SemesterId = semesterId });
 
         return history.ToList();
@@ -200,7 +203,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
 
     public async Task<Transcript> GetTranscriptOfStudentById(string studentId)
     {
-        string getTranscriptSql = "SELECT c.id, c.name, c.credits, ce.grade FROM courses c JOIN course_enrollments ce ON c.id = ce.course_id " +
+        string getTranscriptSql = $"SELECT c.id, c.name{_cultureSuffix} AS name, c.credits, ce.grade FROM courses c JOIN course_enrollments ce ON c.id = ce.course_id " +
             "WHERE ce.student_id = @StudentId AND ce.status = 'passed'";
         var coursesWithGrade = await _db.QueryAsync<SimplifiedCourseWithGrade>(getTranscriptSql, new { StudentId = studentId });
 

@@ -3,9 +3,10 @@ using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
 using student_management_api.Helpers;
+using student_management_api.Localization;
 using student_management_api.Models.DTO;
 using System.Data;
-using student_management_api.Localization;
+using System.Globalization;
 
 namespace student_management_api.Repositories;
 
@@ -13,19 +14,21 @@ public class CourseRepository: ICourseRepository
 {
     private readonly IDbConnection _db;
     private readonly IStringLocalizer<Messages> _localizer;
+    private readonly string _cultureSuffix;
 
     public CourseRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
     {
         _db = db;
         _localizer = localizer;
+        _cultureSuffix = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : $"_{CultureInfo.CurrentUICulture.TwoLetterISOLanguageName}";
     }
 
     public async Task<List<Course>> GetAllCourses()
     {
-        var sql = @"
+        var sql = @$"
         SELECT 
-            c.id, c.name, c.credits, c.faculty_id,
-            c.description, c.created_at,
+            c.id, c.name{_cultureSuffix} AS name, c.credits, c.faculty_id,
+            c.description{_cultureSuffix} AS description, c.created_at,
             c.is_active,
             cp.prerequisite_id
         FROM courses c
@@ -61,13 +64,13 @@ public class CourseRepository: ICourseRepository
 
     public async Task<Course> GetCourseById(string id)
     {
-        var sql = @"
+        var sql = @$"
         SELECT
             c.id,
-            c.name,
+            c.name{_cultureSuffix} AS name,
             c.credits,
             c.faculty_id,
-            c.description,
+            c.description{_cultureSuffix} AS description,
             c.created_at,
             c.is_active,
             cp.prerequisite_id
@@ -131,13 +134,13 @@ public class CourseRepository: ICourseRepository
             try
             {
                 // 1. Cập nhật bảng courses
-                var updateSql = @"
+                var updateSql = @$"
                 UPDATE courses
                 SET 
-                    name         = @Name,
-                    credits      = @Credits,
-                    faculty_id   = @FacultyId,
-                    description  = @Description
+                    name{_cultureSuffix}        = @Name,
+                    credits                     = @Credits,
+                    faculty_id                  = @FacultyId,
+                    description{_cultureSuffix} = @Description
                 WHERE id = @Id;
                 ";
                 var updateParams = new
@@ -205,8 +208,8 @@ public class CourseRepository: ICourseRepository
                 }
 
                 // 2. Thêm vào bảng courses
-                var insertCourseSql = @"
-                INSERT INTO courses (id, name, credits, faculty_id, description)
+                var insertCourseSql = @$"
+                INSERT INTO courses (id, name{_cultureSuffix}, credits, faculty_id, description{_cultureSuffix})
                 VALUES (@Id, @Name, @Credits, @FacultyId, @Description);
                 ";
 

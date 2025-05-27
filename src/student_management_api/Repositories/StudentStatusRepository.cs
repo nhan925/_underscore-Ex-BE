@@ -3,9 +3,10 @@ using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
 using student_management_api.Helpers;
+using student_management_api.Localization;
 using student_management_api.Models.DTO;
 using System.Data;
-using student_management_api.Localization;
+using System.Globalization;
 
 namespace student_management_api.Repositories;
 
@@ -13,23 +14,25 @@ public class StudentStatusRepository : IStudentStatusRepository
 {
     private readonly IDbConnection _db;
     private readonly IStringLocalizer<Messages> _localizer;
+    private readonly string _cultureSuffix;
 
     public StudentStatusRepository(IDbConnection db,IStringLocalizer<Messages> localizer)
     {
         _db = db;
         _localizer = localizer;
+        _cultureSuffix = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : $"_{CultureInfo.CurrentUICulture.TwoLetterISOLanguageName}";
     }
 
     public async Task<List<StudentStatus>> GetAllStudentStatuses()
     {
-        string query = "SELECT * FROM student_statuses";
+        string query = $"SELECT id, name{_cultureSuffix} AS name, is_referenced FROM student_statuses";
         var result = await _db.QueryAsync<StudentStatus>(query);
         return result.ToList();
     }
 
     public async Task<int> UpdateStudentStatus(StudentStatus studentStatus)
     {
-        string query = "UPDATE student_statuses SET name = @Name WHERE id = @Id";
+        string query = $"UPDATE student_statuses SET name{_cultureSuffix} = @Name WHERE id = @Id";
         var count = await _db.ExecuteAsync(query, studentStatus);
         if (count == 0)
         {
@@ -41,7 +44,7 @@ public class StudentStatusRepository : IStudentStatusRepository
 
     public async Task<int> AddStudentStatus(string name)
     {
-        string query = "INSERT INTO student_statuses (name) VALUES (@Name) RETURNING id";
+        string query = $"INSERT INTO student_statuses (name{_cultureSuffix}) VALUES (@Name) RETURNING id";
         var id = await _db.QueryFirstOrDefaultAsync<int>(query, new { Name = name });
 
         if (id == 0)

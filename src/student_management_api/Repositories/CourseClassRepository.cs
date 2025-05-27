@@ -2,10 +2,11 @@
 using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Helpers;
+using student_management_api.Localization;
 using student_management_api.Models.CourseClass;
 using student_management_api.Models.DTO;
 using System.Data;
-using student_management_api.Localization;
+using System.Globalization;
 
 namespace student_management_api.Repositories;
 
@@ -13,15 +14,18 @@ public class CourseClassRepository : ICourseClassRepository
 {
     private readonly IDbConnection _db;
     private readonly IStringLocalizer<Messages> _localizer;
+    private readonly string _cultureSuffix;
 
     public CourseClassRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
     {
         _db = db;
         _localizer = localizer;
+        _cultureSuffix = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : $"_{CultureInfo.CurrentUICulture.TwoLetterISOLanguageName}";
     }
+
     public async Task<string> AddCourseClass(CourseClass courseClass)
     {
-        var query = "INSERT INTO classes (id, course_id, semester_id, lecturer_id, max_students, schedule, room) " +
+        var query = $"INSERT INTO classes (id, course_id, semester_id, lecturer_id, max_students, schedule{_cultureSuffix}, room) " +
                     "VALUES (@CourseClassId, @CourseId, @SemesterId, @LecturerId, @MaxStudents, @Schedule, @Room)";
         var parameters = new
         {
@@ -45,7 +49,8 @@ public class CourseClassRepository : ICourseClassRepository
     public async Task<List<GetCourseClassResult>> GetAllCourseClassesBySemester(int semesterId)
     {
         
-        var courseClassQuery = "SELECT * FROM classes WHERE semester_id = @SemesterId";
+        var courseClassQuery = $"SELECT id, course_id, semester_id, lecturer_id, max_students, schedule{_cultureSuffix} AS schedule, room, created_at, is_active " +
+                               $"FROM classes WHERE semester_id = @SemesterId";
         var courseClasses = await _db.QueryAsync<CourseClass>(courseClassQuery, new { SemesterId = semesterId });
 
         var courseClassResults = new List<GetCourseClassResult>();
@@ -61,7 +66,8 @@ public class CourseClassRepository : ICourseClassRepository
                 Room = courseClass.Room
             };
 
-            var courseQuery = "SELECT * FROM courses WHERE id = @CourseId";
+            var courseQuery = $"SELECT id, name{_cultureSuffix} AS name, credits, faculty_id, description{_cultureSuffix} AS description, created_at, is_active " +
+                              $"FROM courses WHERE id = @CourseId";
             var course = await _db.QueryFirstOrDefaultAsync<Course>(courseQuery, new { CourseId = courseClass.CourseId });
             courseClassResult.Course = course;
 
@@ -69,7 +75,8 @@ public class CourseClassRepository : ICourseClassRepository
             var semesterResult = await _db.QueryFirstOrDefaultAsync<Semester>(semesterQuery, new { SemesterId = courseClass.SemesterId });
             courseClassResult.Semester = semesterResult;
 
-            var lecturerQuery = "SELECT * FROM lecturers WHERE id = @LecturerId";
+            var lecturerQuery = $"SELECT id, full_name, date_of_birth, gender{_cultureSuffix} AS gender, email, phone_number, faculty_id " +
+                                $"FROM lecturers WHERE id = @LecturerId";
             var lecturer = await _db.QueryFirstOrDefaultAsync<Lecturer>(lecturerQuery, new { LecturerId = courseClass.LecturerId });
             courseClassResult.Lecturer = lecturer;
 
@@ -81,8 +88,8 @@ public class CourseClassRepository : ICourseClassRepository
 
     public async Task<List<StudentInClass>> GetStudentsInClass(GetStudentsInClassRequest request)
     {
-        string sql = @"
-            SELECT student_id AS id, grade, status, (SELECT full_name FROM students WHERE id = student_id) full_name
+        string sql = @$"
+            SELECT student_id AS id, grade, status{_cultureSuffix} AS status, (SELECT full_name FROM students WHERE id = student_id) full_name
             FROM course_enrollments
             WHERE course_id = @CourseId AND class_id = @ClassId AND semester_id = @SemesterId";
         
