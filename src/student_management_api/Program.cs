@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
@@ -20,6 +22,7 @@ using Serilog.Sinks.PostgreSQL;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
 using student_management_api.Helpers;
+using student_management_api.Localization;
 using student_management_api.Localization.AiTranslation;
 using student_management_api.Middlewares;
 using student_management_api.Models.DTO;
@@ -217,10 +220,13 @@ public class Program
             options.JsonSerializerOptions.WriteIndented = true;
         });
 
+
         builder.Services.Configure<ApiBehaviorOptions>(options =>
         {
             options.InvalidModelStateResponseFactory = context =>
             {
+                var localizer = context.HttpContext.RequestServices.GetRequiredService<IStringLocalizer<Messages>>();
+
                 var errors = context.ModelState
                     .Where(e => e.Value!.Errors.Count > 0)
                     .SelectMany(e => e.Value!.Errors.Select(err => err.ErrorMessage)) // Extract only messages
@@ -232,7 +238,7 @@ public class Program
                 return new BadRequestObjectResult(new ErrorResponse<List<string>>
                 (
                     status: 400,
-                    message: "Invalid input data",
+                    message: localizer["invalid_input_data"],
                     details: errors
                 ));
             };

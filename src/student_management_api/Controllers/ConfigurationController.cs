@@ -116,7 +116,7 @@ public class ConfigurationController : ControllerBase
             if (updatedCount > 0)
             {
                 _logger.LogInformation("Email domains config updated successfully");
-                return Ok(new { message = _localizer["email_domains_config_updated_successfully"] });
+                return Ok(new { message = _localizer["email_domains_config_updated_successfully"].Value });
             }
             else
             {
@@ -137,7 +137,7 @@ public class ConfigurationController : ControllerBase
             if (updatedCount > 0)
             {
                 _logger.LogInformation("Phone number country config updated successfully");
-                return Ok(new { message = _localizer["phone_number_country_config_updated_successfully"] });
+                return Ok(new { message = _localizer["phone_number_country_config_updated_successfully"].Value });
             }
             else
             {
@@ -158,7 +158,7 @@ public class ConfigurationController : ControllerBase
             if (updatedCount > 0)
             {
                 _logger.LogInformation("Student status rules config updated successfully");
-                return Ok(new { message = _localizer["student_status_rules_config_updated_successfully"] });
+                return Ok(new { message = _localizer["student_status_rules_config_updated_successfully"].Value });
             }
             else
             {
@@ -179,7 +179,7 @@ public class ConfigurationController : ControllerBase
             if (updatedCount > 0)
             {
                 _logger.LogInformation("All rules turned {Status}", isActive ? "on" : "off");
-                return Ok(new { Message = isActive ? _localizer["all_rules_turned_on"] : _localizer["all_rules_turned_off"] });
+                return Ok(new { Message = isActive ? _localizer["all_rules_turned_on"].Value : _localizer["all_rules_turned_off"].Value });
             }
             else
             {

@@ -51,7 +51,7 @@ public class StudentStatusController : ControllerBase
             var count = await _studentStatusService.UpdateStudentStatus(studentStatus);
 
             _logger.LogInformation("Student status with ID {StudentStatusId} updated successfully", studentStatus.Id);
-            return Ok(new { message = _localizer["update_student_status_successfully"] });
+            return Ok(new { message = _localizer["update_student_status_successfully"].Value });
         }
     }
 

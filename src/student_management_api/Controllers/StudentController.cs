@@ -196,7 +196,7 @@ public class StudentController : ControllerBase
             }
 
             _logger.LogInformation("Student with ID {StudentId} updated successfully", id);
-            return Ok(new { message = _localizer["student_updated_successfully"] });
+            return Ok(new { message = _localizer["student_updated_successfully"].Value });
         }
     }
 
@@ -214,7 +214,7 @@ public class StudentController : ControllerBase
             }
 
             _logger.LogInformation("Student with ID {StudentId} deleted successfully", id);
-            return Ok(new { message = _localizer["student_deleted_successfully"] });
+            return Ok(new { message = _localizer["student_deleted_successfully"].Value });
         }
     }
 
@@ -312,7 +312,7 @@ public class StudentController : ControllerBase
 
             await _studentService.AddStudents(requests);
             _logger.LogInformation("Students added successfully from file: {FileName}", file.FileName);
-            return Ok(new { message = _localizer["students_added_successfully"] });
+            return Ok(new { message = _localizer["students_added_successfully"].Value });
         }
     }
 

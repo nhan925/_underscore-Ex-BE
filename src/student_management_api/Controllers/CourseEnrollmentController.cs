@@ -58,7 +58,7 @@ public class CourseEnrollmentController : ControllerBase
                     await _courseEnrollmentService.RegisterClass(request);
                     _logger.LogInformation("Successfully registered class");
 
-                    return Ok(new { message = _localizer["successfully_registered_class"] });
+                    return Ok(new { message = _localizer["successfully_registered_class"].Value });
                 }
                 catch
                 {
@@ -77,7 +77,7 @@ public class CourseEnrollmentController : ControllerBase
                     await _courseEnrollmentService.UnregisterClass(request);
                     _logger.LogInformation("Successfully unregistered class");
 
-                    return Ok(new { message = _localizer["successfully_unregistered_class"] });
+                    return Ok(new { message = _localizer["successfully_unregistered_class"].Value });
                 }
                 catch
                 {
@@ -109,7 +109,7 @@ public class CourseEnrollmentController : ControllerBase
                 await _courseEnrollmentService.UpdateStudentGrade(request.StudentId!, request.CourseId!, request.Grade);
                 _logger.LogInformation("Successfully updated student grade");
 
-                return Ok(new { message = _localizer["successfully_updated_student_grade"] });
+                return Ok(new { message = _localizer["successfully_updated_student_grade"].Value });
             }
             catch
             {

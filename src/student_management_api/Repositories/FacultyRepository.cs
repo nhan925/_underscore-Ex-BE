@@ -4,6 +4,7 @@ using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
 using student_management_api.Helpers;
 using student_management_api.Localization;
+using student_management_api.Localization.AiTranslation;
 using student_management_api.Models.DTO;
 using System.Data;
 using System.Globalization;
@@ -14,13 +15,17 @@ public class FacultyRepository : IFacultyRepository
 {
     private readonly IDbConnection _db;
     private readonly IStringLocalizer<Messages> _localizer;
+    private readonly string _culture;
     private readonly string _cultureSuffix;
+    private readonly IExternalTranslationService _translationService;
 
-    public FacultyRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
+    public FacultyRepository(IDbConnection db, IStringLocalizer<Messages> localizer, IExternalTranslationService translationService)
     {
         _db = db;
         _localizer = localizer;
-        _cultureSuffix = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : $"_{CultureInfo.CurrentUICulture.TwoLetterISOLanguageName}";
+        _culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        _cultureSuffix = _culture == "en" ? "" : $"_{_culture}";
+        _translationService = translationService;
     }
 
     public async Task<List<Faculty>> GetAllFaculties()
@@ -32,7 +37,14 @@ public class FacultyRepository : IFacultyRepository
 
     public async Task<int> UpdateFaculty(Faculty faculty)
     {
-        string query = $"UPDATE faculties SET name{_cultureSuffix} = @Name WHERE id = @Id";
+        string query = $"UPDATE faculties SET name = @Name, name_vi = @NameVi, need_to_review = true WHERE id = @Id";
+        var queryParams = new
+        {
+            Id = faculty.Id,
+            Name = await _translationService.TranslateAsync(faculty.Name!, _culture, "en"),
+            NameVi = await _translationService.TranslateAsync(faculty.Name!, _culture, "vi"),
+        };
+
         var count = await _db.ExecuteAsync(query, faculty);
         if (count == 0)
         {
@@ -44,8 +56,14 @@ public class FacultyRepository : IFacultyRepository
 
     public async Task<int> AddFaculty(string name)
     {
-        string query = $"INSERT INTO faculties (name{_cultureSuffix}) VALUES (@Name) RETURNING id";
-        var id = await _db.QueryFirstOrDefaultAsync<int>(query, new { Name = name });
+        string query = $"INSERT INTO faculties (name, name_vi, need_to_review) VALUES (@Name, @NameVi, true) RETURNING id";
+        var queryParams = new
+        {
+            Name = await _translationService.TranslateAsync(name, _culture, "en"),
+            NameVi = await _translationService.TranslateAsync(name, _culture, "vi"),
+        };
+
+        var id = await _db.QueryFirstOrDefaultAsync<int>(query, queryParams);
 
         if (id == 0)
         {

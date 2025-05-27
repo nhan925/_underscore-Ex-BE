@@ -49,7 +49,7 @@ public class FacultyController : ControllerBase
             var count = await _facultyService.UpdateFaculty(faculty);
 
             _logger.LogInformation("Faculty with ID {FacultyId} updated successfully", faculty.Id);
-            return Ok(new { message = _localizer["update_faculty_successfully"] });
+            return Ok(new { message = _localizer["update_faculty_successfully"].Value });
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging.Console;
@@ -8,6 +9,7 @@ using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
 using student_management_api.Helpers;
 using student_management_api.Localization;
+using student_management_api.Localization.AiTranslation;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using System.Data;
@@ -21,13 +23,17 @@ public class StudentRepository : IStudentRepository
 {
     private readonly IDbConnection _db;
     private readonly IStringLocalizer<Messages> _localizer;
+    private readonly string _culture;
     private readonly string _cultureSuffix;
+    private readonly IExternalTranslationService _translationService;
 
-    public StudentRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
+    public StudentRepository(IDbConnection db, IStringLocalizer<Messages> localizer, IExternalTranslationService translationService)
     {
         _db = db;
         _localizer = localizer;
-        _cultureSuffix = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : $"_{CultureInfo.CurrentUICulture.TwoLetterISOLanguageName}";
+        _culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        _cultureSuffix = _culture == "en" ? "" : $"_{_culture}";
+        _translationService = translationService;
     }
 
     public async Task<int> DeleteStudentById(string id)
@@ -118,6 +124,7 @@ public class StudentRepository : IStudentRepository
             {
                 var sqlBuilder = new StringBuilder("UPDATE students SET ");
                 var parameters = new DynamicParameters();
+                var needToReview = false;
 
                 if (!string.IsNullOrEmpty(request.FullName))
                 {
@@ -133,8 +140,13 @@ public class StudentRepository : IStudentRepository
 
                 if (!string.IsNullOrEmpty(request.Gender))
                 {
-                    sqlBuilder.Append($"gender{_cultureSuffix} = @Gender, ");
-                    parameters.Add("Gender", request.Gender);
+                    sqlBuilder.Append($"gender = @Gender, ");
+                    parameters.Add("Gender", await _translationService.TranslateAsync(request.Gender, _culture, "en"));
+
+                    sqlBuilder.Append($"gender_vi = @GenderVi, ");
+                    parameters.Add("GenderVi", await _translationService.TranslateAsync(request.Gender, _culture, "vi"));
+
+                    needToReview = true; // Mark as needing review if the content is translated by AI
                 }
 
                 if (request.FacultyId.HasValue)
@@ -175,8 +187,18 @@ public class StudentRepository : IStudentRepository
 
                 if (!string.IsNullOrEmpty(request.Nationality))
                 {
-                    sqlBuilder.Append($"nationality{_cultureSuffix} = @Nationality, ");
-                    parameters.Add("Nationality", request.Nationality);
+                    sqlBuilder.Append($"nationality = @Nationality, ");
+                    parameters.Add("Nationality", await _translationService.TranslateAsync(request.Nationality, _culture, "en"));
+
+                    sqlBuilder.Append($"nationality_vi = @NationalityVi, ");
+                    parameters.Add("NationalityVi", await _translationService.TranslateAsync(request.Nationality, _culture, "vi"));
+
+                    needToReview = true; // Mark as needing review if the content is translated by AI
+                }
+
+                if (needToReview)
+                {
+                    sqlBuilder.Append($"need_to_review = true, ");
                 }
 
                 // Remove last comma
@@ -201,20 +223,25 @@ public class StudentRepository : IStudentRepository
                     await _db.ExecuteAsync(deleteAddressQuery, new { StudentId = id }, transaction);
 
                     string addressQuery = @$"
-                INSERT INTO addresses (student_id, other{_cultureSuffix}, village{_cultureSuffix}, district{_cultureSuffix}, city{_cultureSuffix}, country{_cultureSuffix}, type) 
-                VALUES (@StudentId, @Other, @Village, @District, @City, @Country, @Type)";
+                INSERT INTO addresses (student_id, other, village, district, city, country, type, other_vi, village_vi, district_vi, city_vi, country_vi, need_to_review) 
+                VALUES (@StudentId, @Other, @Village, @District, @City, @Country, @Type, @OtherVi, @VillageVi, @DistrictVi, @CityVi, @CountryVi, true)";
 
                     foreach (var address in request.Addresses)
                     {
                         var addressParameters = new
                         {
                             StudentId = id,
-                            address.Other,
-                            address.Village,
-                            address.District,
-                            address.City,
-                            address.Country,
-                            address.Type
+                            Other = await _translationService.TranslateAsync(address.Other!, _culture, "en"),
+                            Village = await _translationService.TranslateAsync(address.Village!, _culture, "en"),
+                            District = await _translationService.TranslateAsync(address.District!, _culture, "en"),
+                            City = await _translationService.TranslateAsync(address.City!, _culture, "en"),
+                            Country = await _translationService.TranslateAsync(address.Country!, _culture, "en"),
+                            address.Type,
+                            OtherVi = await _translationService.TranslateAsync(address.Other!, _culture, "vi"),
+                            VillageVi = await _translationService.TranslateAsync(address.Village!, _culture, "vi"),
+                            DistrictVi = await _translationService.TranslateAsync(address.District!, _culture, "vi"),
+                            CityVi = await _translationService.TranslateAsync(address.City!, _culture, "vi"),
+                            CountryVi = await _translationService.TranslateAsync(address.Country!, _culture, "vi"),
                         };
 
                         await _db.ExecuteAsync(addressQuery, addressParameters, transaction);
@@ -227,18 +254,20 @@ public class StudentRepository : IStudentRepository
                     await _db.ExecuteAsync(deleteIdentityInfoQuery, new { StudentId = id }, transaction);
 
                     string identityInfoQuery = @$"
-                INSERT INTO identity_info (student_id, number, place_of_issue{_cultureSuffix}, date_of_issue, expiry_date, additional_info{_cultureSuffix}, type) 
-                VALUES (@StudentId, @Number, @PlaceOfIssue, @DateOfIssue, @ExpiryDate, @AdditionalInfo, @Type)";
+                INSERT INTO identity_info (student_id, number, place_of_issue, date_of_issue, expiry_date, additional_info, type, place_of_issue_vi, additional_info_vi, need_to_review) 
+                VALUES (@StudentId, @Number, @PlaceOfIssue, @DateOfIssue, @ExpiryDate, @AdditionalInfo, @Type, @PlaceOfIssueVi, @AdditionalInfoVi, true)";
 
                     var identityInfoParameters = new
                     {
                         StudentId = id,
                         request.IdentityInfo.Number,
-                        request.IdentityInfo.PlaceOfIssue,
+                        PlaceOfIssue = await _translationService.TranslateAsync(request.IdentityInfo.PlaceOfIssue!, _culture, "en"),
                         request.IdentityInfo.DateOfIssue,
                         request.IdentityInfo.ExpiryDate,
-                        request.IdentityInfo.AdditionalInfo,
-                        request.IdentityInfo.Type
+                        AdditionalInfo = request.IdentityInfo.AdditionalInfo,
+                        request.IdentityInfo.Type,
+                        PlaceOfIssueVi = await _translationService.TranslateAsync(request.IdentityInfo.PlaceOfIssue!, _culture, "vi"),
+                        AdditionalInfoVi = request.IdentityInfo.AdditionalInfo,
                     };
 
                     await _db.ExecuteAsync(identityInfoQuery, identityInfoParameters, transaction);
@@ -299,22 +328,24 @@ public class StudentRepository : IStudentRepository
             try
             {
                 string studentQuery = @$"
-                INSERT INTO students (id, full_name, date_of_birth, gender{_cultureSuffix}, faculty_id, intake_year, program_id, email, phone_number, status_id, nationality{_cultureSuffix}) 
-                VALUES (@Id, @FullName, @DateOfBirth, @Gender, @FacultyId, @IntakeYear, @ProgramId, @Email, @PhoneNumber, @StatusId, @Nationality)";
+                INSERT INTO students (id, full_name, date_of_birth, gender, faculty_id, intake_year, program_id, email, phone_number, status_id, nationality, gender_vi, nationality_vi, need_to_review) 
+                VALUES (@Id, @FullName, @DateOfBirth, @Gender, @FacultyId, @IntakeYear, @ProgramId, @Email, @PhoneNumber, @StatusId, @Nationality, @GenderVi, @NationalityVi, true)";
 
                 var studentParameters = new
                 {
                     Id = studentId,
                     request.FullName,
                     request.DateOfBirth,
-                    request.Gender,
+                    Gender = await _translationService.TranslateAsync(request.Gender!, _culture, "en"),
+                    GenderVi = await _translationService.TranslateAsync(request.Gender!, _culture, "vi"),
                     request.FacultyId,
                     request.IntakeYear,
                     request.ProgramId,
                     request.Email,
                     request.PhoneNumber,
                     request.StatusId,
-                    request.Nationality
+                    Nationality = await _translationService.TranslateAsync(request.Nationality!, _culture, "en"),
+                    NationalityVi = await _translationService.TranslateAsync(request.Nationality!, _culture, "vi"),
                 };
 
                 var studentCount = await _db.ExecuteAsync(studentQuery, studentParameters, transaction);
@@ -327,20 +358,25 @@ public class StudentRepository : IStudentRepository
                 if (request.Addresses != null && request.Addresses.Any())
                 {
                     string addressQuery = @$"
-                    INSERT INTO addresses (student_id, other{_cultureSuffix}, village{_cultureSuffix}, district{_cultureSuffix}, city{_cultureSuffix}, country{_cultureSuffix}, type) 
-                    VALUES (@StudentId, @Other, @Village, @District, @City, @Country, @Type)";
+                        INSERT INTO addresses (student_id, other, village, district, city, country, type, other_vi, village_vi, district_vi, city_vi, country_vi, need_to_review) 
+                        VALUES (@StudentId, @Other, @Village, @District, @City, @Country, @Type, @OtherVi, @VillageVi, @DistrictVi, @CityVi, @CountryVi, true)";
 
                     foreach (var address in request.Addresses)
                     {
                         var addressParameters = new
                         {
                             StudentId = studentId,
-                            address.Other,
-                            address.Village,
-                            address.District,
-                            address.City,
-                            address.Country,
-                            address.Type
+                            Other = await _translationService.TranslateAsync(address.Other!, _culture, "en"),
+                            Village = await _translationService.TranslateAsync(address.Village!, _culture, "en"),
+                            District = await _translationService.TranslateAsync(address.District!, _culture, "en"),
+                            City = await _translationService.TranslateAsync(address.City!, _culture, "en"),
+                            Country = await _translationService.TranslateAsync(address.Country!, _culture, "en"),
+                            address.Type,
+                            OtherVi = await _translationService.TranslateAsync(address.Other!, _culture, "vi"),
+                            VillageVi = await _translationService.TranslateAsync(address.Village!, _culture, "vi"),
+                            DistrictVi = await _translationService.TranslateAsync(address.District!, _culture, "vi"),
+                            CityVi = await _translationService.TranslateAsync(address.City!, _culture, "vi"),
+                            CountryVi = await _translationService.TranslateAsync(address.Country!, _culture, "vi"),
                         };
 
                         await _db.ExecuteAsync(addressQuery, addressParameters, transaction);
@@ -350,18 +386,20 @@ public class StudentRepository : IStudentRepository
                 if (request.IdentityInfo != null)
                 {
                     string identityInfoQuery = @$"
-                    INSERT INTO identity_info (student_id, number, place_of_issue{_cultureSuffix}, date_of_issue, expiry_date, additional_info{_cultureSuffix}, type) 
-                    VALUES (@StudentId, @Number, @PlaceOfIssue, @DateOfIssue, @ExpiryDate, @AdditionalInfo, @Type)";
+                        INSERT INTO identity_info (student_id, number, place_of_issue, date_of_issue, expiry_date, additional_info, type, place_of_issue_vi, additional_info_vi, need_to_review) 
+                        VALUES (@StudentId, @Number, @PlaceOfIssue, @DateOfIssue, @ExpiryDate, @AdditionalInfo, @Type, @PlaceOfIssueVi, @AdditionalInfoVi, true)";
 
                     var identityInfoParameters = new
                     {
                         StudentId = studentId,
                         request.IdentityInfo.Number,
-                        request.IdentityInfo.PlaceOfIssue,
+                        PlaceOfIssue = await _translationService.TranslateAsync(request.IdentityInfo.PlaceOfIssue!, _culture, "en"),
                         request.IdentityInfo.DateOfIssue,
                         request.IdentityInfo.ExpiryDate,
-                        request.IdentityInfo.AdditionalInfo,
-                        request.IdentityInfo.Type
+                        AdditionalInfo = request.IdentityInfo.AdditionalInfo,
+                        request.IdentityInfo.Type,
+                        PlaceOfIssueVi = await _translationService.TranslateAsync(request.IdentityInfo.PlaceOfIssue!, _culture, "vi"),
+                        AdditionalInfoVi = request.IdentityInfo.AdditionalInfo,
                     };
 
                     await _db.ExecuteAsync(identityInfoQuery, identityInfoParameters, transaction);
@@ -405,44 +443,53 @@ public class StudentRepository : IStudentRepository
 
                     // Student Table
                     studentValues.Add($"(@Id{index}, @FullName{index}, @DateOfBirth{index}, @Gender{index}, @FacultyId{index}, @IntakeYear{index}, " +
-                        $"@ProgramId{index}, @Email{index}, @PhoneNumber{index}, @StatusId{index}, @Nationality{index})");
+                        $"@ProgramId{index}, @Email{index}, @PhoneNumber{index}, @StatusId{index}, @Nationality{index}, @NationalityVi{index}, @GenderVi{index}, true)");
 
                     studentParameters.Add(new NpgsqlParameter($"@Id{index}", studentId));
                     studentParameters.Add(new NpgsqlParameter($"@FullName{index}", request.FullName));
                     studentParameters.Add(new NpgsqlParameter($"@DateOfBirth{index}", request.DateOfBirth));
-                    studentParameters.Add(new NpgsqlParameter($"@Gender{index}", request.Gender));
+                    studentParameters.Add(new NpgsqlParameter($"@Gender{index}", await _translationService.TranslateAsync(request.Gender!, _culture, "en")));
+                    studentParameters.Add(new NpgsqlParameter($"@GenderVi{index}", await _translationService.TranslateAsync(request.Gender!, _culture, "vi")));
                     studentParameters.Add(new NpgsqlParameter($"@FacultyId{index}", request.FacultyId));
                     studentParameters.Add(new NpgsqlParameter($"@IntakeYear{index}", request.IntakeYear));
                     studentParameters.Add(new NpgsqlParameter($"@ProgramId{index}", request.ProgramId));
                     studentParameters.Add(new NpgsqlParameter($"@Email{index}", request.Email));
                     studentParameters.Add(new NpgsqlParameter($"@PhoneNumber{index}", request.PhoneNumber));
                     studentParameters.Add(new NpgsqlParameter($"@StatusId{index}", request.StatusId));
-                    studentParameters.Add(new NpgsqlParameter($"@Nationality{index}", request.Nationality));
+                    studentParameters.Add(new NpgsqlParameter($"@Nationality{index}", await _translationService.TranslateAsync(request.Nationality!, _culture, "en")));
+                    studentParameters.Add(new NpgsqlParameter($"@NationalityVi{index}", await _translationService.TranslateAsync(request.Nationality!, _culture, "vi")));
 
                     // Address Table
                     int addressCount = 0;
                     foreach (var address in request.Addresses!)
                     {
                         addressValues.Add($"(@StudentId{index}_{addressCount}, @Other{index}_{addressCount}, @Village{index}_{addressCount}, @District{index}_{addressCount}, " +
-                            $"@City{index}_{addressCount}, @Country{index}_{addressCount}, @Type{index}_{addressCount})");
+                            $"@City{index}_{addressCount}, @Country{index}_{addressCount}, @Type{index}_{addressCount}, " +
+                            $"@OtherVi{index}_{addressCount}, @VillageVi{index}_{addressCount}, @DistrictVi{index}_{addressCount}, @CityVi{index}_{addressCount}, @CountryVi{index}_{addressCount}, true)");
 
                         addressParameters.Add(new NpgsqlParameter($"@StudentId{index}_{addressCount}", studentId));
-                        addressParameters.Add(new NpgsqlParameter($"@Other{index}_{addressCount}", address.Other));
-                        addressParameters.Add(new NpgsqlParameter($"@Village{index}_{addressCount}", address.Village));
-                        addressParameters.Add(new NpgsqlParameter($"@District{index}_{addressCount}", address.District));
-                        addressParameters.Add(new NpgsqlParameter($"@City{index}_{addressCount}", address.City));
-                        addressParameters.Add(new NpgsqlParameter($"@Country{index}_{addressCount}", address.Country));
+                        addressParameters.Add(new NpgsqlParameter($"@Other{index}_{addressCount}", await _translationService.TranslateAsync(address.Other!, _culture, "en")));
+                        addressParameters.Add(new NpgsqlParameter($"@Village{index}_{addressCount}", await _translationService.TranslateAsync(address.Village!, _culture, "en")));
+                        addressParameters.Add(new NpgsqlParameter($"@District{index}_{addressCount}", await _translationService.TranslateAsync(address.District!, _culture, "en")));
+                        addressParameters.Add(new NpgsqlParameter($"@City{index}_{addressCount}", await _translationService.TranslateAsync(address.City!, _culture, "en")));
+                        addressParameters.Add(new NpgsqlParameter($"@Country{index}_{addressCount}", await _translationService.TranslateAsync(address.Country!, _culture, "en")));
                         addressParameters.Add(new NpgsqlParameter($"@Type{index}_{addressCount}", address.Type));
+                        addressParameters.Add(new NpgsqlParameter($"@OtherVi{index}_{addressCount}", await _translationService.TranslateAsync(address.Other!, _culture, "vi")));
+                        addressParameters.Add(new NpgsqlParameter($"@VillageVi{index}_{addressCount}", await _translationService.TranslateAsync(address.Village!, _culture, "vi")));
+                        addressParameters.Add(new NpgsqlParameter($"@DistrictVi{index}_{addressCount}", await _translationService.TranslateAsync(address.District!, _culture, "vi")));
+                        addressParameters.Add(new NpgsqlParameter($"@CityVi{index}_{addressCount}", await _translationService.TranslateAsync(address.City!, _culture, "vi")));
+                        addressParameters.Add(new NpgsqlParameter($"@CountryVi{index}_{addressCount}", await _translationService.TranslateAsync(address.Country!, _culture, "vi")));
 
                         addressCount++;
                     }
 
                     // Identity Info Table
-                    identityValues.Add($"(@StudentId{index}, @Number{index}, @PlaceOfIssue{index}, @DateOfIssue{index}, @ExpiryDate{index}, @AdditionalInfo{index}, @Type{index})");
+                    identityValues.Add($"(@StudentId{index}, @Number{index}, @PlaceOfIssue{index}, @DateOfIssue{index}, @ExpiryDate{index}, @AdditionalInfo{index}, @Type{index}, @PlaceOfIssueVi{index}, @AdditionalInfoVi{index}, true)");
 
                     identityParameters.Add(new NpgsqlParameter($"@StudentId{index}", studentId));
                     identityParameters.Add(new NpgsqlParameter($"@Number{index}", request.IdentityInfo!.Number));
-                    identityParameters.Add(new NpgsqlParameter($"@PlaceOfIssue{index}", request.IdentityInfo.PlaceOfIssue));
+                    identityParameters.Add(new NpgsqlParameter($"@PlaceOfIssue{index}", await _translationService.TranslateAsync(request.IdentityInfo.PlaceOfIssue!, _culture, "en")));
+                    identityParameters.Add(new NpgsqlParameter($"@PlaceOfIssueVi{index}", await _translationService.TranslateAsync(request.IdentityInfo.PlaceOfIssue!, _culture, "vi")));
                     identityParameters.Add(new NpgsqlParameter($"@DateOfIssue{index}", request.IdentityInfo.DateOfIssue));
                     identityParameters.Add(new NpgsqlParameter($"@ExpiryDate{index}", request.IdentityInfo.ExpiryDate));
                     identityParameters.Add(new NpgsqlParameter($"@Type{index}", request.IdentityInfo.Type));
@@ -452,7 +499,13 @@ public class StudentRepository : IStudentRepository
                         ? (object)DBNull.Value  // Ensure it's cast to object
                         : JsonSerializer.Serialize(request.IdentityInfo.AdditionalInfo);
 
+                    var additionalInfoViParam = new NpgsqlParameter($"@AdditionalInfoVi{index}", NpgsqlDbType.Jsonb);
+                    additionalInfoViParam.Value = request.IdentityInfo.AdditionalInfo is null
+                        ? (object)DBNull.Value  // Ensure it's cast to object
+                        : JsonSerializer.Serialize(request.IdentityInfo.AdditionalInfo);
+
                     identityParameters.Add(additionalInfoParam);
+                    identityParameters.Add(additionalInfoViParam);
 
                     index++;
                 }
@@ -461,7 +514,7 @@ public class StudentRepository : IStudentRepository
                 if (studentValues.Count > 0)
                 {
                     string studentQuery = $@"
-                    INSERT INTO students (id, full_name, date_of_birth, gender{_cultureSuffix}, faculty_id, intake_year, program_id, email, phone_number, status_id, nationality{_cultureSuffix}) 
+                    INSERT INTO students (id, full_name, date_of_birth, gender, faculty_id, intake_year, program_id, email, phone_number, status_id, nationality, nationality_vi, gender_vi, need_to_review) 
                     VALUES {string.Join(", ", studentValues)}";
 
                     using (var studentCmd = new NpgsqlCommand(studentQuery, (NpgsqlConnection?)_db, (NpgsqlTransaction?)transaction))
@@ -475,7 +528,7 @@ public class StudentRepository : IStudentRepository
                 if (addressValues.Count > 0)
                 {
                     string addressQuery = $@"
-                    INSERT INTO addresses (student_id, other{_cultureSuffix}, village{_cultureSuffix}, district{_cultureSuffix}, city{_cultureSuffix}, country{_cultureSuffix}, type)  
+                    INSERT INTO addresses (student_id, other, village, district, city, country, type, other_vi, village_vi, district_vi, city_vi, country_vi, need_to_review)  
                     VALUES {string.Join(", ", addressValues)}";
 
                     using (var addressCmd = new NpgsqlCommand(addressQuery, (NpgsqlConnection?)_db, (NpgsqlTransaction?)transaction))
@@ -489,7 +542,7 @@ public class StudentRepository : IStudentRepository
                 if (identityValues.Count > 0)
                 {
                     string identityQuery = $@"
-                    INSERT INTO identity_info (student_id, number, place_of_issue{_cultureSuffix}, date_of_issue, expiry_date, additional_info{_cultureSuffix}, type)  
+                    INSERT INTO identity_info (student_id, number, place_of_issue, date_of_issue, expiry_date, additional_info, type, place_of_issue_vi, additional_info_vi, need_to_review)  
                     VALUES {string.Join(", ", identityValues)}";
 
                     using (var identityCmd = new NpgsqlCommand(identityQuery, (NpgsqlConnection?)_db, (NpgsqlTransaction?)transaction))

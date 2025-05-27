@@ -20,13 +20,24 @@ public class ExternalTranslationService : IExternalTranslationService
 
     public async Task<string> TranslateAsync(string text, string sourceLanguage, string targetLanguage)
     {
+        if (sourceLanguage == targetLanguage)
+        {
+            return text; // No translation needed if both languages are the same
+        }
+
+        var languageMap = new Dictionary<string, string>
+        {
+            { "en", "English" },
+            { "vi", "Vietnamese" }
+        };
+
         var requestBody = new
         {
             model = _model,
             messages = new[]
             {
                 new { role = "system", content = "You are a professional translator. Translate clearly and accurately between Vietnamese and English. Always provide ONLY the translated text without quotation marks, periods, or any other punctuation unless it's part of the original text." },
-                new { role = "user", content = $"Translate the following {sourceLanguage} text to {targetLanguage}:\r\n\r\n{sourceLanguage}: \"{text}\"\r\n\r\n{targetLanguage}:" }
+                new { role = "user", content = $"Translate the following {languageMap[sourceLanguage]} text to {languageMap[targetLanguage]}:\r\n\r\n{languageMap[sourceLanguage]}: \"{text}\"\r\n\r\n{languageMap[targetLanguage]}:" }
             },
             temperature = 0.0,
             top_p = 0.9,

@@ -4,6 +4,7 @@ using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
 using student_management_api.Helpers;
 using student_management_api.Localization;
+using student_management_api.Localization.AiTranslation;
 using student_management_api.Models.DTO;
 using System.Data;
 using System.Globalization;
@@ -14,13 +15,17 @@ public class StudyProgramRepository : IStudyProgramRepository
 {
     private readonly IDbConnection _db;
     private readonly IStringLocalizer<Messages> _localizer;
+    private readonly string _culture;
     private readonly string _cultureSuffix;
+    private readonly IExternalTranslationService _translationService;
 
-    public StudyProgramRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
+    public StudyProgramRepository(IDbConnection db, IStringLocalizer<Messages> localizer, IExternalTranslationService translationService)
     {
         _db = db;
         _localizer = localizer;
-        _cultureSuffix = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : $"_{CultureInfo.CurrentUICulture.TwoLetterISOLanguageName}";
+        _culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        _cultureSuffix = _culture == "en" ? "" : $"_{_culture}";
+        _translationService = translationService;
     }
 
     public async Task<List<StudyProgram>> GetAllPrograms()
@@ -32,8 +37,15 @@ public class StudyProgramRepository : IStudyProgramRepository
 
     public async Task<int> UpdateProgram(StudyProgram program)
     {
-        string query = $"UPDATE programs SET name{_cultureSuffix} = @Name WHERE id = @Id";
-        var count = await _db.ExecuteAsync(query, program);
+        string query = $"UPDATE programs SET name = @Name, name_vi = @NameVi, need_to_review = true WHERE id = @Id";
+        var queryParams = new
+        {
+            Id = program.Id,
+            Name = await _translationService.TranslateAsync(program.Name!, _culture, "en"),
+            NameVi = await _translationService.TranslateAsync(program.Name!, _culture, "vi"),
+        };
+
+        var count = await _db.ExecuteAsync(query, queryParams);
         if (count == 0)
         {
             throw new NotFoundException(_localizer["program_not_found"]);
@@ -44,8 +56,14 @@ public class StudyProgramRepository : IStudyProgramRepository
 
     public async Task<int> AddProgram(string name)
     {
-        string query = $"INSERT INTO programs (name{_cultureSuffix}) VALUES (@Name) RETURNING id";
-        var id = await _db.QueryFirstOrDefaultAsync<int>(query, new { Name = name });
+        string query = $"INSERT INTO programs (name, name_vi, need_to_review) VALUES (@Name, @NameVi, true) RETURNING id";
+        var queryParams = new
+        {
+            Name = await _translationService.TranslateAsync(name, _culture, "en"),
+            NameVi = await _translationService.TranslateAsync(name, _culture, "vi"),
+        };
+
+        var id = await _db.QueryFirstOrDefaultAsync<int>(query, queryParams);
 
         if (id == 0)
         {

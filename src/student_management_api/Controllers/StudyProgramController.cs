@@ -51,7 +51,7 @@ public class StudyProgramController : ControllerBase
             var count = await _programService.UpdateProgram(program);
 
             _logger.LogInformation("Study program with ID {StudyProgramId} updated successfully", program.Id);
-            return Ok(new { message = _localizer["update_program_successfully"] });
+            return Ok(new { message = _localizer["update_program_successfully"].Value });
         }
     }
 

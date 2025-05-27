@@ -83,7 +83,7 @@ public class CourseController: ControllerBase
             }
 
             _logger.LogInformation("Successfully updated course with ID: {CourseId}", course.Id);
-            return Ok(new {Message = $"{_localizer["update_course_successfully"]}, ID: {course.Id}"});
+            return Ok(new {Message = $"{_localizer["update_course_successfully"].Value}, ID: {course.Id}"});
         }
     }
 
@@ -121,14 +121,14 @@ public class CourseController: ControllerBase
                 _logger.LogInformation("Successfully added course with ID: {CourseId}", course.Id);
                 return CreatedAtAction(nameof(GetCourseById), new { id = course.Id }, new
                 {
-                    Message = $"{_localizer["course_added_successfully"]}, ID: {course.Id}",
+                    Message = $"{_localizer["course_added_successfully"].Value}, ID: {course.Id}",
                     Data = course
                 });
             }
             else
             {
                 _logger.LogWarning("Course creation failed for ID: {CourseId}", course.Id);
-                return StatusCode(500, new ErrorResponse<string>(status: 500, message: $"{_localizer["failed_to_create_course"]}, ID: {course.Id}"));
+                return StatusCode(500, new ErrorResponse<string>(status: 500, message: $"{_localizer["failed_to_create_course"].Value}, ID: {course.Id}"));
             }
         }
     }

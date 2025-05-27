@@ -4,6 +4,7 @@ using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
 using student_management_api.Helpers;
 using student_management_api.Localization;
+using student_management_api.Localization.AiTranslation;
 using student_management_api.Models.DTO;
 using System.Data;
 using System.Globalization;
@@ -14,13 +15,17 @@ public class CourseRepository: ICourseRepository
 {
     private readonly IDbConnection _db;
     private readonly IStringLocalizer<Messages> _localizer;
+    private readonly string _culture;
     private readonly string _cultureSuffix;
+    private readonly IExternalTranslationService _translationService;
 
-    public CourseRepository(IDbConnection db, IStringLocalizer<Messages> localizer)
+    public CourseRepository(IDbConnection db, IStringLocalizer<Messages> localizer, IExternalTranslationService translationService)
     {
         _db = db;
         _localizer = localizer;
-        _cultureSuffix = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : $"_{CultureInfo.CurrentUICulture.TwoLetterISOLanguageName}";
+        _culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        _cultureSuffix = _culture == "en" ? "" : $"_{_culture}";
+        _translationService = translationService;
     }
 
     public async Task<List<Course>> GetAllCourses()
@@ -137,19 +142,25 @@ public class CourseRepository: ICourseRepository
                 var updateSql = @$"
                 UPDATE courses
                 SET 
-                    name{_cultureSuffix}        = @Name,
+                    name                        = @Name,
+                    name_vi                     = @NameVi,    
                     credits                     = @Credits,
                     faculty_id                  = @FacultyId,
-                    description{_cultureSuffix} = @Description
+                    description                 = @Description,
+                    description_vi              = @DescriptionVi,
+                    need_to_review              = @NeedToReview
                 WHERE id = @Id;
                 ";
                 var updateParams = new
                 {
-                    course.Id,
-                    course.Name,
-                    course.Credits,
-                    course.FacultyId,
-                    course.Description
+                    Id = course.Id,
+                    Name = await _translationService.TranslateAsync(course.Name!, _culture, "en"),
+                    NameVi = await _translationService.TranslateAsync(course.Name!, _culture, "vi"),
+                    Credits = course.Credits,
+                    FacultyId = course.FacultyId,
+                    Description = await _translationService.TranslateAsync(course.Description!, _culture, "en"),
+                    DescriptionVi = await _translationService.TranslateAsync(course.Description!, _culture, "vi"),
+                    NeedToReview = true,
                 };
                 var rowsAffected = await _db.ExecuteAsync(updateSql, updateParams, transaction);
 
@@ -209,17 +220,20 @@ public class CourseRepository: ICourseRepository
 
                 // 2. Thêm vào bảng courses
                 var insertCourseSql = @$"
-                INSERT INTO courses (id, name{_cultureSuffix}, credits, faculty_id, description{_cultureSuffix})
-                VALUES (@Id, @Name, @Credits, @FacultyId, @Description);
+                INSERT INTO courses (id, name, credits, faculty_id, description, name_vi, description_vi, need_to_review)
+                VALUES (@Id, @Name, @Credits, @FacultyId, @Description, @NameVi, @DescriptionVi, @NeedToReview);
                 ";
 
                 var courseParams = new
                 {
-                    course.Id,
-                    course.Name,
-                    course.Credits,
-                    course.FacultyId,
-                    course.Description
+                    Id = course.Id,
+                    Name = await _translationService.TranslateAsync(course.Name!, _culture, "en"),
+                    NameVi = await _translationService.TranslateAsync(course.Name!, _culture, "vi"),
+                    Credits = course.Credits,
+                    FacultyId = course.FacultyId,
+                    Description = await _translationService.TranslateAsync(course.Description!, _culture, "en"),
+                    DescriptionVi = await _translationService.TranslateAsync(course.Description!, _culture, "vi"),
+                    NeedToReview = true,
                 };
 
                 var rowsAffected = await _db.ExecuteAsync(insertCourseSql, courseParams, transaction);
