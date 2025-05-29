@@ -12,6 +12,8 @@ using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using System.Text.Json;
 using student_management_api.Localization;
+using student_management_api.Models.CourseEnrollment;
+using System.Globalization;
 
 namespace student_management_api.Controllers;
 
@@ -24,18 +26,21 @@ public class StudentController : ControllerBase
     private readonly IConfigurationService _configurationService;
     private readonly ILogger<StudentController> _logger;
     private readonly IStringLocalizer<Messages> _localizer;
+    private readonly ICourseEnrollmentService _courseEnrollmentService;
 
     public StudentController(
         IStudentService studentService,
         IConfigurationService configurationService,
         ILogger<StudentController> logger,
-        IStringLocalizer<Messages> localizer
+        IStringLocalizer<Messages> localizer,
+        ICourseEnrollmentService courseEnrollmentService
     )
     {
         _studentService = studentService;
         _configurationService = configurationService;
         _logger = logger;
         _localizer = localizer;
+        _courseEnrollmentService = courseEnrollmentService;
     }
 
     #region ValidateStudentInfomationsInRequestFunctions
@@ -346,6 +351,57 @@ public class StudentController : ControllerBase
 
             _logger.LogInformation("Students exported successfully as {Format}", format);
             return File(fileStream, contentType, fileName);
+        }
+    }
+
+    [HttpPut("update-grade")]
+    public async Task<IActionResult> UpdateStudentGrade([FromBody] UpdateStudentGradeRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
+        }
+
+        using (_logger.BeginScope("UpdateStudentGrade request"))
+        {
+            _logger.LogInformation("Updating student grade with request: {@Request}", request);
+
+            try
+            {
+                await _courseEnrollmentService.UpdateStudentGrade(request.StudentId!, request.CourseId!, request.Grade);
+                _logger.LogInformation("Successfully updated student grade");
+
+                return Ok(new { message = _localizer["successfully_updated_student_grade"].Value });
+            }
+            catch
+            {
+                _logger.LogWarning("Failed to update student grade");
+                throw;
+            }
+        }
+    }
+
+    [HttpGet("{id}/transcript")]
+    public async Task<IActionResult> GetStudentTranscriptById(string id)
+    {
+        using (_logger.BeginScope("GetStudentTranscriptById request for StudentId: {StudentId}", id))
+        {
+            // Load HTML template
+            var culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", $"transcript_template-{culture}.html");
+            var htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
+
+            _logger.LogInformation("Fetching transcript for student with ID: {StudentId}", id);
+            var transcriptStream = await _courseEnrollmentService.GetTranscriptOfStudentById(id, htmlTemplate);
+            if (transcriptStream == null)
+            {
+                _logger.LogWarning("Transcript not found for student with ID: {StudentId}", id);
+                return NotFound(new ErrorResponse<string>(status: 404, message: $"{_localizer["transcript_not_found"]}, ID: {id}"));
+            }
+
+            _logger.LogInformation("Transcript fetched successfully for student with ID: {StudentId}", id);
+
+            return File(transcriptStream, "application/pdf", $"{id}_transcript.pdf");
         }
     }
 }
