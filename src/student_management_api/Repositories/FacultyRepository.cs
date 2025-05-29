@@ -45,7 +45,7 @@ public class FacultyRepository : IFacultyRepository
             NameVi = await _translationService.TranslateAsync(faculty.Name!, _culture, "vi"),
         };
 
-        var count = await _db.ExecuteAsync(query, faculty);
+        var count = await _db.ExecuteAsync(query, queryParams);
         if (count == 0)
         {
             throw new NotFoundException(_localizer["faculty_not_found"]);
