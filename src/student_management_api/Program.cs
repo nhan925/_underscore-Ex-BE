@@ -53,6 +53,8 @@ public class Program
             ?? throw new Exception("AI_SERVICE_URL is missing");
         var AiModel = Environment.GetEnvironmentVariable("AI_MODEL")
             ?? throw new Exception("AI_MODEL is missing");
+        var AiApiKey = Environment.GetEnvironmentVariable("AI_API_KEY")
+            ?? throw new Exception("AI_API_KEY is missing");
 
         // Register custom type handlers
         SqlMapper.AddTypeHandler(new JsonbTypeHandler<Dictionary<string, string>>());
@@ -133,7 +135,7 @@ public class Program
         builder.Services.AddScoped<ICourseEnrollmentRepository, CourseEnrollmentRepository>();
 
         builder.Services.AddSingleton<IConverter>(new SynchronizedConverter(new PdfTools()));
-        builder.Services.AddSingleton<IExternalTranslationService>(new ExternalTranslationService(AiServiceUrl, AiModel));
+        builder.Services.AddSingleton<IExternalTranslationService>(new GeminiTranslationService(AiApiKey, AiModel));
 
         builder.Services.AddControllers();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
