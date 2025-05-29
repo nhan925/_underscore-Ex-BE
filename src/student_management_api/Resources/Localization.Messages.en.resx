@@ -138,8 +138,14 @@
   <data name="classes_exist_for_this_course_The_course_has_been_marked_as_inactive" xml:space="preserve">
     <value>Classes exist for this course. The course has been marked as inactive</value>
   </data>
+  <data name="class_id_already_exists" xml:space="preserve">
+    <value>There has been a class with the same ID for this course in this semester !</value>
+  </data>
   <data name="class_is_full" xml:space="preserve">
     <value>Class is full</value>
+  </data>
+  <data name="class_with_duplicate_schedule_and_room" xml:space="preserve">
+    <value>Class with the same schedule and room already exists in this semester. Please choose a different schedule or room.</value>
   </data>
   <data name="course_added_successfully" xml:space="preserve">
     <value>Course added successfully</value>

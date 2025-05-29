@@ -138,8 +138,14 @@
   <data name="classes_exist_for_this_course_The_course_has_been_marked_as_inactive" xml:space="preserve">
     <value>Khóa học này có lớp gắn với nó. Đã đánh là là không hoạt động</value>
   </data>
+  <data name="class_id_already_exists" xml:space="preserve">
+    <value>Đã có lớp học với ID này cho khóa học này trong học kỳ này !</value>
+  </data>
   <data name="class_is_full" xml:space="preserve">
     <value>Lớp đã đủ số lượng SV</value>
+  </data>
+  <data name="class_with_duplicate_schedule_and_room" xml:space="preserve">
+    <value>Lớp học với lịch và phòng học giống nhau đã tồn tại trong học kỳ này. Vui lòng chọn lịch trình hoặc phòng học khác.</value>
   </data>
   <data name="course_added_successfully" xml:space="preserve">
     <value>Thêm khóa học thành công</value>

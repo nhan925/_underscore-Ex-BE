@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Exceptions;
 using student_management_api.Helpers;
 using student_management_api.Localization;
 using student_management_api.Localization.AiTranslation;
@@ -79,10 +80,30 @@ public class CourseClassRepository : ICourseClassRepository
             ScheduleVi = TranslateDayOfWeekInSchedule(courseClass.Schedule!, _culture, "vi"),
             NeedToReview = true,
         };
-        var courseClassCount = await _db.ExecuteAsync(query, parameters);
-        if (courseClassCount == 0)
+
+        try
         {
-            throw new Exception(_localizer["failed_to_add_class"]);
+            var courseClassCount = await _db.ExecuteAsync(query, parameters);
+
+            if (courseClassCount == 0)
+            {
+                throw new Exception(_localizer["failed_to_add_class"]);
+            }
+        }
+        catch(Exception ex)
+        {
+            if (ex.Message.Contains("duplicate key value violates unique constraint \"classes_semester_id_schedule_room_key\""))
+            {
+                throw new ForbiddenException(_localizer["class_with_duplicate_schedule_and_room"]);
+            }
+            else if (ex.Message.Contains("duplicate key value violates unique constraint \"classes_pkey\""))
+            {
+                throw new ForbiddenException(_localizer["class_id_already_exists"]);
+            }
+            else
+            {
+                throw;
+            }
         }
 
         return courseClass.Id!;
