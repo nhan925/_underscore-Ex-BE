@@ -213,7 +213,7 @@
   <data name="invalid_format_Supported_formats_are_json_and_excel" xml:space="preserve">
     <value>Invalid format. Supported formats are 'json' and 'excel'</value>
   </data>
-  <data name="invalid_input_data" xml:space="preserve">
+  <data name="invalid_input" xml:space="preserve">
     <value>Invalid input data</value>
   </data>
   <data name="invalid_or_empty_file" xml:space="preserve">

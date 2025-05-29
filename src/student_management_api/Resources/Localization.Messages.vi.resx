@@ -213,7 +213,7 @@
   <data name="invalid_format_Supported_formats_are_json_and_excel" xml:space="preserve">
     <value>Chỉ hỗ trợ định dạng 'json' và 'excel'</value>
   </data>
-  <data name="invalid_input_data" xml:space="preserve">
+  <data name="invalid_input" xml:space="preserve">
     <value>Dữ liệu không hợp lệ</value>
   </data>
   <data name="invalid_or_empty_file" xml:space="preserve">

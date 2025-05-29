@@ -238,7 +238,7 @@ public class Program
                 return new BadRequestObjectResult(new ErrorResponse<List<string>>
                 (
                     status: 400,
-                    message: localizer["invalid_input_data"],
+                    message: localizer["invalid_input"],
                     details: errors
                 ));
             };
