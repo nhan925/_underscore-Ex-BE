@@ -36,7 +36,7 @@ public class AuthController : ControllerBase
                 if (!ModelState.IsValid)
                 {
                     _logger.LogWarning("Invalid login request data for {Username}", request.Username);
-                    return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input_data"], details: ModelState));
+                    return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
                 }
 
                 var token = await _jwtService.AuthenticateUser(request);
