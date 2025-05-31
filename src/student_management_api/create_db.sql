@@ -29,7 +29,7 @@ CREATE TABLE students (
     id VARCHAR(10) PRIMARY KEY,  -- Mã số sinh viên
     full_name TEXT NOT NULL,  -- Họ tên
     date_of_birth DATE NOT NULL,  -- Ngày tháng năm sinh
-    gender VARCHAR(10) CHECK (gender IN ('Male', 'Female', 'Other')),  -- Giới tính
+    gender VARCHAR(10),  -- Giới tính
     faculty_id INT NOT NULL,  -- Khoa (Foreign Key)
     intake_year INT NOT NULL,  -- Khóa (Year of Enrollment)
     program TEXT NOT NULL,  -- Chương trình

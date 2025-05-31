@@ -36,6 +36,41 @@ public class StudentRepository : IStudentRepository
         _translationService = translationService;
     }
 
+    // Manually translated methods to ensure they are not auto-translated by AI for Gender
+    private string TranslateGender(string gender, string sourceLanguage, string targetLanguage)
+    {
+        if (sourceLanguage == targetLanguage)
+        {
+            return gender;
+        }
+
+        var genderTranslations = new Dictionary<string, string>
+        {
+            { "Male", "Nam" },
+            { "Female", "Nữ" },
+            { "Other", "Khác" }
+        };
+
+        if (targetLanguage == "vi")
+        {
+            foreach (var kvp in genderTranslations)
+            {
+                gender = gender.Replace(kvp.Key, kvp.Value);
+            }
+        }
+        else if (targetLanguage == "en")
+        {
+            foreach (var kvp in genderTranslations)
+            {
+                gender = gender.Replace(kvp.Value, kvp.Key);
+            }
+        }
+
+        return gender;
+    }
+
+
+
     public async Task<int> DeleteStudentById(string id)
     {
         string query = "DELETE FROM students WHERE id = @Id";
@@ -141,10 +176,10 @@ public class StudentRepository : IStudentRepository
                 if (!string.IsNullOrEmpty(request.Gender))
                 {
                     sqlBuilder.Append($"gender = @Gender, ");
-                    parameters.Add("Gender", await _translationService.TranslateAsync(request.Gender, _culture, "en"));
+                    parameters.Add("Gender", TranslateGender(request.Gender, _culture, "en"));
 
                     sqlBuilder.Append($"gender_vi = @GenderVi, ");
-                    parameters.Add("GenderVi", await _translationService.TranslateAsync(request.Gender, _culture, "vi"));
+                    parameters.Add("GenderVi", TranslateGender(request.Gender, _culture, "vi"));
 
                     needToReview = true; // Mark as needing review if the content is translated by AI
                 }
@@ -336,8 +371,8 @@ public class StudentRepository : IStudentRepository
                     Id = studentId,
                     request.FullName,
                     request.DateOfBirth,
-                    Gender = await _translationService.TranslateAsync(request.Gender!, _culture, "en"),
-                    GenderVi = await _translationService.TranslateAsync(request.Gender!, _culture, "vi"),
+                    Gender = TranslateGender(request.Gender!, _culture, "en"),
+                    GenderVi = TranslateGender(request.Gender!, _culture, "vi"),
                     request.FacultyId,
                     request.IntakeYear,
                     request.ProgramId,
@@ -448,8 +483,8 @@ public class StudentRepository : IStudentRepository
                     studentParameters.Add(new NpgsqlParameter($"@Id{index}", studentId));
                     studentParameters.Add(new NpgsqlParameter($"@FullName{index}", request.FullName));
                     studentParameters.Add(new NpgsqlParameter($"@DateOfBirth{index}", request.DateOfBirth));
-                    studentParameters.Add(new NpgsqlParameter($"@Gender{index}", await _translationService.TranslateAsync(request.Gender!, _culture, "en")));
-                    studentParameters.Add(new NpgsqlParameter($"@GenderVi{index}", await _translationService.TranslateAsync(request.Gender!, _culture, "vi")));
+                    studentParameters.Add(new NpgsqlParameter($"@Gender{index}", TranslateGender(request.Gender!, _culture, "en")));
+                    studentParameters.Add(new NpgsqlParameter($"@GenderVi{index}", TranslateGender(request.Gender!, _culture, "vi")));
                     studentParameters.Add(new NpgsqlParameter($"@FacultyId{index}", request.FacultyId));
                     studentParameters.Add(new NpgsqlParameter($"@IntakeYear{index}", request.IntakeYear));
                     studentParameters.Add(new NpgsqlParameter($"@ProgramId{index}", request.ProgramId));
@@ -598,5 +633,4 @@ public class StudentRepository : IStudentRepository
 
         return students;
     }
-
 }
