@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using student_management_api.Controllers;
+using System.Text;
 using System.Text.Json;
 
 namespace student_management_api.Localization.AiTranslation;
@@ -8,12 +9,14 @@ public class GeminiTranslationService : IExternalTranslationService
     private readonly HttpClient _httpClient;
     private readonly string _model;
     private readonly string _apiKey;
+    private readonly ILogger<GeminiTranslationService> _logger;
 
-    public GeminiTranslationService(string apiKey, string model = "gemma-3-27b-it")
+    public GeminiTranslationService(ILogger<GeminiTranslationService> logger, string apiKey, string model = "gemma-3-27b-it")
     {
         _httpClient = new HttpClient();
         _model = model;
         _apiKey = apiKey;
+        _logger = logger;
     }
 
     public async Task<string> TranslateAsync(string text, string sourceLanguage, string targetLanguage)
@@ -50,7 +53,17 @@ public class GeminiTranslationService : IExternalTranslationService
             $"https://generativelanguage.googleapis.com/v1beta/models/{_model}:generateContent?key={_apiKey}",
             content);
 
-        response.EnsureSuccessStatusCode();
+        // Fallback to default language if the API key is not set or the model is not available
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Translation request failed for text: {Text}", text);
+            return text; // Return original text if request fails
+        }
+
         var responseJson = await response.Content.ReadAsStringAsync();
 
         using var doc = JsonDocument.Parse(responseJson);

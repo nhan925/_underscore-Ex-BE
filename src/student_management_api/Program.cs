@@ -1,6 +1,7 @@
 using Dapper;
 using DinkToPdf;
 using DinkToPdf.Contracts;
+using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using dotenv;
 using dotenv.net;
@@ -135,7 +136,11 @@ public class Program
         builder.Services.AddScoped<ICourseEnrollmentRepository, CourseEnrollmentRepository>();
 
         builder.Services.AddSingleton<IConverter>(new SynchronizedConverter(new PdfTools()));
-        builder.Services.AddSingleton<IExternalTranslationService>(new GeminiTranslationService(AiApiKey, AiModel));
+        builder.Services.AddSingleton<IExternalTranslationService>(provider =>
+        {
+            var logger = provider.GetRequiredService<ILogger<GeminiTranslationService>>();
+            return new GeminiTranslationService(logger, AiApiKey, AiModel);
+        });
 
         builder.Services.AddControllers();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
