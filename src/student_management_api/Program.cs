@@ -23,8 +23,7 @@ using Serilog.Sinks.PostgreSQL;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
 using student_management_api.Helpers;
-using student_management_api.Localization;
-using student_management_api.Localization.AiTranslation;
+using student_management_api.Resources;
 using student_management_api.Middlewares;
 using student_management_api.Models.DTO;
 using student_management_api.Repositories;
@@ -34,6 +33,7 @@ using System.Data;
 using System.Globalization;
 using System.Text;
 using System.Text.Json.Serialization;
+using student_management_api.Localization;
 
 namespace student_management_api;
 
@@ -200,7 +200,7 @@ public class Program
         builder.Services.AddOpenApi();
 
         // Add localization services
-        builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+        builder.Services.AddLocalization();
 
         // Set up supported cultures
         var supportedCultures = new[] { "en", "vi" }; // English, Vietnamese

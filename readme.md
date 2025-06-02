@@ -136,17 +136,14 @@ src/
     │   ├── ForbiddenException.cs
     │   └── NotFoundException.cs
     │
-    ├── Localization/                           # Localization resources
-    │   ├── Messages.cs                         # Dummy class to reuse localization messages
-    │   │
-    │   └── AiTranslation/
-    │       ├── ExternalTranslationService.cs   # Local LLM translation service
-    │       ├── GeminiTranslationService.cs     # Gemini translation service
-    │       └── IExternalTranslationService.cs  # Interface for translation services
+    ├── Localization/                           # Localization services
+    │   ├── ExternalTranslationService.cs       # Local LLM translation service
+    │   ├── GeminiTranslationService.cs         # Gemini translation service
+    │   └── IExternalTranslationService.cs      # Interface for translation services
     │
     ├── Resources/                              # Localization resources (messages)
-    │   ├── Localization.Messages.en.resx
-    │   └── Localization.Messages.vi.resx
+    │   ├── Messages.resx                       # Default English messages
+    │   └── Messages.vi.resx                    # Vietnamese messages
     │
     ├── Templates/                              # Student transcript templates
     │   ├── transcript_template-en.html 

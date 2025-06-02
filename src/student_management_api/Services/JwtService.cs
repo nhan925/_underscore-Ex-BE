@@ -8,7 +8,7 @@ using student_management_api.Models.DTO;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using student_management_api.Localization;
+using student_management_api.Resources;
 
 namespace student_management_api.Services;
 

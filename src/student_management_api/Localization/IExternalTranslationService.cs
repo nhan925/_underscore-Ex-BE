@@ -1,4 +1,4 @@
-﻿namespace student_management_api.Localization.AiTranslation;
+﻿namespace student_management_api.Localization;
 
 public interface IExternalTranslationService
 {

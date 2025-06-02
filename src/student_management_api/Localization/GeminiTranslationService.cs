@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace student_management_api.Localization.AiTranslation;
+namespace student_management_api.Localization;
 
 public class GeminiTranslationService : IExternalTranslationService
 {

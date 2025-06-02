@@ -2,7 +2,7 @@
 using Moq;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
-using student_management_api.Localization;
+using student_management_api.Resources;
 using student_management_api.Models.DTO;
 using student_management_api.Services;
 using System;

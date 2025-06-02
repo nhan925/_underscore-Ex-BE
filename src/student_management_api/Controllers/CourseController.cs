@@ -6,7 +6,7 @@ using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IServices;
 using student_management_api.Helpers;
 using student_management_api.Models.DTO;
-using student_management_api.Localization;
+using student_management_api.Resources;
 using student_management_api.Services;
 
 namespace student_management_api.Controllers;

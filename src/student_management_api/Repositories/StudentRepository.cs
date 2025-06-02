@@ -8,14 +8,14 @@ using NpgsqlTypes;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Exceptions;
 using student_management_api.Helpers;
-using student_management_api.Localization;
-using student_management_api.Localization.AiTranslation;
+using student_management_api.Resources;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using System.Data;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using student_management_api.Localization;
 
 namespace student_management_api.Repositories;
 
