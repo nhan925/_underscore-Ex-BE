@@ -5,11 +5,11 @@
 ```
 src/
 │
-├── student_management_api_tests/     # Project test
+├── student_management_api_tests/               # Project test
 │
-└── student_management_api/           # Main project
+└── student_management_api/                     # Main project
     │
-    ├── Controllers/                  # API endpoints
+    ├── Controllers/                            # API endpoints
     │   ├── AuthController.cs
     │   ├── ConfigurationController.cs
     │   ├── CountryPhoneCodeController.cs
@@ -23,7 +23,7 @@ src/
     │   ├── StudyProgramController.cs
     │   └── YearAndSemesterController.cs
     |	
-    ├── Services/                     # Business logic layer
+    ├── Services/                               # Business logic layer
     │   ├── FacultyService.cs
     │   ├── ConfigurationService.cs
     │   ├── CountryPhoneCodeService.cs
@@ -37,7 +37,7 @@ src/
     │   ├── StudyProgramService.cs
     │   └── YearAndSemesterService.cs
     │
-    ├── Repositories/                 # Data access layer
+    ├── Repositories/                           # Data access layer
     │   ├── FacultyRepository.cs
     │   ├── ConfigurationRepository.cs
     │   ├── CourseClassRepository.cs
@@ -50,7 +50,7 @@ src/
     │   ├── UserRepository.cs
     │   └── YearAndSemesterRepository.cs
     │
-    ├── Models/                       # Data structures
+    ├── Models/                                 # Data structures
     │   ├── Authentication/
     │   │   └── AuthRequest.cs
     │   │
@@ -95,7 +95,7 @@ src/
     │       ├── Transcript.cs 
     │       └── UpdateStudentRequest.cs 
     │
-    ├── Contracts/                    # Interfaces
+    ├── Contracts/                              # Interfaces
     │   ├── IRepositories/
     │   │   ├── IFacultyRepository.cs
     │   │   ├── IConfigurationRepository.cs
@@ -123,16 +123,38 @@ src/
     │       ├── IStudyProgramService.cs
     │       └── IYearAndSemesterService.cs
     │
-    ├── Helpers/                      # Helper classes
-    │   └── JsonbTypeHandler.cs       # Custom Dapper type handler for JSON
+    ├── Helpers/                                # Helper classes
+    │   ├── JsonbTypeHandler.cs                 # Custom Dapper type handler for JSON
+    │   ├── ErrorResponse.cs                    # Error response model
+    │   └── LanguageHeaderOperationFilter.cs    # Filter for Swagger to handle language headers
     │
-    ├── Middlewares/                  # Custom middleware components
+    ├── Middlewares/                            # Custom middleware components
     │   ├── ExceptionHandlingMiddleware.cs
     │   └── LoggingEnrichmentMiddleware.cs
     │
-    ├── .env                          # Environment variables (not in repo)
-    ├── .env.example                  # Example environment variables template
-    ├── create_db.sql                 # Script to create database schema
+    ├── Exceptions/                             # Customed exceptions
+    │   ├── ForbiddenException.cs
+    │   └── NotFoundException.cs
+    │
+    ├── Localization/                           # Localization resources
+    │   ├── Messages.cs                         # Dummy class to reuse localization messages
+    │   │
+    │   └── AiTranslation/
+    │       ├── ExternalTranslationService.cs   # Local LLM translation service
+    │       ├── GeminiTranslationService.cs     # Gemini translation service
+    │       └── IExternalTranslationService.cs  # Interface for translation services
+    │
+    ├── Resources/                              # Localization resources (messages)
+    │   ├── Localization.Messages.en.resx
+    │   └── Localization.Messages.vi.resx
+    │
+    ├── Templates/                              # Student transcript templates
+    │   ├── transcript_template-en.html 
+    │   └── transcript_template-vi.html
+    │
+    ├── .env                                    # Environment variables (not in repo)
+    ├── .env.example                            # Example environment variables template
+    ├── create_db.sql                           # Script to create database schema
     └── Program.cs   
 ```
 ### Flow hoạt động - Kiến trúc
