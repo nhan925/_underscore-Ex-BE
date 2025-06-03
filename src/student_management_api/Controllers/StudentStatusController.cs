@@ -8,6 +8,7 @@ using student_management_api.Models.DTO;
 using System;
 using System.Threading.Tasks;
 using student_management_api.Resources;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -28,6 +29,10 @@ public class StudentStatusController : ControllerBase
     }
 
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get all student statuses",
+        Description = "Endpoint to retrieve all student statuses. Returns a list of student statuses with their IDs and names."
+    )]
     public async Task<IActionResult> GetStatuses()
     {
         using (_logger.BeginScope("GetStatuses request"))
@@ -42,6 +47,10 @@ public class StudentStatusController : ControllerBase
     }
 
     [HttpPut]
+    [SwaggerOperation(
+        Summary = "Update a student status",
+        Description = "Endpoint to update an existing student status. Requires a valid StudentStatus object with an ID."
+    )]
     public async Task<IActionResult> UpdateStudentStatus([FromBody] StudentStatus studentStatus)
     {
         using (_logger.BeginScope("UpdateStudentStatus request for StudentStatusId: {StudentStatusId}", studentStatus.Id))
@@ -56,6 +65,10 @@ public class StudentStatusController : ControllerBase
     }
 
     [HttpPost("{name}")]
+    [SwaggerOperation(
+        Summary = "Add a new student status",
+        Description = "Endpoint to add a new student status by name. Returns the ID of the newly created status."
+    )]
     public async Task<IActionResult> AddStudentStatus(string name)
     {
         using (_logger.BeginScope("AddStudentStatus request for StudentStatusName: {StudentStatusName}", name))

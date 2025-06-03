@@ -7,6 +7,7 @@ using student_management_api.Helpers;
 using student_management_api.Models.CourseEnrollment;
 using System.Globalization;
 using student_management_api.Resources;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -27,6 +28,10 @@ public class CourseEnrollmentController : ControllerBase
     }
 
     [HttpGet("history/{semester_id}")]
+    [SwaggerOperation(
+        Summary = "Get enrollment history by semester",
+        Description = "Endpoint to retrieve all enrollment history for a specific semester. Requires valid SemesterId."
+    )]
     public async Task<IActionResult> GetEnrollmentHistoryBySemester(int semester_id)
     {
         using (_logger.BeginScope("GetEnrollmentHistoryBySemester request"))
@@ -41,6 +46,10 @@ public class CourseEnrollmentController : ControllerBase
     }
 
     [HttpPost]
+    [SwaggerOperation(
+        Summary = "Register or unregister a class",
+        Description = "Endpoint to register or unregister a class based on the action specified in the query parameter. Use 'register' to enroll and 'unregister' to withdraw."
+    )]
     public async Task<IActionResult> RegisterAndUnregisterClass([FromQuery] string action, [FromBody] CourseEnrollmentRequest request)
     {
         if (!ModelState.IsValid)

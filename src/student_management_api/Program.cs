@@ -162,7 +162,26 @@ public class Program
             {
                 Title = "Student Management API",
                 Version = "v1",
-                Description = "API for managing students in the system"
+                Description = """
+                ### **API for managing students in the system**
+                - All error will be in this schema
+                    ```
+                    {
+                      "status": int,
+                      "message": string,
+                      "details": object 
+                    }
+                    ```
+
+                - The `details` field will contain additional information about the error, such as validation errors or other relevant details.
+
+                - **All endpoints require JWT authentication**. You can get a token by logging in with the `/api/auth/login` endpoint.
+
+                - **Localization**: The API supports multiple languages. You can specify the language in the `Accept-Language` header or use the `lang` query parameter. Supported languages are:
+                    + `en`: English
+
+                    + `vi`: Vietnamese
+                """
             });
 
             // Enable JWT Authentication in Swagger
@@ -193,6 +212,8 @@ public class Program
 
             // Add custom "language" header to all endpoints
             options.OperationFilter<LanguageHeaderOperationFilter>();
+
+            options.EnableAnnotations();
         });
 
 

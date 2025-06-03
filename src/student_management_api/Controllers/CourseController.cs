@@ -8,6 +8,7 @@ using student_management_api.Helpers;
 using student_management_api.Models.DTO;
 using student_management_api.Resources;
 using student_management_api.Services;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -30,6 +31,10 @@ public class CourseController: ControllerBase
     }
 
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get all courses",
+        Description = "Endpoint to retrieve all courses available in the system."
+    )]
     public async Task<IActionResult> GetAllCourses()
     {
         using (_logger.BeginScope("GetAllCourses request"))
@@ -45,6 +50,10 @@ public class CourseController: ControllerBase
 
 
     [HttpGet("{id}")]
+    [SwaggerOperation(
+        Summary = "Get course by ID",
+        Description = "Endpoint to retrieve a specific course by its ID."
+    )]
     public async Task<IActionResult> GetCourseById(string id)
     {
         using (_logger.BeginScope("GetCourseById request - CourseId: {CourseId}", id))
@@ -65,6 +74,10 @@ public class CourseController: ControllerBase
     }
 
     [HttpPut]
+    [SwaggerOperation(
+        Summary = "Update course by ID",
+        Description = "Endpoint to update an existing course by its ID."
+    )]  
     public async Task<IActionResult> UpdateCourseById([FromBody] Course course)
     {
         if (!ModelState.IsValid)
@@ -88,6 +101,10 @@ public class CourseController: ControllerBase
     }
 
     [HttpGet("{id}/has-students")]
+    [SwaggerOperation(
+        Summary = "Check if course has students enrolled",
+        Description = "Endpoint to check if there are any students enrolled in a specific course by its ID."
+    )]
     public async Task<IActionResult> CheckStudentExistFromCourse(string id)
     {
         using (_logger.BeginScope("CheckStudentExistFromCourse request - CourseId: {CourseId}", id))
@@ -103,6 +120,10 @@ public class CourseController: ControllerBase
     }
 
     [HttpPost]
+    [SwaggerOperation(
+        Summary = "Add a new course",
+        Description = "Endpoint to add a new course to the system."
+    )]
     public async Task<IActionResult> AddCourse([FromBody] Course course)
     {
         if (!ModelState.IsValid)
@@ -134,6 +155,10 @@ public class CourseController: ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [SwaggerOperation(
+        Summary = "Delete course by ID",
+        Description = "Endpoint to delete a specific course by its ID."
+    )]
     public async Task<IActionResult> DeleteCourseById(string id)
     {
         using (_logger.BeginScope("DeleteCourseById request - CourseId: {CourseId}", id))
@@ -147,6 +172,4 @@ public class CourseController: ControllerBase
             return Ok(new { Message = resultMessage });
         }
     }
-
-
 }

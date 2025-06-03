@@ -9,6 +9,7 @@ using student_management_api.Models.CourseClass;
 using student_management_api.Models.DTO;
 using student_management_api.Services;
 using student_management_api.Resources;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -29,6 +30,10 @@ public class CourseClassController : ControllerBase
     }
 
     [HttpPost]
+    [SwaggerOperation(
+        Summary = "Add a new class",
+        Description = "Endpoint to add a new class. Requires valid CourseClass model."
+    )]
     public async Task<IActionResult> AddCourseClass([FromBody] CourseClass courseClass)
     {
         if (!ModelState.IsValid)
@@ -47,6 +52,10 @@ public class CourseClassController : ControllerBase
     }
 
     [HttpGet("{semesterId}")]
+    [SwaggerOperation(
+        Summary = "Get all classes by semester",
+        Description = "Endpoint to retrieve all classes for a specific semester. Requires valid SemesterId."
+    )]
     public async Task<IActionResult> GetAllCourseClassesBySemester(int semesterId)
     {
         using (_logger.BeginScope("GetAllCourseClassesBySemester request with SemesterId: {SemesterId}", semesterId))
@@ -60,6 +69,10 @@ public class CourseClassController : ControllerBase
     }
 
     [HttpGet("students")]
+    [SwaggerOperation(
+        Summary = "Get students in a class",
+        Description = "Endpoint to retrieve all students enrolled in a specific class. Requires valid ClassId."
+    )]
     public async Task<IActionResult> GetStudentsInClass([FromQuery] GetStudentsInClassRequest request)
     {
         if (!ModelState.IsValid)

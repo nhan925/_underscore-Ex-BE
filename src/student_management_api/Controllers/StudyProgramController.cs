@@ -8,6 +8,7 @@ using student_management_api.Models.DTO;
 using System;
 using System.Threading.Tasks;
 using student_management_api.Resources;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -28,6 +29,10 @@ public class StudyProgramController : ControllerBase
     }
 
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get all study programs",
+        Description = "Endpoint to retrieve all study programs available in the system."
+    )]
     public async Task<IActionResult> GetPrograms()
     {
         using (_logger.BeginScope("GetPrograms request"))
@@ -42,6 +47,10 @@ public class StudyProgramController : ControllerBase
     }
 
     [HttpPut]
+    [SwaggerOperation(
+        Summary = "Update a study program",
+        Description = "Endpoint to update an existing study program by its ID."
+    )]
     public async Task<IActionResult> UpdateProgram([FromBody] StudyProgram program)
     {
         using (_logger.BeginScope("UpdateProgram request for StudyProgramId: {StudyProgramId}", program.Id))
@@ -56,6 +65,10 @@ public class StudyProgramController : ControllerBase
     }
 
     [HttpPost("{name}")]
+    [SwaggerOperation(
+        Summary = "Add a new study program",
+        Description = "Endpoint to add a new study program by its name."
+    )]
     public async Task<IActionResult> AddProgram(string name)
     {
         using (_logger.BeginScope("AddProgram request for StudyProgramName: {StudyProgramName}", name))

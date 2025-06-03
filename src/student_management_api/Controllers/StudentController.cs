@@ -14,6 +14,7 @@ using System.Text.Json;
 using student_management_api.Resources;
 using student_management_api.Models.CourseEnrollment;
 using System.Globalization;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -154,6 +155,10 @@ public class StudentController : ControllerBase
     #endregion
 
     [HttpGet("{id}")]
+    [SwaggerOperation(
+        Summary = "Get student by ID",
+        Description = "Endpoint to retrieve a student by their unique ID."
+    )]
     public async Task<IActionResult> GetStudentById(string id)
     {
         using (_logger.BeginScope("GetStudentById request for StudentId: {StudentId}", id))
@@ -165,6 +170,10 @@ public class StudentController : ControllerBase
     }
 
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get students with pagination and filtering",
+        Description = "Endpoint to retrieve a paginated list of students with optional search and filter parameters."
+    )]
     public async Task<IActionResult> GetStudents([FromQuery] int page = 1, [FromQuery] int pageSize = 10,
         [FromQuery] string? search = null, [FromQuery] StudentFilter? filter = null)
     {
@@ -177,6 +186,10 @@ public class StudentController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [SwaggerOperation(
+        Summary = "Update student by ID",
+        Description = "Endpoint to update an existing student's information by their unique ID."
+    )]
     public async Task<IActionResult> UpdateStudentById(string id, [FromBody] UpdateStudentRequest request)
     {
         if (!ModelState.IsValid)
@@ -206,6 +219,10 @@ public class StudentController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [SwaggerOperation(
+        Summary = "Delete student by ID",
+        Description = "Endpoint to delete a student by their unique ID."
+    )]
     public async Task<IActionResult> DeleteStudentById(string id)
     {
         using (_logger.BeginScope("DeleteStudentById request for StudentId: {StudentId}", id))
@@ -224,6 +241,10 @@ public class StudentController : ControllerBase
     }
 
     [HttpPost]
+    [SwaggerOperation(
+        Summary = "Add a new student",
+        Description = "Endpoint to add a new student. Requires valid AddStudentRequest model."
+    )]
     public async Task<IActionResult> AddStudent([FromBody] AddStudentRequest request)
     {
         if (!ModelState.IsValid)
@@ -248,6 +269,10 @@ public class StudentController : ControllerBase
     }
 
     [HttpPost("import/{format}")]
+    [SwaggerOperation(
+        Summary = "Import students from file",
+        Description = "Endpoint to import students from a file in JSON or Excel format. Supported formats are 'json' and 'excel'"
+    )]
     public async Task<IActionResult> AddStudentsFromFile(IFormFile file, string format)
     {
         if (file == null || file.Length == 0)
@@ -322,6 +347,10 @@ public class StudentController : ControllerBase
     }
 
     [HttpGet("export/{format}")]
+    [SwaggerOperation(
+        Summary = "Export students to file",
+        Description = "Endpoint to export students to a file in JSON or Excel format. Supported formats are 'json' and 'excel'"
+    )]
     public async Task<IActionResult> ExportStudents(string format)
     {
         using (_logger.BeginScope("ExportStudents request, Format: {Format}", format))
@@ -355,6 +384,10 @@ public class StudentController : ControllerBase
     }
 
     [HttpPut("update-grade")]
+    [SwaggerOperation(
+        Summary = "Update student grade",
+        Description = "Endpoint to update a student's grade for a specific course. Requires valid UpdateStudentGradeRequest model."
+    )]
     public async Task<IActionResult> UpdateStudentGrade([FromBody] UpdateStudentGradeRequest request)
     {
         if (!ModelState.IsValid)
@@ -382,6 +415,10 @@ public class StudentController : ControllerBase
     }
 
     [HttpGet("{id}/transcript")]
+    [SwaggerOperation(
+        Summary = "Get student transcript by ID",
+        Description = "Endpoint to retrieve a student's transcript by their unique ID. Returns a PDF file."
+    )]
     public async Task<IActionResult> GetStudentTranscriptById(string id)
     {
         using (_logger.BeginScope("GetStudentTranscriptById request for StudentId: {StudentId}", id))

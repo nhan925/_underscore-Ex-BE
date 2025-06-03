@@ -6,6 +6,7 @@ using student_management_api.Contracts.IServices;
 using student_management_api.Helpers;
 using student_management_api.Models.DTO;
 using student_management_api.Resources;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -26,6 +27,10 @@ public class FacultyController : ControllerBase
     }
 
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get all faculties",
+        Description = "Endpoint to retrieve all faculties in the system."
+    )]
     public async Task<IActionResult> GetFaculties()
     {
         using (_logger.BeginScope("GetFaculties request"))
@@ -40,6 +45,10 @@ public class FacultyController : ControllerBase
     }
 
     [HttpPut]
+    [SwaggerOperation(
+        Summary = "Update faculty",
+        Description = "Endpoint to update an existing faculty. Requires valid Faculty model."
+    )]
     public async Task<IActionResult> UpdateFaculty([FromBody] Faculty faculty)
     {
         using (_logger.BeginScope("UpdateFaculty request for FacultyId: {FacultyId}", faculty.Id))
@@ -54,6 +63,10 @@ public class FacultyController : ControllerBase
     }
 
     [HttpPost("{name}")]
+    [SwaggerOperation(
+        Summary = "Add a new faculty",
+        Description = "Endpoint to add a new faculty by name."
+    )]
     public async Task<IActionResult> AddFaculty(string name)
     {
         using (_logger.BeginScope("AddFaculty request for FacultyName: {FacultyName}", name))

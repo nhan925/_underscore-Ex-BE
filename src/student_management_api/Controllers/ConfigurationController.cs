@@ -7,6 +7,7 @@ using student_management_api.Helpers;
 using student_management_api.Models.Configuration;
 using student_management_api.Models.DTO;
 using student_management_api.Resources;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -27,6 +28,10 @@ public class ConfigurationController : ControllerBase
     }
 
     [HttpGet("{type}")]
+    [SwaggerOperation(
+        Summary = "Get all config",
+        Description = "Get configuration data based on type. Supported types: email, phone-number, student-status."
+    )]
     public async Task<IActionResult> GetConfig(string type)
     {
         using (_logger.BeginScope("GetConfig request"))
@@ -60,6 +65,10 @@ public class ConfigurationController : ControllerBase
     }
 
     [HttpGet("check/{type}/{value}")]
+    [SwaggerOperation(
+        Summary = "Check config validity",
+        Description = "Check if the provided value is valid for the specified config type. Supported types: email, phone-number."
+    )]
     public async Task<IActionResult> CheckConfig(string type, string value) 
     {
         using (_logger.BeginScope("CheckConfig request"))
@@ -93,6 +102,10 @@ public class ConfigurationController : ControllerBase
     }
 
     [HttpGet("next-statuses/{statusId}")]
+    [SwaggerOperation(
+        Summary = "Get next statuses",
+        Description = "Fetch the next possible statuses based on the current status ID."
+    )]
     public async Task<IActionResult> GetNextStatuses(int statusId)
     {
         using (_logger.BeginScope("GetNextStatuses request"))
@@ -106,6 +119,10 @@ public class ConfigurationController : ControllerBase
     }
 
     [HttpPost("update/email")]
+    [SwaggerOperation(
+        Summary = "Update email domains config",
+        Description = "Update the configuration for valid email domains."
+    )] 
     public async Task<IActionResult> UpdateEmailDomainsConfig([FromBody] Configuration<List<string>> config)
     {
         using (_logger.BeginScope("UpdateEmailDomainsConfig request"))
@@ -127,6 +144,10 @@ public class ConfigurationController : ControllerBase
     }
 
     [HttpPost("update/phone-number")]
+    [SwaggerOperation(
+        Summary = "Update phone number country config",
+        Description = "Update the configuration for valid phone number countries."
+    )]
     public async Task<IActionResult> UpdatePhoneNumberCountryConfig([FromBody] Configuration<List<string>> config)
     {
         using (_logger.BeginScope("UpdatePhoneNumberCountryConfig request"))
@@ -148,6 +169,10 @@ public class ConfigurationController : ControllerBase
     }
 
     [HttpPost("update/student-status")]
+    [SwaggerOperation(
+        Summary = "Update student status rules config",
+        Description = "Update the configuration for student status rules."
+    )]
     public async Task<IActionResult> UpdateStudentStatusConfig([FromBody] Configuration<Dictionary<int, List<int>>> config)
     {
         using (_logger.BeginScope("UpdateStudentStatusConfig request"))
@@ -169,6 +194,10 @@ public class ConfigurationController : ControllerBase
     }
 
     [HttpPost("is-active/{isActive}")]
+    [SwaggerOperation(
+        Summary = "Turn all rules on or off",
+        Description = "Activate or deactivate all rules in the system."
+    )]
     public async Task<IActionResult> TurnAllRulesOnOrOff(bool isActive)
     {
         using (_logger.BeginScope("TurnAllRulesOnOrOff request"))

@@ -6,6 +6,7 @@ using student_management_api.Contracts.IServices;
 using student_management_api.Helpers;
 using student_management_api.Models.Authentication;
 using student_management_api.Resources;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -25,6 +26,10 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [SwaggerOperation(
+        Summary = "Login for user",
+        Description = "Login endpoint for users to authenticate and receive a JWT token."
+    )]
     public async Task<IActionResult> Login([FromBody] AuthRequest request)
     {
         using (_logger.BeginScope("Login attempt for {Username}", request.Username))
