@@ -149,6 +149,41 @@ public class CourseClassRepository : ICourseClassRepository
         return courseClassResults;
     }
 
+    public async Task<GetCourseClassResult> GetCourseClassByCourseAndSemester(string classId, string courseId, int semesterId)
+    {
+        var courseClassQuery = $"SELECT id, course_id, semester_id, lecturer_id, max_students, schedule{_cultureSuffix} AS schedule, room, created_at, is_active " +
+                               $"FROM classes WHERE id = @ClassId AND course_id = @CourseId AND semester_id = @SemesterId";
+        var courseQuery = $"SELECT id, name{_cultureSuffix} AS name, credits, faculty_id, description{_cultureSuffix} AS description, created_at, is_active " +
+                          $"FROM courses WHERE id = @CourseId";
+        var semesterQuery = "SELECT * FROM semesters WHERE id = @SemesterId";
+        var lecturerQuery = $"SELECT id, full_name, date_of_birth, gender{_cultureSuffix} AS gender, email, phone_number, faculty_id " +
+                            $"FROM lecturers WHERE id = @LecturerId";
+
+        var courseClass = await _db.QueryFirstOrDefaultAsync<CourseClass>(courseClassQuery, new { ClassId = classId, CourseId = courseId, SemesterId = semesterId });
+        var courseClassResult = new GetCourseClassResult();
+
+        if (courseClass != null)
+        {
+            courseClassResult = new GetCourseClassResult
+            {
+                Id = courseClass.Id,
+                MaxStudents = courseClass.MaxStudents,
+                Schedule = courseClass.Schedule,
+                Room = courseClass.Room
+            };
+
+            var course = await _db.QueryFirstOrDefaultAsync<Course>(courseQuery, new { CourseId = courseClass.CourseId });
+            var semester = await _db.QueryFirstOrDefaultAsync<Semester>(semesterQuery, new { SemesterId = courseClass.SemesterId });
+            var lecturer = await _db.QueryFirstOrDefaultAsync<Lecturer>(lecturerQuery, new { LecturerId = courseClass.LecturerId });
+
+            courseClassResult.Course = course;
+            courseClassResult.Semester = semester;
+            courseClassResult.Lecturer = lecturer;
+        }
+
+        return courseClassResult;
+    }
+
     public async Task<List<StudentInClass>> GetStudentsInClass(GetStudentsInClassRequest request)
     {
         string sql = @$"

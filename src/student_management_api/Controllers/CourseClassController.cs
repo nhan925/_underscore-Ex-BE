@@ -68,6 +68,23 @@ public class CourseClassController : ControllerBase
         }
     }
 
+    [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get a class by ClassId, CourseId, and SemesterId",
+        Description = "Endpoint to retrieve a specific class by providing ClassId, CourseId, and SemesterId as query parameters."
+    )]
+    public async Task<IActionResult> GetCourseClassByCourseAndSemester([FromQuery] string classId, [FromQuery] string courseId, [FromQuery] int semesterId)
+    {
+        using (_logger.BeginScope("GetCourseClass request with ClassId/CourseId/SemesterId: {ClassId} / {CourseId} / {SemesterId}", classId, courseId, semesterId))
+        {
+            _logger.LogInformation("Fetching course class for  with ClassId/CourseId/SemesterId: {ClassId} / {CourseId} / {SemesterId}", classId, courseId, semesterId);
+            var courseClass = await _courseClassService.GetCourseClassByCourseAndSemester(classId, courseId, semesterId);
+
+            _logger.LogInformation("Successfully retrieved course class with ClassId/CourseId/SemesterId: {ClassId} / {CourseId} / {SemesterId}", classId, courseId, semesterId);
+            return Ok(courseClass);
+        }
+    }
+
     [HttpGet("students")]
     [SwaggerOperation(
         Summary = "Get students in a class",

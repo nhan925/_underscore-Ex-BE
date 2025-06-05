@@ -10,4 +10,6 @@ public interface ICourseClassService
     Task<string> AddCourseClass(CourseClass courseClass);
 
     Task<List<StudentInClass>> GetStudentsInClass(GetStudentsInClassRequest request);
+
+    Task<GetCourseClassResult> GetCourseClassByCourseAndSemester(string classId, string courseId, int semesterId);
 }
