@@ -333,4 +333,7 @@
   <data name="invalid_composited_id_for_class" xml:space="preserve">
     <value>Invalid composited ID for class</value>
   </data>
+  <data name="cannot_register_after_the_semester_has_ended" xml:space="preserve">
+    <value>Cannot register after the semester has ended</value>
+  </data>
 </root>

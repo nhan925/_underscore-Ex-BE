@@ -333,4 +333,7 @@
   <data name="invalid_composited_id_for_class" xml:space="preserve">
     <value>ID kết hợp của lớp không hợp lệ</value>
   </data>
+  <data name="cannot_register_after_the_semester_has_ended" xml:space="preserve">
+    <value>Không thể đăng ký sau khi học kì đã kết thúc</value>
+  </data>
 </root>

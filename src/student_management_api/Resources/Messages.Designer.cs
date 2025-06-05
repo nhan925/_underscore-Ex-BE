@@ -106,6 +106,15 @@ namespace student_management_api.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot register after the semester has ended.
+        /// </summary>
+        public static string cannot_register_after_the_semester_has_ended {
+            get {
+                return ResourceManager.GetString("cannot_register_after_the_semester_has_ended", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot unregister after the semester has started.
         /// </summary>
         public static string cannot_unregister_after_the_semester_has_started {
