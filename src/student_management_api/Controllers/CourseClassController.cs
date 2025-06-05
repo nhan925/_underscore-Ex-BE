@@ -51,7 +51,7 @@ public class CourseClassController : ControllerBase
         }
     }
 
-    [HttpGet("{semesterId}")]
+    [HttpGet("in-semester/{semesterId}")]
     [SwaggerOperation(
         Summary = "Get all classes by semester",
         Description = "Endpoint to retrieve all classes for a specific semester. Requires valid SemesterId."
@@ -68,7 +68,7 @@ public class CourseClassController : ControllerBase
         }
     }
 
-    [HttpGet("/{compositedId}")]
+    [HttpGet("{compositedId}")]
     [SwaggerOperation(
         Summary = "Get a class by ClassId, CourseId, and SemesterId",
         Description = "Get a specific class using ClassId, CourseId, and SemesterId. Composited ID is '{classId}-{courseId}-{semesterId}'."
