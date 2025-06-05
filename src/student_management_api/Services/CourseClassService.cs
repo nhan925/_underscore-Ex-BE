@@ -24,9 +24,9 @@ public class CourseClassService : ICourseClassService
         return courseClasses ?? new();
     }
 
-    public async Task<GetCourseClassResult> GetCourseClassByCourseAndSemester(string classId, string courseId, int semesterId)
+    public async Task<GetCourseClassResult> GetCourseClassByIdAndCourseAndSemester(string classId, string courseId, int semesterId)
     {
-        var courseClass = await _courseClassRepository.GetCourseClassByCourseAndSemester(classId, courseId, semesterId);
+        var courseClass = await _courseClassRepository.GetCourseClassByIdAndCourseAndSemester(classId, courseId, semesterId);
         return courseClass ?? new();
     }
 

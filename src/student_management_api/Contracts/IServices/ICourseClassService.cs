@@ -11,5 +11,5 @@ public interface ICourseClassService
 
     Task<List<StudentInClass>> GetStudentsInClass(GetStudentsInClassRequest request);
 
-    Task<GetCourseClassResult> GetCourseClassByCourseAndSemester(string classId, string courseId, int semesterId);
+    Task<GetCourseClassResult> GetCourseClassByIdAndCourseAndSemester(string classId, string courseId, int semesterId);
 }

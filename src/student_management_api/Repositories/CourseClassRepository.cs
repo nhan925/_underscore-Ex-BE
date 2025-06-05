@@ -149,7 +149,7 @@ public class CourseClassRepository : ICourseClassRepository
         return courseClassResults;
     }
 
-    public async Task<GetCourseClassResult> GetCourseClassByCourseAndSemester(string classId, string courseId, int semesterId)
+    public async Task<GetCourseClassResult> GetCourseClassByIdAndCourseAndSemester(string classId, string courseId, int semesterId)
     {
         var courseClassQuery = $"SELECT id, course_id, semester_id, lecturer_id, max_students, schedule{_cultureSuffix} AS schedule, room, created_at, is_active " +
                                $"FROM classes WHERE id = @ClassId AND course_id = @CourseId AND semester_id = @SemesterId";
@@ -160,18 +160,16 @@ public class CourseClassRepository : ICourseClassRepository
                             $"FROM lecturers WHERE id = @LecturerId";
 
         var courseClass = await _db.QueryFirstOrDefaultAsync<CourseClass>(courseClassQuery, new { ClassId = classId, CourseId = courseId, SemesterId = semesterId });
-        var courseClassResult = new GetCourseClassResult();
+        var courseClassResult = courseClass != null ? new GetCourseClassResult
+        {
+            Id = courseClass.Id,
+            MaxStudents = courseClass.MaxStudents,
+            Schedule = courseClass.Schedule,
+            Room = courseClass.Room
+        } : new GetCourseClassResult();
 
         if (courseClass != null)
         {
-            courseClassResult = new GetCourseClassResult
-            {
-                Id = courseClass.Id,
-                MaxStudents = courseClass.MaxStudents,
-                Schedule = courseClass.Schedule,
-                Room = courseClass.Room
-            };
-
             var course = await _db.QueryFirstOrDefaultAsync<Course>(courseQuery, new { CourseId = courseClass.CourseId });
             var semester = await _db.QueryFirstOrDefaultAsync<Semester>(semesterQuery, new { SemesterId = courseClass.SemesterId });
             var lecturer = await _db.QueryFirstOrDefaultAsync<Lecturer>(lecturerQuery, new { LecturerId = courseClass.LecturerId });
