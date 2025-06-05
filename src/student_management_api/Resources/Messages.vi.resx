@@ -144,6 +144,9 @@
   <data name="class_is_full" xml:space="preserve">
     <value>Lớp đã đủ số lượng SV</value>
   </data>
+  <data name="class_not_found" xml:space="preserve">
+    <value>Lớp không tồn tại</value>
+  </data>
   <data name="class_with_duplicate_schedule_and_room" xml:space="preserve">
     <value>Lớp học với lịch và phòng học giống nhau đã tồn tại trong học kỳ này. Vui lòng chọn lịch trình hoặc phòng học khác.</value>
   </data>

@@ -321,16 +321,8 @@ CREATE TABLE IF NOT EXISTS course_enrollments (
     REFERENCES students(id)
     ON DELETE RESTRICT,
     
-    FOREIGN KEY(course_id) 
-    REFERENCES courses(id)
-    ON DELETE RESTRICT,
-    
     FOREIGN KEY(class_id, course_id, semester_id) 
     REFERENCES classes(id, course_id, semester_id)
-    ON DELETE RESTRICT,
-    
-    FOREIGN KEY(semester_id) 
-    REFERENCES semesters(id)
     ON DELETE RESTRICT,
     
     CHECK (grade IS NULL OR (grade BETWEEN 0 AND 10))

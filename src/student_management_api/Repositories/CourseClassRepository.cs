@@ -160,24 +160,26 @@ public class CourseClassRepository : ICourseClassRepository
                             $"FROM lecturers WHERE id = @LecturerId";
 
         var courseClass = await _db.QueryFirstOrDefaultAsync<CourseClass>(courseClassQuery, new { ClassId = classId, CourseId = courseId, SemesterId = semesterId });
-        var courseClassResult = courseClass != null ? new GetCourseClassResult
+        
+        if (courseClass == null)
+        {
+            throw new NotFoundException(_localizer["class_not_found"]); // Throwing NotFoundException if the class is not found
+        }
+
+        var course = await _db.QueryFirstOrDefaultAsync<Course>(courseQuery, new { CourseId = courseClass.CourseId });
+        var semester = await _db.QueryFirstOrDefaultAsync<Semester>(semesterQuery, new { SemesterId = courseClass.SemesterId });
+        var lecturer = await _db.QueryFirstOrDefaultAsync<Lecturer>(lecturerQuery, new { LecturerId = courseClass.LecturerId });
+
+        var courseClassResult = new GetCourseClassResult
         {
             Id = courseClass.Id,
             MaxStudents = courseClass.MaxStudents,
             Schedule = courseClass.Schedule,
-            Room = courseClass.Room
-        } : new GetCourseClassResult();
-
-        if (courseClass != null)
-        {
-            var course = await _db.QueryFirstOrDefaultAsync<Course>(courseQuery, new { CourseId = courseClass.CourseId });
-            var semester = await _db.QueryFirstOrDefaultAsync<Semester>(semesterQuery, new { SemesterId = courseClass.SemesterId });
-            var lecturer = await _db.QueryFirstOrDefaultAsync<Lecturer>(lecturerQuery, new { LecturerId = courseClass.LecturerId });
-
-            courseClassResult.Course = course;
-            courseClassResult.Semester = semester;
-            courseClassResult.Lecturer = lecturer;
-        }
+            Room = courseClass.Room,
+            Course = course,
+            Semester = semester,
+            Lecturer = lecturer
+        };
 
         return courseClassResult;
     }

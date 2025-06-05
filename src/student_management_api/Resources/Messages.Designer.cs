@@ -133,6 +133,15 @@ namespace student_management_api.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Class not found.
+        /// </summary>
+        public static string class_not_found {
+            get {
+                return ResourceManager.GetString("class_not_found", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Class with the same schedule and room already exists in this semester. Please choose a different schedule or room..
         /// </summary>
         public static string class_with_duplicate_schedule_and_room {
