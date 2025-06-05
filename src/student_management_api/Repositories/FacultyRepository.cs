@@ -67,7 +67,7 @@ public class FacultyRepository : IFacultyRepository
 
         if (id == 0)
         {
-            throw new Exception(_localizer["failed_to_add_faculty"]);
+            throw new OperationFailedException(_localizer["failed_to_add_faculty"]);
         }
 
         return id;

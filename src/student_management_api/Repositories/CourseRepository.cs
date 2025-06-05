@@ -131,7 +131,7 @@ public class CourseRepository: ICourseRepository
         var hasStudents = await CheckStudentExistFromCourse(course.Id!);
         if (hasStudents && currentCredits != course.Credits)
         {
-            throw new InvalidOperationException(_localizer["cannot_change_credits_for_a_course_that_has_students_enrolled"]);
+            throw new ForbiddenException(_localizer["cannot_change_credits_for_a_course_that_has_students_enrolled"]);
         }
 
         using (var transaction = _db.BeginTransaction())

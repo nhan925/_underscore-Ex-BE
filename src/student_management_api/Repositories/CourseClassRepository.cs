@@ -87,7 +87,7 @@ public class CourseClassRepository : ICourseClassRepository
 
             if (courseClassCount == 0)
             {
-                throw new Exception(_localizer["failed_to_add_class"]);
+                throw new OperationFailedException(_localizer["failed_to_add_class"]);
             }
         }
         catch(Exception ex)

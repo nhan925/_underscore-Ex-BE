@@ -67,7 +67,7 @@ public class StudyProgramRepository : IStudyProgramRepository
 
         if (id == 0)
         {
-            throw new Exception(_localizer["failed_to_add_program"]);
+            throw new OperationFailedException(_localizer["failed_to_add_program"]);
         }
 
         return id;

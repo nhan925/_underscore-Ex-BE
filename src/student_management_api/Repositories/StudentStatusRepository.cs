@@ -67,7 +67,7 @@ public class StudentStatusRepository : IStudentStatusRepository
 
         if (id == 0)
         {
-            throw new Exception(_localizer["failed_to_add_student_status"]);
+            throw new OperationFailedException(_localizer["failed_to_add_student_status"]);
         }
 
         return id;

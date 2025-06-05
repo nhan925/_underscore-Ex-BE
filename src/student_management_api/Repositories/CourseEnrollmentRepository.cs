@@ -44,7 +44,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
         var historyAffectedRows = await _db.ExecuteAsync(historySql, historyParameters, transaction);
         if (historyAffectedRows == 0)
         {
-            throw new Exception(_localizer["failed_to_log_enrollment_history"]);
+            throw new OperationFailedException(_localizer["failed_to_log_enrollment_history"]);
         }
     }
 
@@ -63,7 +63,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
                 var endDate = await _db.QueryFirstOrDefaultAsync<DateTime>(endDateSql, new { SemesterId = request.SemesterId });
                 if (DateTime.Now > endDate)
                 {
-                    throw new Exception(_localizer["cannot_register_after_the_semester_has_ended"]);
+                    throw new ForbiddenException(_localizer["cannot_register_after_the_semester_has_ended"]);
                 }
 
                 var maxStudents = "SELECT max_students FROM classes WHERE id = @ClassId AND course_id = @CourseId AND semester_id = @SemesterId";
@@ -84,7 +84,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
 
                 if (currentStudentsCount >= maxStudentsCount)
                 {
-                    throw new Exception(_localizer["class_is_full"]);
+                    throw new ForbiddenException(_localizer["class_is_full"]);
                 }
 
                 var prerequisiteSql = "SELECT prerequisite_id FROM course_prerequisites WHERE course_id = @CourseId";
@@ -133,7 +133,7 @@ public class CourseEnrollmentRepository : ICourseEnrollmentRepository
                     var insertAffectedRows = await _db.ExecuteAsync(insertSql, insertParameters, transaction);
                     if (insertAffectedRows == 0)
                     {
-                        throw new Exception(_localizer["failed_to_register_for_the_course"]);
+                        throw new OperationFailedException(_localizer["failed_to_register_for_the_course"]);
                     }
                 }
 

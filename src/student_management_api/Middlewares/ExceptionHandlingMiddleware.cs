@@ -43,6 +43,10 @@ public class ExceptionHandlingMiddleware
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             }
+            else if (ex is OperationFailedException || ex is EnvironmentVariableNotFoundException)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            }
             else
             {
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

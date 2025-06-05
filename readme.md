@@ -134,6 +134,8 @@ src/
     │
     ├── Exceptions/                             # Customed exceptions
     │   ├── ForbiddenException.cs
+    │   ├── EnvironmentVariableNotFoundException.cs
+    │   ├── OperationFailedException.cs
     │   └── NotFoundException.cs
     │
     ├── Localization/                           # Localization services
