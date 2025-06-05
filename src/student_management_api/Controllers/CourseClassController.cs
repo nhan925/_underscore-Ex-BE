@@ -68,21 +68,33 @@ public class CourseClassController : ControllerBase
         }
     }
 
-    [HttpGet("/{classId}-{courseId}-{semesterId}")]
+    [HttpGet("/{compositedId}")]
     [SwaggerOperation(
         Summary = "Get a class by ClassId, CourseId, and SemesterId",
-        Description = "Get a specific class using ClassId, CourseId, and SemesterId. Requires valid identifiers."
+        Description = "Get a specific class using ClassId, CourseId, and SemesterId. Composited ID is '{classId}-{courseId}-{semesterId}'."
     )]
-    public async Task<IActionResult> GetCourseClassByIdAndCourseAndSemester(string classId, string courseId, int semesterId)
+    public async Task<IActionResult> GetCourseClassByIdAndCourseAndSemester(string compositedId)
     {
-        using (_logger.BeginScope("GetCourseClass request with ClassId/CourseId/SemesterId: {ClassId} / {CourseId} / {SemesterId}", classId, courseId, semesterId))
+        using (_logger.BeginScope("GetCourseClassByIdAndCourseAndSemester with composited ID: {CompositedId}", compositedId))
         {
+            _logger.LogInformation("Parsing composited ID: {CompositedId}", compositedId);
+            var parts = compositedId.Split('-');
+            if (parts.Length != 3 || !int.TryParse(parts[2], out int semesterId) || string.IsNullOrEmpty(parts[0]) || string.IsNullOrEmpty(parts[1]))
+            {
+                _logger.LogWarning("Invalid composited ID format: {CompositedId}", compositedId);
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_composited_id_for_class"]));
+            }
+
+            var classId = parts[0];
+            var courseId = parts[1];
+
             _logger.LogInformation("Fetching course class for  with ClassId/CourseId/SemesterId: {ClassId} / {CourseId} / {SemesterId}", 
                 classId, courseId, semesterId);
             var courseClass = await _courseClassService.GetCourseClassByIdAndCourseAndSemester(classId, courseId, semesterId);
 
             _logger.LogInformation("Successfully retrieved course class with ClassId/CourseId/SemesterId: {ClassId} / {CourseId} / {SemesterId}", 
                 classId, courseId, semesterId);
+            
             return Ok(courseClass);
         }
     }

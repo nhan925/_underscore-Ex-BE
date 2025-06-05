@@ -322,6 +322,15 @@ namespace student_management_api.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid composited ID for class.
+        /// </summary>
+        public static string invalid_composited_id_for_class {
+            get {
+                return ResourceManager.GetString("invalid_composited_id_for_class", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid config type.
         /// </summary>
         public static string invalid_config_type {

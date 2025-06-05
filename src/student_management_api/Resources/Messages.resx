@@ -144,9 +144,6 @@
   <data name="class_is_full" xml:space="preserve">
     <value>Class is full</value>
   </data>
-  <data name="class_not_found" xml:space="preserve">
-    <value>Class not found</value>
-  </data>
   <data name="class_with_duplicate_schedule_and_room" xml:space="preserve">
     <value>Class with the same schedule and room already exists in this semester. Please choose a different schedule or room.</value>
   </data>
@@ -329,5 +326,11 @@
   </data>
   <data name="value_is_empty" xml:space="preserve">
     <value>Value is empty</value>
+  </data>
+  <data name="class_not_found" xml:space="preserve">
+    <value>Class not found</value>
+  </data>
+  <data name="invalid_composited_id_for_class" xml:space="preserve">
+    <value>Invalid composited ID for class</value>
   </data>
 </root>
