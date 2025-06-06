@@ -12,24 +12,5 @@ public class EnrollmentHistory
 
     public int SemesterId { get; set; }
 
-    private string? _action;
-    public string Action
-    {
-        get {
-            if (_action == "register")
-            {
-                return "Đăng ký";
-            }
-            else if (_action == "cancel")
-            {
-                return "Hủy đăng ký";
-            }
-            else
-            {
-                return "Unknown action";
-            }
-        }
-
-        set => _action = value;
-    }
+    public string? Action { get; set; }
 }

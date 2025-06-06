@@ -1,10 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
 using student_management_api.Models.DTO;
 using System;
 using System.Threading.Tasks;
+using student_management_api.Resources;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -15,14 +19,20 @@ public class StudyProgramController : ControllerBase
 {
     private readonly IStudyProgramService _programService;
     private readonly ILogger<StudyProgramController> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public StudyProgramController(IStudyProgramService programService, ILogger<StudyProgramController> logger)
+    public StudyProgramController(IStudyProgramService programService, ILogger<StudyProgramController> logger, IStringLocalizer<Messages> localizer)
     {
         _programService = programService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get all study programs",
+        Description = "Endpoint to retrieve all study programs available in the system."
+    )]
     public async Task<IActionResult> GetPrograms()
     {
         using (_logger.BeginScope("GetPrograms request"))
@@ -37,6 +47,10 @@ public class StudyProgramController : ControllerBase
     }
 
     [HttpPut]
+    [SwaggerOperation(
+        Summary = "Update a study program",
+        Description = "Endpoint to update an existing study program by its ID."
+    )]
     public async Task<IActionResult> UpdateProgram([FromBody] StudyProgram program)
     {
         using (_logger.BeginScope("UpdateProgram request for StudyProgramId: {StudyProgramId}", program.Id))
@@ -46,11 +60,15 @@ public class StudyProgramController : ControllerBase
             var count = await _programService.UpdateProgram(program);
 
             _logger.LogInformation("Study program with ID {StudyProgramId} updated successfully", program.Id);
-            return Ok(new { message = "Update program successfully" });
+            return Ok(new { message = _localizer["update_program_successfully"].Value });
         }
     }
 
     [HttpPost("{name}")]
+    [SwaggerOperation(
+        Summary = "Add a new study program",
+        Description = "Endpoint to add a new study program by its name."
+    )]
     public async Task<IActionResult> AddProgram(string name)
     {
         using (_logger.BeginScope("AddProgram request for StudyProgramName: {StudyProgramName}", name))

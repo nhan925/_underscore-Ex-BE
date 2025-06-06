@@ -1,8 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
 using student_management_api.Models.DTO;
+using student_management_api.Resources;
 using student_management_api.Services;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -15,14 +21,20 @@ public class CourseController: ControllerBase
 {
     private readonly ICourseService _courseService;
     private readonly ILogger<CourseController> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public CourseController(ICourseService courseService, ILogger<CourseController> logger)
+    public CourseController(ICourseService courseService, ILogger<CourseController> logger, IStringLocalizer<Messages> localizer)
     {
         _courseService = courseService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get all courses",
+        Description = "Endpoint to retrieve all courses available in the system."
+    )]
     public async Task<IActionResult> GetAllCourses()
     {
         using (_logger.BeginScope("GetAllCourses request"))
@@ -38,6 +50,10 @@ public class CourseController: ControllerBase
 
 
     [HttpGet("{id}")]
+    [SwaggerOperation(
+        Summary = "Get course by ID",
+        Description = "Endpoint to retrieve a specific course by its ID."
+    )]
     public async Task<IActionResult> GetCourseById(string id)
     {
         using (_logger.BeginScope("GetCourseById request - CourseId: {CourseId}", id))
@@ -49,7 +65,7 @@ public class CourseController: ControllerBase
             if (course == null || string.IsNullOrEmpty(course.Id))
             {
                 _logger.LogWarning("Course not found with ID: {CourseId}", id);
-                return NotFound(new { Message = $"Course with ID {id} not found." });
+                return NotFound(new ErrorResponse<string>(status: 404, message: $"{_localizer["course_not_found"]}, ID: {id}"));
             }
 
             _logger.LogInformation("Successfully retrieved course with ID: {CourseId}", id);
@@ -58,10 +74,16 @@ public class CourseController: ControllerBase
     }
 
     [HttpPut]
+    [SwaggerOperation(
+        Summary = "Update course by ID",
+        Description = "Endpoint to update an existing course by its ID."
+    )]  
     public async Task<IActionResult> UpdateCourseById([FromBody] Course course)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        {
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
+        }
 
         using (_logger.BeginScope("UpdateCourseById request - CourseId: {CourseId}", course.Id))
         {
@@ -70,15 +92,19 @@ public class CourseController: ControllerBase
             if (affectedRows == 0)
             {
                 _logger.LogWarning("Update failed or course not found with ID: {CourseId}", course.Id);
-                return NotFound(new { Message = $"Course with ID {course.Id} not found or no change made." });
+                return NotFound(new ErrorResponse<string>(status: 404, message: $"{_localizer["course_not_found_or_no_changes_made"]}, ID: {course.Id}"));
             }
 
             _logger.LogInformation("Successfully updated course with ID: {CourseId}", course.Id);
-            return Ok(new {Message = $"Successfully updated course with ID: {course.Id}"});
+            return Ok(new {Message = $"{_localizer["update_course_successfully"].Value}, ID: {course.Id}"});
         }
     }
 
     [HttpGet("{id}/has-students")]
+    [SwaggerOperation(
+        Summary = "Check if course has students enrolled",
+        Description = "Endpoint to check if there are any students enrolled in a specific course by its ID."
+    )]
     public async Task<IActionResult> CheckStudentExistFromCourse(string id)
     {
         using (_logger.BeginScope("CheckStudentExistFromCourse request - CourseId: {CourseId}", id))
@@ -94,10 +120,16 @@ public class CourseController: ControllerBase
     }
 
     [HttpPost]
+    [SwaggerOperation(
+        Summary = "Add a new course",
+        Description = "Endpoint to add a new course to the system."
+    )]
     public async Task<IActionResult> AddCourse([FromBody] Course course)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        {
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
+        }
 
         using (_logger.BeginScope("AddCourse request - CourseId: {CourseId}", course.Id))
         {
@@ -110,19 +142,23 @@ public class CourseController: ControllerBase
                 _logger.LogInformation("Successfully added course with ID: {CourseId}", course.Id);
                 return CreatedAtAction(nameof(GetCourseById), new { id = course.Id }, new
                 {
-                    Message = $"Successfully added course with ID: {course.Id}",
+                    Message = $"{_localizer["course_added_successfully"].Value}, ID: {course.Id}",
                     Data = course
                 });
             }
             else
             {
                 _logger.LogWarning("Course creation failed for ID: {CourseId}", course.Id);
-                return StatusCode(500, new { Message = $"Failed to create course with ID: {course.Id}" });
+                return StatusCode(500, new ErrorResponse<string>(status: 500, message: $"{_localizer["failed_to_create_course"].Value}, ID: {course.Id}"));
             }
         }
     }
 
     [HttpDelete("{id}")]
+    [SwaggerOperation(
+        Summary = "Delete course by ID",
+        Description = "Endpoint to delete a specific course by its ID."
+    )]
     public async Task<IActionResult> DeleteCourseById(string id)
     {
         using (_logger.BeginScope("DeleteCourseById request - CourseId: {CourseId}", id))
@@ -136,6 +172,4 @@ public class CourseController: ControllerBase
             return Ok(new { Message = resultMessage });
         }
     }
-
-
 }

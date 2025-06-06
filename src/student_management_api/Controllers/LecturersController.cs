@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using student_management_api.Contracts.IServices;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -19,6 +20,10 @@ public class LecturersController : ControllerBase
     }
 
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get all lecturers",
+        Description = "Endpoint to retrieve all lecturers in the system."
+    )]
     public async Task<IActionResult> GetAllLecturers()
     {
         using (_logger.BeginScope("GetAllLecturers request"))

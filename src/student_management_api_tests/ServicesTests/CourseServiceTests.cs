@@ -1,5 +1,8 @@
-﻿using Moq;
+﻿using Microsoft.Extensions.Localization;
+using Moq;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Exceptions;
+using student_management_api.Resources;
 using student_management_api.Models.DTO;
 using student_management_api.Services;
 using System;
@@ -13,11 +16,13 @@ public class CourseServiceTests
 {
     private readonly Mock<ICourseRepository> _mockCourseRepository;
     private readonly CourseService _courseService;
+    private readonly Mock<IStringLocalizer<Messages>> _mockLocalizer;
 
     public CourseServiceTests()
     {
         _mockCourseRepository = new Mock<ICourseRepository>();
-        _courseService = new CourseService(_mockCourseRepository.Object);
+        _mockLocalizer = new Mock<IStringLocalizer<Messages>>();
+        _courseService = new CourseService(_mockCourseRepository.Object, _mockLocalizer.Object);
     }
 
     #region GetAllCourses Tests
@@ -236,7 +241,7 @@ public class CourseServiceTests
     }
 
     [Fact]
-    public async Task DeleteCourseById_InactiveCourse_ThrowsException()
+    public async Task DeleteCourseById_InactiveCourse_ThrowsForbiddenException()
     {
         // Arrange
         string courseId = "CS101";
@@ -256,10 +261,9 @@ public class CourseServiceTests
             .ReturnsAsync(course);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Exception>(() =>
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
             _courseService.DeleteCourseById(courseId));
 
-        Assert.Equal("Đã xóa rồi, bạn không thể xóa nữa!", exception.Message);
         _mockCourseRepository.Verify(
             repo => repo.DeleteCourseById(courseId),
             Times.Never()
@@ -267,7 +271,7 @@ public class CourseServiceTests
     }
 
     [Fact]
-    public async Task DeleteCourseById_CourseOlderThan30Minutes_ThrowsException()
+    public async Task DeleteCourseById_CourseOlderThan30Minutes_ThrowsForbiddenException()
     {
         // Arrange
         string courseId = "CS101";
@@ -287,10 +291,9 @@ public class CourseServiceTests
             .ReturnsAsync(course);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Exception>(() =>
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
             _courseService.DeleteCourseById(courseId));
 
-        Assert.Equal("Đã quá 30 phút, không thể xóa!", exception.Message);
         _mockCourseRepository.Verify(
             repo => repo.DeleteCourseById(courseId),
             Times.Never()

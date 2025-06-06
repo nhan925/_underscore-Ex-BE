@@ -1,10 +1,15 @@
 ﻿using DocumentFormat.OpenXml.Office2016.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
 using student_management_api.Models.CourseClass;
 using student_management_api.Models.DTO;
 using student_management_api.Services;
+using student_management_api.Resources;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -15,17 +20,26 @@ public class CourseClassController : ControllerBase
 {
     private readonly ICourseClassService _courseClassService;
     private readonly ILogger<CourseClassController> _logger;
-    public CourseClassController(ICourseClassService courseClassService, ILogger<CourseClassController> logger)
+    private readonly IStringLocalizer<Messages> _localizer;
+
+    public CourseClassController(ICourseClassService courseClassService, ILogger<CourseClassController> logger, IStringLocalizer<Messages> localizer)
     {
         _courseClassService = courseClassService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [HttpPost]
+    [SwaggerOperation(
+        Summary = "Add a new class",
+        Description = "Endpoint to add a new class. Requires valid CourseClass model."
+    )]
     public async Task<IActionResult> AddCourseClass([FromBody] CourseClass courseClass)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        {
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
+        }
 
         using (_logger.BeginScope("AddCourseClass request"))
         {
@@ -37,7 +51,11 @@ public class CourseClassController : ControllerBase
         }
     }
 
-    [HttpGet("{semesterId}")]
+    [HttpGet("in-semester/{semesterId}")]
+    [SwaggerOperation(
+        Summary = "Get all classes by semester",
+        Description = "Endpoint to retrieve all classes for a specific semester. Requires valid SemesterId."
+    )]
     public async Task<IActionResult> GetAllCourseClassesBySemester(int semesterId)
     {
         using (_logger.BeginScope("GetAllCourseClassesBySemester request with SemesterId: {SemesterId}", semesterId))
@@ -50,12 +68,47 @@ public class CourseClassController : ControllerBase
         }
     }
 
+    [HttpGet("{compositedId}")]
+    [SwaggerOperation(
+        Summary = "Get a class by ClassId, CourseId, and SemesterId",
+        Description = "Get a specific class using ClassId, CourseId, and SemesterId. Composited ID is '{classId}-{courseId}-{semesterId}'."
+    )]
+    public async Task<IActionResult> GetCourseClassByIdAndCourseAndSemester(string compositedId)
+    {
+        using (_logger.BeginScope("GetCourseClassByIdAndCourseAndSemester with composited ID: {CompositedId}", compositedId))
+        {
+            _logger.LogInformation("Parsing composited ID: {CompositedId}", compositedId);
+            var parts = compositedId.Split('-');
+            if (parts.Length != 3 || !int.TryParse(parts[2], out int semesterId) || string.IsNullOrEmpty(parts[0]) || string.IsNullOrEmpty(parts[1]))
+            {
+                _logger.LogWarning("Invalid composited ID format: {CompositedId}", compositedId);
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_composited_id_for_class"]));
+            }
+
+            var classId = parts[0];
+            var courseId = parts[1];
+
+            _logger.LogInformation("Fetching course class for  with ClassId/CourseId/SemesterId: {ClassId} / {CourseId} / {SemesterId}", 
+                classId, courseId, semesterId);
+            var courseClass = await _courseClassService.GetCourseClassByIdAndCourseAndSemester(classId, courseId, semesterId);
+
+            _logger.LogInformation("Successfully retrieved course class with ClassId/CourseId/SemesterId: {ClassId} / {CourseId} / {SemesterId}", 
+                classId, courseId, semesterId);
+            
+            return Ok(courseClass);
+        }
+    }
+
     [HttpGet("students")]
+    [SwaggerOperation(
+        Summary = "Get students in a class",
+        Description = "Endpoint to retrieve all students enrolled in a specific class. Requires valid ClassId."
+    )]
     public async Task<IActionResult> GetStudentsInClass([FromQuery] GetStudentsInClassRequest request)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
         }
 
         using (_logger.BeginScope("GetStudentsInClass request"))

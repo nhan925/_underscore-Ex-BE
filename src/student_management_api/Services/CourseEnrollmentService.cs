@@ -1,9 +1,14 @@
 ﻿using DinkToPdf;
 using DinkToPdf.Contracts;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
+using student_management_api.Exceptions;
+using student_management_api.Helpers;
 using student_management_api.Models.CourseEnrollment;
 using student_management_api.Models.DTO;
+using student_management_api.Resources;
 
 namespace student_management_api.Services;
 
@@ -15,11 +20,14 @@ public class CourseEnrollmentService : ICourseEnrollmentService
 
     private readonly IConverter _pdfConverter;
 
-    public CourseEnrollmentService(ICourseEnrollmentRepository courseEnrollmentRepository, IStudentRepository studentRepository, IConverter converter)
+    private readonly IStringLocalizer<Messages> _localizer;
+
+    public CourseEnrollmentService(ICourseEnrollmentRepository courseEnrollmentRepository, IStudentRepository studentRepository, IConverter converter, IStringLocalizer<Messages> localizer)
     {
         _courseEnrollmentRepository = courseEnrollmentRepository;
         _studentRepository = studentRepository;
         _pdfConverter = converter;
+        _localizer = localizer;
     }
 
     public async Task<List<EnrollmentHistory>> GetEnrollmentHistoryBySemester(int semesterId)
@@ -33,7 +41,7 @@ public class CourseEnrollmentService : ICourseEnrollmentService
         var student = await _studentRepository.GetStudentById(studentId);
         if (student == null)
         {
-            throw new Exception("student not found");
+            throw new NotFoundException(_localizer["student_not_found"]);
         }
         
         var transcript = await _courseEnrollmentRepository.GetTranscriptOfStudentById(studentId);
@@ -45,7 +53,7 @@ public class CourseEnrollmentService : ICourseEnrollmentService
 
         // Fill placeholders
         var htmlContent = htmlTemplate
-            .Replace("{{school_name}}", "Trường Đại học TKPM")
+            .Replace("{{school_name}}", _localizer["tkpm_university"])
             .Replace("{{student_name}}", student.FullName)
             .Replace("{{student_id}}", student.Id)
             .Replace("{{intake_year}}", student.IntakeYear.ToString())
@@ -87,7 +95,7 @@ public class CourseEnrollmentService : ICourseEnrollmentService
         var affectedRows = await _courseEnrollmentRepository.UpdateStudentGrade(studentId, courseId, grade);
         if (affectedRows == 0)
         {
-            throw new Exception("Failed to update student grade or Student not found");
+            throw new NotFoundException(_localizer["failed_to_update_student_grade"]);
         }
     }
 }

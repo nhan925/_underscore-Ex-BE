@@ -1,7 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
 using student_management_api.Models.CourseEnrollment;
+using System.Globalization;
+using student_management_api.Resources;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -12,14 +18,20 @@ public class CourseEnrollmentController : ControllerBase
 {
     private readonly ICourseEnrollmentService _courseEnrollmentService;
     private readonly ILogger<CourseEnrollmentController> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public CourseEnrollmentController(ICourseEnrollmentService courseEnrollmentService, ILogger<CourseEnrollmentController> logger)
+    public CourseEnrollmentController(ICourseEnrollmentService courseEnrollmentService, ILogger<CourseEnrollmentController> logger, IStringLocalizer<Messages> localizer)
     {
         _courseEnrollmentService = courseEnrollmentService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [HttpGet("history/{semester_id}")]
+    [SwaggerOperation(
+        Summary = "Get enrollment history by semester",
+        Description = "Endpoint to retrieve all enrollment history for a specific semester. Requires valid SemesterId."
+    )]
     public async Task<IActionResult> GetEnrollmentHistoryBySemester(int semester_id)
     {
         using (_logger.BeginScope("GetEnrollmentHistoryBySemester request"))
@@ -34,11 +46,15 @@ public class CourseEnrollmentController : ControllerBase
     }
 
     [HttpPost]
+    [SwaggerOperation(
+        Summary = "Register or unregister a class",
+        Description = "Endpoint to register or unregister a class based on the action specified in the query parameter. Use 'register' to enroll and 'unregister' to withdraw."
+    )]
     public async Task<IActionResult> RegisterAndUnregisterClass([FromQuery] string action, [FromBody] CourseEnrollmentRequest request)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
         }
 
         if (action == "register")
@@ -51,7 +67,7 @@ public class CourseEnrollmentController : ControllerBase
                     await _courseEnrollmentService.RegisterClass(request);
                     _logger.LogInformation("Successfully registered class");
 
-                    return Ok(new { message = "Successfully registered class" });
+                    return Ok(new { message = _localizer["successfully_registered_class"].Value });
                 }
                 catch
                 {
@@ -70,7 +86,7 @@ public class CourseEnrollmentController : ControllerBase
                     await _courseEnrollmentService.UnregisterClass(request);
                     _logger.LogInformation("Successfully unregistered class");
 
-                    return Ok(new { message = "Successfully unregistered class" });
+                    return Ok(new { message = _localizer["successfully_unregistered_class"].Value });
                 }
                 catch
                 {
@@ -81,57 +97,7 @@ public class CourseEnrollmentController : ControllerBase
         }
         else
         {
-            return BadRequest(new { message = "Invalid action" });
-        }
-    }
-
-    [HttpPut("update-grade")]
-    public async Task<IActionResult> UpdateStudentGrade([FromBody] UpdateStudentGradeRequest request)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        using (_logger.BeginScope("UpdateStudentGrade request"))
-        {
-            _logger.LogInformation("Updating student grade with request: {@Request}", request);
-
-            try
-            {
-                await _courseEnrollmentService.UpdateStudentGrade(request.StudentId!, request.CourseId!, request.Grade);
-                _logger.LogInformation("Successfully updated student grade");
-
-                return Ok(new { message = "Successfully updated student grade" });
-            }
-            catch
-            {
-                _logger.LogWarning("Failed to update student grade");
-                throw;
-            }
-        }
-    }
-
-    [HttpGet("transcript/{student_id}")]
-    public async Task<IActionResult> GetStudentTranscriptById(string student_id)
-    {
-        using (_logger.BeginScope("GetStudentTranscriptById request for StudentId: {StudentId}", student_id))
-        {
-            // Load HTML template
-            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "transcript_template.html");
-            var htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
-
-            _logger.LogInformation("Fetching transcript for student with ID: {StudentId}", student_id);
-            var transcriptStream = await _courseEnrollmentService.GetTranscriptOfStudentById(student_id, htmlTemplate);
-            if (transcriptStream == null)
-            {
-                _logger.LogWarning("Transcript not found for student with ID: {StudentId}", student_id);
-                return NotFound(new { message = "Transcript not found" });
-            }
-
-            _logger.LogInformation("Transcript fetched successfully for student with ID: {StudentId}", student_id);
-
-            return File(transcriptStream, "application/pdf", $"{student_id}_transcript.pdf");
+            return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_action_specified_Use_register_or_unregister"]));
         }
     }
 }

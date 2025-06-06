@@ -1,9 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
 using student_management_api.Models.Configuration;
 using student_management_api.Models.DTO;
+using student_management_api.Resources;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -14,14 +18,20 @@ public class ConfigurationController : ControllerBase
 {
     private readonly IConfigurationService _configurationService;
     private readonly ILogger<ConfigurationController> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public ConfigurationController(IConfigurationService configurationService, ILogger<ConfigurationController> logger)
+    public ConfigurationController(IConfigurationService configurationService, ILogger<ConfigurationController> logger, IStringLocalizer<Messages> localizer)
     {
         _configurationService = configurationService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [HttpGet("{type}")]
+    [SwaggerOperation(
+        Summary = "Get all config",
+        Description = "Get configuration data based on type. Supported types: email, phone-number, student-status."
+    )]
     public async Task<IActionResult> GetConfig(string type)
     {
         using (_logger.BeginScope("GetConfig request"))
@@ -49,12 +59,16 @@ public class ConfigurationController : ControllerBase
             else
             {
                 _logger.LogWarning("Invalid config type");
-                return BadRequest(new { message = "Invalid config type" });
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_config_type"]));
             }
         }
     }
 
     [HttpGet("check/{type}/{value}")]
+    [SwaggerOperation(
+        Summary = "Check config validity",
+        Description = "Check if the provided value is valid for the specified config type. Supported types: email, phone-number."
+    )]
     public async Task<IActionResult> CheckConfig(string type, string value) 
     {
         using (_logger.BeginScope("CheckConfig request"))
@@ -64,7 +78,7 @@ public class ConfigurationController : ControllerBase
             if (string.IsNullOrEmpty(value))
             {
                 _logger.LogWarning("Value is empty");
-                return BadRequest(new { message = "Value is empty" });
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["value_is_empty"]));
             }
 
             if (type == "email")
@@ -82,12 +96,16 @@ public class ConfigurationController : ControllerBase
             else
             {
                 _logger.LogWarning("Invalid config type");
-                return BadRequest(new { message = "Invalid config type" });
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_config_type"]));
             }
         }
     }
 
     [HttpGet("next-statuses/{statusId}")]
+    [SwaggerOperation(
+        Summary = "Get next statuses",
+        Description = "Fetch the next possible statuses based on the current status ID."
+    )]
     public async Task<IActionResult> GetNextStatuses(int statusId)
     {
         using (_logger.BeginScope("GetNextStatuses request"))
@@ -101,6 +119,10 @@ public class ConfigurationController : ControllerBase
     }
 
     [HttpPost("update/email")]
+    [SwaggerOperation(
+        Summary = "Update email domains config",
+        Description = "Update the configuration for valid email domains."
+    )] 
     public async Task<IActionResult> UpdateEmailDomainsConfig([FromBody] Configuration<List<string>> config)
     {
         using (_logger.BeginScope("UpdateEmailDomainsConfig request"))
@@ -111,17 +133,21 @@ public class ConfigurationController : ControllerBase
             if (updatedCount > 0)
             {
                 _logger.LogInformation("Email domains config updated successfully");
-                return Ok(new { message = "Email domains config updated successfully" });
+                return Ok(new { message = _localizer["email_domains_config_updated_successfully"].Value });
             }
             else
             {
                 _logger.LogWarning("No changes applied");
-                return NotFound(new { message = "No changes applied" });
+                return NotFound(new ErrorResponse<string>(status: 404, message: _localizer["no_changes_applied"]));
             }
         }
     }
 
     [HttpPost("update/phone-number")]
+    [SwaggerOperation(
+        Summary = "Update phone number country config",
+        Description = "Update the configuration for valid phone number countries."
+    )]
     public async Task<IActionResult> UpdatePhoneNumberCountryConfig([FromBody] Configuration<List<string>> config)
     {
         using (_logger.BeginScope("UpdatePhoneNumberCountryConfig request"))
@@ -132,17 +158,21 @@ public class ConfigurationController : ControllerBase
             if (updatedCount > 0)
             {
                 _logger.LogInformation("Phone number country config updated successfully");
-                return Ok(new { message = "Phone number country config updated successfully" });
+                return Ok(new { message = _localizer["phone_number_country_config_updated_successfully"].Value });
             }
             else
             {
                 _logger.LogWarning("No changes applied");
-                return NotFound(new { message = "No changes applied" });
+                return NotFound(new ErrorResponse<string>(status: 404, message: _localizer["no_changes_applied"]));
             }
         }
     }
 
     [HttpPost("update/student-status")]
+    [SwaggerOperation(
+        Summary = "Update student status rules config",
+        Description = "Update the configuration for student status rules."
+    )]
     public async Task<IActionResult> UpdateStudentStatusConfig([FromBody] Configuration<Dictionary<int, List<int>>> config)
     {
         using (_logger.BeginScope("UpdateStudentStatusConfig request"))
@@ -153,17 +183,21 @@ public class ConfigurationController : ControllerBase
             if (updatedCount > 0)
             {
                 _logger.LogInformation("Student status rules config updated successfully");
-                return Ok(new { message = "Student status rules config updated successfully" });
+                return Ok(new { message = _localizer["student_status_rules_config_updated_successfully"].Value });
             }
             else
             {
                 _logger.LogWarning("No changes applied");
-                return NotFound(new { message = "No changes applied" });
+                return NotFound(new ErrorResponse<string>(status: 404, message: _localizer["no_changes_applied"]));
             }
         }
     }
 
     [HttpPost("is-active/{isActive}")]
+    [SwaggerOperation(
+        Summary = "Turn all rules on or off",
+        Description = "Activate or deactivate all rules in the system."
+    )]
     public async Task<IActionResult> TurnAllRulesOnOrOff(bool isActive)
     {
         using (_logger.BeginScope("TurnAllRulesOnOrOff request"))
@@ -174,12 +208,12 @@ public class ConfigurationController : ControllerBase
             if (updatedCount > 0)
             {
                 _logger.LogInformation("All rules turned {Status}", isActive ? "on" : "off");
-                return Ok(new { Message = $"All rules turned {(isActive ? "on" : "off")}" });
+                return Ok(new { Message = isActive ? _localizer["all_rules_turned_on"].Value : _localizer["all_rules_turned_off"].Value });
             }
             else
             {
                 _logger.LogWarning("No rules found or no changes applied");
-                return NotFound(new { Message = "No rules found or no changes applied." });
+                return NotFound(new ErrorResponse<string>(status: 404, message: _localizer["no_rules_found_or_no_changes_applied"]));
             }
         }
     }

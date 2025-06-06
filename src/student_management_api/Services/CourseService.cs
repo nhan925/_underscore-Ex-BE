@@ -1,6 +1,10 @@
-﻿using student_management_api.Contracts.IRepositories;
+﻿using Microsoft.Extensions.Localization;
+using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
+using student_management_api.Exceptions;
+using student_management_api.Helpers;
 using student_management_api.Models.DTO;
+using student_management_api.Resources;
 
 namespace student_management_api.Services;
 
@@ -8,9 +12,12 @@ public class CourseService : ICourseService
 {
     private readonly ICourseRepository _courseRepository;
 
-    public CourseService(ICourseRepository courseRepository)
+    private readonly IStringLocalizer<Messages> _localizer;
+
+    public CourseService(ICourseRepository courseRepository, IStringLocalizer<Messages> localizer)
     {
         _courseRepository = courseRepository;
+        _localizer = localizer;
     }
 
     public async Task<List<Course>> GetAllCourses()
@@ -41,7 +48,7 @@ public class CourseService : ICourseService
 
         if (!course.IsActive)
         {
-            throw new Exception("Đã xóa rồi, bạn không thể xóa nữa!");
+            throw new ForbiddenException(_localizer["course_has_been_deleted"]);
         }
 
 
@@ -53,8 +60,9 @@ public class CourseService : ICourseService
 
         if (timeDifference > 30)
         {
-            throw new Exception("Đã quá 30 phút, không thể xóa!");
+            throw new ForbiddenException(_localizer["exceeded_30_minutes_cannot_delete"]);
         }
+
         return await _courseRepository.DeleteCourseById(id);
     }
 
