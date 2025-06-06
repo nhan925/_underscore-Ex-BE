@@ -156,9 +156,9 @@ src/
     ├── create_db.sql                           # Script to create database schema
     └── Program.cs   
 ```
-### Flow hoạt động - Kiến trúc
+### Kiến trúc
 <div align=center>
-	<img src="Documents/call_flow.svg" alt="Call Flow" width="300">
+	<img src="Documents/architecture.svg" alt="Call Flow" width="50%">
 </div>
 
 
