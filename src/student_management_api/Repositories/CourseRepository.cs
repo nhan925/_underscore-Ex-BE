@@ -1,24 +1,39 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Exceptions;
+using student_management_api.Helpers;
+using student_management_api.Resources;
 using student_management_api.Models.DTO;
 using System.Data;
+using System.Globalization;
+using student_management_api.Localization;
 
 namespace student_management_api.Repositories;
 
 public class CourseRepository: ICourseRepository
 {
     private readonly IDbConnection _db;
-    public CourseRepository(IDbConnection db)
+    private readonly IStringLocalizer<Messages> _localizer;
+    private readonly string _culture;
+    private readonly string _cultureSuffix;
+    private readonly IExternalTranslationService _translationService;
+
+    public CourseRepository(IDbConnection db, IStringLocalizer<Messages> localizer, IExternalTranslationService translationService)
     {
         _db = db;
+        _localizer = localizer;
+        _culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        _cultureSuffix = _culture == "en" ? "" : $"_{_culture}";
+        _translationService = translationService;
     }
 
     public async Task<List<Course>> GetAllCourses()
     {
-        var sql = @"
+        var sql = @$"
         SELECT 
-            c.id, c.name, c.credits, c.faculty_id,
-            c.description, c.created_at,
+            c.id, c.name{_cultureSuffix} AS name, c.credits, c.faculty_id,
+            c.description{_cultureSuffix} AS description, c.created_at,
             c.is_active,
             cp.prerequisite_id
         FROM courses c
@@ -54,13 +69,13 @@ public class CourseRepository: ICourseRepository
 
     public async Task<Course> GetCourseById(string id)
     {
-        var sql = @"
+        var sql = @$"
         SELECT
             c.id,
-            c.name,
+            c.name{_cultureSuffix} AS name,
             c.credits,
             c.faculty_id,
-            c.description,
+            c.description{_cultureSuffix} AS description,
             c.created_at,
             c.is_active,
             cp.prerequisite_id
@@ -94,7 +109,9 @@ public class CourseRepository: ICourseRepository
 
         var course = courseDict.Values.FirstOrDefault();
         if (course == null)
-            throw new Exception($"Course with ID {id} not found.");
+        {
+            throw new NotFoundException($"{_localizer["course_not_found"]}, ID: {id}");
+        }
 
         return course;
     }
@@ -114,7 +131,7 @@ public class CourseRepository: ICourseRepository
         var hasStudents = await CheckStudentExistFromCourse(course.Id!);
         if (hasStudents && currentCredits != course.Credits)
         {
-            throw new InvalidOperationException("Không thể thay đổi số tín chỉ cho khóa học đã có sinh viên đăng ký");
+            throw new ForbiddenException(_localizer["cannot_change_credits_for_a_course_that_has_students_enrolled"]);
         }
 
         using (var transaction = _db.BeginTransaction())
@@ -122,22 +139,28 @@ public class CourseRepository: ICourseRepository
             try
             {
                 // 1. Cập nhật bảng courses
-                var updateSql = @"
+                var updateSql = @$"
                 UPDATE courses
                 SET 
-                    name         = @Name,
-                    credits      = @Credits,
-                    faculty_id   = @FacultyId,
-                    description  = @Description
+                    name                        = @Name,
+                    name_vi                     = @NameVi,    
+                    credits                     = @Credits,
+                    faculty_id                  = @FacultyId,
+                    description                 = @Description,
+                    description_vi              = @DescriptionVi,
+                    need_to_review              = @NeedToReview
                 WHERE id = @Id;
                 ";
                 var updateParams = new
                 {
-                    course.Id,
-                    course.Name,
-                    course.Credits,
-                    course.FacultyId,
-                    course.Description
+                    Id = course.Id,
+                    Name = await _translationService.TranslateAsync(course.Name!, _culture, "en"),
+                    NameVi = await _translationService.TranslateAsync(course.Name!, _culture, "vi"),
+                    Credits = course.Credits,
+                    FacultyId = course.FacultyId,
+                    Description = await _translationService.TranslateAsync(course.Description!, _culture, "en"),
+                    DescriptionVi = await _translationService.TranslateAsync(course.Description!, _culture, "vi"),
+                    NeedToReview = true,
                 };
                 var rowsAffected = await _db.ExecuteAsync(updateSql, updateParams, transaction);
 
@@ -190,24 +213,27 @@ public class CourseRepository: ICourseRepository
 
                         if (exists == 0)
                         {
-                            throw new Exception($"Prerequisite course ID {prerequisiteId} does not exist.");
+                            throw new NotFoundException(_localizer["prerequisite_course_not_exists"]);
                         }
                     }
                 }
 
                 // 2. Thêm vào bảng courses
-                var insertCourseSql = @"
-                INSERT INTO courses (id, name, credits, faculty_id, description)
-                VALUES (@Id, @Name, @Credits, @FacultyId, @Description);
+                var insertCourseSql = @$"
+                INSERT INTO courses (id, name, credits, faculty_id, description, name_vi, description_vi, need_to_review)
+                VALUES (@Id, @Name, @Credits, @FacultyId, @Description, @NameVi, @DescriptionVi, @NeedToReview);
                 ";
 
                 var courseParams = new
                 {
-                    course.Id,
-                    course.Name,
-                    course.Credits,
-                    course.FacultyId,
-                    course.Description
+                    Id = course.Id,
+                    Name = await _translationService.TranslateAsync(course.Name!, _culture, "en"),
+                    NameVi = await _translationService.TranslateAsync(course.Name!, _culture, "vi"),
+                    Credits = course.Credits,
+                    FacultyId = course.FacultyId,
+                    Description = await _translationService.TranslateAsync(course.Description!, _culture, "en"),
+                    DescriptionVi = await _translationService.TranslateAsync(course.Description!, _culture, "vi"),
+                    NeedToReview = true,
                 };
 
                 var rowsAffected = await _db.ExecuteAsync(insertCourseSql, courseParams, transaction);
@@ -257,7 +283,7 @@ public class CourseRepository: ICourseRepository
                 await _db.ExecuteAsync(deactivateSql, new { Id = id }, transaction);
 
                 transaction.Commit();
-                return "Đã có lớp học thuộc khóa học này. Khóa học được đánh dấu dừng hoạt động";
+                return _localizer["classes_exist_for_this_course_The_course_has_been_marked_as_inactive"];
             }
 
             // 2. Kiểm tra nếu có học sinh đã đăng ký học lớp thuộc course này
@@ -270,7 +296,7 @@ public class CourseRepository: ICourseRepository
                 await _db.ExecuteAsync(deactivateSql, new { Id = id }, transaction);
 
                 transaction.Commit();
-                return "Đã có học sinh học lớp học này. Khóa học được đánh dấu dừng hoạt động";
+                return _localizer["classes_exist_for_this_course_The_course_has_been_marked_as_inactive"];
             }
 
             // 3. Xóa khóa học
@@ -278,12 +304,12 @@ public class CourseRepository: ICourseRepository
             await _db.ExecuteAsync(deleteCourseSql, new { Id = id }, transaction);
 
             transaction.Commit();
-            return "Xóa khóa học thành công";
+            return _localizer["course_deleted_successfully"];
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             transaction.Rollback();
-            throw new Exception("Error to delete this course " + ex.Message);
+            throw;
         }
     }
 

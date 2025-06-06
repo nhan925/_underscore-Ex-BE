@@ -1,8 +1,11 @@
 ﻿using ClosedXML.Excel;
 using CsvHelper;
 using CsvHelper.Configuration;
+using Microsoft.Extensions.Localization;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
+using student_management_api.Exceptions;
+using student_management_api.Resources;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using System.Formats.Asn1;
@@ -16,9 +19,12 @@ namespace student_management_api.Services;
 public class StudentService: IStudentService
 {
     private readonly IStudentRepository _studentRepository;
-    public StudentService(IStudentRepository studentRepository)
+    private readonly IStringLocalizer<Messages> _localizer;
+
+    public StudentService(IStudentRepository studentRepository, IStringLocalizer<Messages> localizer)
     {
         _studentRepository = studentRepository;
+        _localizer = localizer;
     }
 
     public async Task<string> AddStudent(AddStudentRequest request)
@@ -26,7 +32,7 @@ public class StudentService: IStudentService
         var studentId = await _studentRepository.AddStudent(request);
         if (studentId == null)
         {
-            throw new Exception("failed to add student");
+            throw new OperationFailedException(_localizer["failed_to_add_student"]);
         }
 
         return studentId;
@@ -37,7 +43,7 @@ public class StudentService: IStudentService
         var count = await _studentRepository.DeleteStudentById(id);
         if (count == 0)
         {
-            throw new Exception("student not found");
+            throw new NotFoundException(_localizer["student_not_found"]);
         }
 
         return count;
@@ -48,7 +54,7 @@ public class StudentService: IStudentService
         var student = await _studentRepository.GetStudentById(id);
         if (student == null)
         {
-            throw new Exception("student not found");
+            throw new NotFoundException(_localizer["student_not_found"]);
         }
 
         return student;
@@ -65,7 +71,7 @@ public class StudentService: IStudentService
         var count = await _studentRepository.UpdateStudentById(id, request);
         if (count == 0)
         {
-            throw new Exception("student not found");
+            throw new NotFoundException(_localizer["student_not_found"]);
         }
 
         return count;

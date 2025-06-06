@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using student_management_api.Contracts.IServices;
 using student_management_api.Models.DTO;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Threading.Tasks;
 
@@ -23,6 +24,10 @@ public class CountryPhoneCodeController : ControllerBase
     }
 
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get all country phone codes",
+        Description = "Fetches a list of all country phone codes."
+    )]
     public IActionResult GetCountryPhoneCode()
     {
         using (_logger.BeginScope("GetCountryPhoneCode request"))

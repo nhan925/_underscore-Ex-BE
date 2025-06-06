@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using student_management_api.Contracts.IServices;
 using student_management_api.Models.DTO;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -19,6 +20,10 @@ public class YearAndSemesterController : ControllerBase
     }
 
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get all years",
+        Description = "Endpoint to retrieve all academic years."
+    )]
     public async Task<IActionResult> GetAllYears()
     {
         using (_logger.BeginScope("GetAllYears request"))
@@ -33,6 +38,10 @@ public class YearAndSemesterController : ControllerBase
     }
 
     [HttpGet("{yearId}/semesters")]
+    [SwaggerOperation(
+        Summary = "Get semesters by year",
+        Description = "Endpoint to retrieve all semesters for a specific academic year. Requires valid YearId."
+    )]
     public async Task<IActionResult> GetSemestersByYear(int yearId)
     {
         using (_logger.BeginScope("GetSemesterByYear request with YearId: {YearId}", yearId))

@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
 using student_management_api.Models.DTO;
+using student_management_api.Resources;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -13,14 +17,20 @@ public class FacultyController : ControllerBase
 {
     private readonly IFacultyService _facultyService;
     private readonly ILogger<FacultyController> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
 
-    public FacultyController(IFacultyService facultyService, ILogger<FacultyController> logger)
+    public FacultyController(IFacultyService facultyService, ILogger<FacultyController> logger, IStringLocalizer<Messages> localizer)
     {
         _facultyService = facultyService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get all faculties",
+        Description = "Endpoint to retrieve all faculties in the system."
+    )]
     public async Task<IActionResult> GetFaculties()
     {
         using (_logger.BeginScope("GetFaculties request"))
@@ -35,6 +45,10 @@ public class FacultyController : ControllerBase
     }
 
     [HttpPut]
+    [SwaggerOperation(
+        Summary = "Update faculty",
+        Description = "Endpoint to update an existing faculty. Requires valid Faculty model."
+    )]
     public async Task<IActionResult> UpdateFaculty([FromBody] Faculty faculty)
     {
         using (_logger.BeginScope("UpdateFaculty request for FacultyId: {FacultyId}", faculty.Id))
@@ -44,11 +58,15 @@ public class FacultyController : ControllerBase
             var count = await _facultyService.UpdateFaculty(faculty);
 
             _logger.LogInformation("Faculty with ID {FacultyId} updated successfully", faculty.Id);
-            return Ok(new { message = "Update faculty successfully" });
+            return Ok(new { message = _localizer["update_faculty_successfully"].Value });
         }
     }
 
     [HttpPost("{name}")]
+    [SwaggerOperation(
+        Summary = "Add a new faculty",
+        Description = "Endpoint to add a new faculty by name."
+    )]
     public async Task<IActionResult> AddFaculty(string name)
     {
         using (_logger.BeginScope("AddFaculty request for FacultyName: {FacultyName}", name))
