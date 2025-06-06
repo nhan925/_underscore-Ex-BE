@@ -158,7 +158,7 @@ src/
 ```
 ### Kiến trúc
 <div align=center>
-	<img src="Documents/architecture.svg" alt="Call Flow" width="50%">
+	<img src="Documents/architecture.svg" alt="Call Flow" width="100%">
 </div>
 
 
