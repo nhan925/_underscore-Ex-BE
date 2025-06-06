@@ -32,7 +32,7 @@ public class StudentService: IStudentService
         var studentId = await _studentRepository.AddStudent(request);
         if (studentId == null)
         {
-            throw new Exception(_localizer["failed_to_add_student"]);
+            throw new OperationFailedException(_localizer["failed_to_add_student"]);
         }
 
         return studentId;

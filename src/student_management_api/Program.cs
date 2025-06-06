@@ -22,18 +22,19 @@ using Serilog.Events;
 using Serilog.Sinks.PostgreSQL;
 using student_management_api.Contracts.IRepositories;
 using student_management_api.Contracts.IServices;
+using student_management_api.Exceptions;
 using student_management_api.Helpers;
-using student_management_api.Resources;
+using student_management_api.Localization;
 using student_management_api.Middlewares;
 using student_management_api.Models.DTO;
 using student_management_api.Repositories;
+using student_management_api.Resources;
 using student_management_api.Services;
 using System;
 using System.Data;
 using System.Globalization;
 using System.Text;
 using System.Text.Json.Serialization;
-using student_management_api.Localization;
 
 namespace student_management_api;
 
@@ -49,13 +50,13 @@ public class Program
         DotEnv.Load();
         var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION");
         var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
-            ?? throw new Exception("JWT_SECRET is missing");
+            ?? throw new EnvironmentVariableNotFoundException("JWT_SECRET is missing");
         var AiServiceUrl = Environment.GetEnvironmentVariable("AI_SERVICE_URL")
-            ?? throw new Exception("AI_SERVICE_URL is missing");
+            ?? throw new EnvironmentVariableNotFoundException("AI_SERVICE_URL is missing");
         var AiModel = Environment.GetEnvironmentVariable("AI_MODEL")
-            ?? throw new Exception("AI_MODEL is missing");
+            ?? throw new EnvironmentVariableNotFoundException("AI_MODEL is missing");
         var AiApiKey = Environment.GetEnvironmentVariable("AI_API_KEY")
-            ?? throw new Exception("AI_API_KEY is missing");
+            ?? throw new EnvironmentVariableNotFoundException("AI_API_KEY is missing");
 
         // Register custom type handlers
         SqlMapper.AddTypeHandler(new JsonbTypeHandler<Dictionary<string, string>>());

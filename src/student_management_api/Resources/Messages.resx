@@ -327,4 +327,13 @@
   <data name="value_is_empty" xml:space="preserve">
     <value>Value is empty</value>
   </data>
+  <data name="class_not_found" xml:space="preserve">
+    <value>Class not found</value>
+  </data>
+  <data name="invalid_composited_id_for_class" xml:space="preserve">
+    <value>Invalid composited ID for class</value>
+  </data>
+  <data name="cannot_register_after_the_semester_has_ended" xml:space="preserve">
+    <value>Cannot register after the semester has ended</value>
+  </data>
 </root>

@@ -106,6 +106,15 @@ namespace student_management_api.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot register after the semester has ended.
+        /// </summary>
+        public static string cannot_register_after_the_semester_has_ended {
+            get {
+                return ResourceManager.GetString("cannot_register_after_the_semester_has_ended", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot unregister after the semester has started.
         /// </summary>
         public static string cannot_unregister_after_the_semester_has_started {
@@ -129,6 +138,15 @@ namespace student_management_api.Resources {
         public static string class_is_full {
             get {
                 return ResourceManager.GetString("class_is_full", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Class not found.
+        /// </summary>
+        public static string class_not_found {
+            get {
+                return ResourceManager.GetString("class_not_found", resourceCulture);
             }
         }
         
@@ -309,6 +327,15 @@ namespace student_management_api.Resources {
         public static string invalid_action_specified_Use_register_or_unregister {
             get {
                 return ResourceManager.GetString("invalid_action_specified_Use_register_or_unregister", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid composited ID for class.
+        /// </summary>
+        public static string invalid_composited_id_for_class {
+            get {
+                return ResourceManager.GetString("invalid_composited_id_for_class", resourceCulture);
             }
         }
         

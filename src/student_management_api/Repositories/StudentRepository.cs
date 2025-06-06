@@ -249,7 +249,7 @@ public class StudentRepository : IStudentRepository
 
                 if (studentCount == 0)
                 {
-                    throw new Exception(_localizer["update_student_failed"]);
+                    throw new OperationFailedException(_localizer["update_student_failed"]);
                 }
 
                 if (request.Addresses != null && request.Addresses.Any())
@@ -387,7 +387,7 @@ public class StudentRepository : IStudentRepository
 
                 if (studentCount == 0)
                 {
-                    throw new Exception(_localizer["add_student_failed"]);
+                    throw new OperationFailedException(_localizer["add_student_failed"]);
                 }
 
                 if (request.Addresses != null && request.Addresses.Any())
