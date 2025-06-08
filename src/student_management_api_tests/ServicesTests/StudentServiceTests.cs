@@ -62,7 +62,7 @@ public class StudentServiceTests
             .ReturnsAsync((string)null!);
 
         // Act
-        await Assert.ThrowsAsync<Exception>(() =>
+        await Assert.ThrowsAsync<OperationFailedException>(() =>
             _studentService.AddStudent(request));
     }
 

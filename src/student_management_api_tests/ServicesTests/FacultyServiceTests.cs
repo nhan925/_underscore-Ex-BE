@@ -1,5 +1,6 @@
 ﻿using Moq;
 using student_management_api.Contracts.IRepositories;
+using student_management_api.Exceptions;
 using student_management_api.Models.DTO;
 using student_management_api.Services;
 using System.Collections.Generic;
@@ -133,21 +134,21 @@ public class FacultyServiceTests
 
     #region AddFaculty Tests
     [Fact]
-    public async Task AddFaculty_ValidName_ReturnsAddedRowCount()
+    public async Task AddFaculty_ValidName_ReturnsFacultyId()
     {
         // Arrange
         string facultyName = "Physics";
-        int expectedRowsAffected = 1;
+        int expectedFacultyId = 10;
 
         _mockFacultyRepository
             .Setup(repo => repo.AddFaculty(facultyName))
-            .ReturnsAsync(expectedRowsAffected);
+            .ReturnsAsync(expectedFacultyId);
 
         // Act
         var result = await _facultyService.AddFaculty(facultyName);
 
         // Assert
-        Assert.Equal(expectedRowsAffected, result);
+        Assert.Equal(expectedFacultyId, result);
         _mockFacultyRepository.Verify(
             repo => repo.AddFaculty(facultyName),
             Times.Once()
@@ -155,24 +156,17 @@ public class FacultyServiceTests
     }
 
     [Fact]
-    public async Task AddFaculty_EmptyName_ReturnsZero()
+    public async Task AddFaculty_InsertFailed_ThrowsException()
     {
         // Arrange
-        string facultyName = "";
-        int expectedRowsAffected = 0;
-
+        string facultyName = "Physics";
         _mockFacultyRepository
             .Setup(repo => repo.AddFaculty(facultyName))
-            .ReturnsAsync(expectedRowsAffected);
+            .ThrowsAsync(new OperationFailedException("failed_to_add_faculty"));
 
-        // Act
-        var result = await _facultyService.AddFaculty(facultyName);
-
-        // Assert
-        Assert.Equal(expectedRowsAffected, result);
-        _mockFacultyRepository.Verify(
-            repo => repo.AddFaculty(facultyName),
-            Times.Once()
+        // Act & Assert
+        await Assert.ThrowsAsync<OperationFailedException>(
+            () => _facultyService.AddFaculty(facultyName)
         );
     }
     #endregion
