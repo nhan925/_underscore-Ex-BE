@@ -74,7 +74,25 @@ public class StudentRepository : IStudentRepository
     public async Task<int> DeleteStudentById(string id)
     {
         string query = "DELETE FROM students WHERE id = @Id";
-        return await _db.ExecuteAsync(query, new { Id = id });
+        var result = 0; // Initialize result to 0
+
+        try
+        {
+            result = await _db.ExecuteAsync(query, new { Id = id });
+        }
+        catch (Exception ex)
+        {
+            if (ex.Message.Contains("violates foreign key constraint \"course_enrollments_student_id_fkey\""))
+            {
+                throw new ForbiddenException(_localizer["student_is_enrolled_in_courses"]);
+            }
+            else
+            {
+                throw; // Rethrow other exceptions
+            }
+        }
+
+        return result;
     }
 
     public async Task<Student?> GetStudentById(string id)

@@ -547,6 +547,15 @@ namespace student_management_api.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Student is enrolled in courses.
+        /// </summary>
+        public static string student_is_enrolled_in_courses {
+            get {
+                return ResourceManager.GetString("student_is_enrolled_in_courses", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Student not found.
         /// </summary>
         public static string student_not_found {

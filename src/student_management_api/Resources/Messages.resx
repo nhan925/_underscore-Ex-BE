@@ -336,4 +336,7 @@
   <data name="cannot_register_after_the_semester_has_ended" xml:space="preserve">
     <value>Cannot register after the semester has ended</value>
   </data>
+  <data name="student_is_enrolled_in_courses" xml:space="preserve">
+    <value>Student is enrolled in courses</value>
+  </data>
 </root>
