@@ -2,12 +2,19 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing.Template;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using student_management_api.Contracts.IServices;
+using student_management_api.Helpers;
 using student_management_api.Models.DTO;
 using student_management_api.Models.Student;
 using System.Text.Json;
+using student_management_api.Resources;
+using student_management_api.Models.CourseEnrollment;
+using System.Globalization;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace student_management_api.Controllers;
 
@@ -19,16 +26,22 @@ public class StudentController : ControllerBase
     private readonly IStudentService _studentService;
     private readonly IConfigurationService _configurationService;
     private readonly ILogger<StudentController> _logger;
+    private readonly IStringLocalizer<Messages> _localizer;
+    private readonly ICourseEnrollmentService _courseEnrollmentService;
 
     public StudentController(
         IStudentService studentService,
         IConfigurationService configurationService,
-        ILogger<StudentController> logger
+        ILogger<StudentController> logger,
+        IStringLocalizer<Messages> localizer,
+        ICourseEnrollmentService courseEnrollmentService
     )
     {
         _studentService = studentService;
         _configurationService = configurationService;
         _logger = logger;
+        _localizer = localizer;
+        _courseEnrollmentService = courseEnrollmentService;
     }
 
     #region ValidateStudentInfomationsInRequestFunctions
@@ -40,7 +53,7 @@ public class StudentController : ControllerBase
         if (!isValidEmail)
         {
             _logger.LogWarning("Invalid email domain for {Email}", email);
-            return (false, BadRequest(new { message = "Invalid email domain" }));
+            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_email_domain"])));
         }
 
         return (true, Ok());
@@ -54,7 +67,7 @@ public class StudentController : ControllerBase
         if (!isValidPhoneNumber)
         {
             _logger.LogWarning("Invalid phone number for {PhoneNumber}", phoneNumber);
-            return (false, BadRequest(new { message = "Invalid phone number" }));
+            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_phone_number"])));
         }
 
         return (true, Ok());
@@ -68,7 +81,7 @@ public class StudentController : ControllerBase
         if (!nextStatuses.Any(s => s.Id == nextStatus))
         {
             _logger.LogWarning("Invalid student status transition from {CurrentStatus} to {NextStatus}", currentStatus, nextStatus);
-            return (false, BadRequest(new { message = "Invalid student status transition" }));
+            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_student_status_transition"])));
         }
 
         return (true, Ok());
@@ -78,7 +91,7 @@ public class StudentController : ControllerBase
     {
         if (request == null)
         {
-            return (false, BadRequest(new { message = "Invalid request" }));
+            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_request"])));
         }
 
         if (request is AddStudentRequest addStudentRequest)
@@ -122,7 +135,7 @@ public class StudentController : ControllerBase
                 var currentStudent = await _studentService.GetStudentById(studentId!);
                 if (currentStudent == null)
                 {
-                    return (false, NotFound(new { message = "Student not found" }));
+                    return (false, NotFound(new ErrorResponse<string>(status: 404, message: _localizer["student_not_found"])));
                 }
 
                 var statusValidationResult = await ValidateStudentStatus((int)currentStudent.StatusId!, updateStudentRequest.StatusId);
@@ -136,12 +149,16 @@ public class StudentController : ControllerBase
         }
         else
         {
-            return (false, BadRequest(new { message = "Invalid request" }));
+            return (false, BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_request_type"])));
         }
     }
     #endregion
 
     [HttpGet("{id}")]
+    [SwaggerOperation(
+        Summary = "Get student by ID",
+        Description = "Endpoint to retrieve a student by their unique ID."
+    )]
     public async Task<IActionResult> GetStudentById(string id)
     {
         using (_logger.BeginScope("GetStudentById request for StudentId: {StudentId}", id))
@@ -153,6 +170,10 @@ public class StudentController : ControllerBase
     }
 
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get students with pagination and filtering",
+        Description = "Endpoint to retrieve a paginated list of students with optional search and filter parameters."
+    )]
     public async Task<IActionResult> GetStudents([FromQuery] int page = 1, [FromQuery] int pageSize = 10,
         [FromQuery] string? search = null, [FromQuery] StudentFilter? filter = null)
     {
@@ -165,10 +186,16 @@ public class StudentController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [SwaggerOperation(
+        Summary = "Update student by ID",
+        Description = "Endpoint to update an existing student's information by their unique ID."
+    )]
     public async Task<IActionResult> UpdateStudentById(string id, [FromBody] UpdateStudentRequest request)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        {
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
+        }
 
         using (_logger.BeginScope("UpdateStudentById request for StudentId: {StudentId}", id))
         {
@@ -182,14 +209,20 @@ public class StudentController : ControllerBase
             var updatedCount = await _studentService.UpdateStudentById(id, request);
 
             if (updatedCount == 0)
-                return NotFound(new { message = "student not found or no changes made" });
+            {
+                return NotFound(new ErrorResponse<string>(status: 404, message: _localizer["student_not_found_or_no_changes_made"]));
+            }
 
             _logger.LogInformation("Student with ID {StudentId} updated successfully", id);
-            return Ok(new { message = "student updated successfully" });
+            return Ok(new { message = _localizer["student_updated_successfully"].Value });
         }
     }
 
     [HttpDelete("{id}")]
+    [SwaggerOperation(
+        Summary = "Delete student by ID",
+        Description = "Endpoint to delete a student by their unique ID."
+    )]
     public async Task<IActionResult> DeleteStudentById(string id)
     {
         using (_logger.BeginScope("DeleteStudentById request for StudentId: {StudentId}", id))
@@ -198,18 +231,26 @@ public class StudentController : ControllerBase
             var deletedCount = await _studentService.DeleteStudentById(id);
 
             if (deletedCount == 0)
-                return NotFound(new { message = "student not found" });
+            {
+                return NotFound(new ErrorResponse<string>(status: 404, message: _localizer["student_not_found_or_already_deleted"]));
+            }
 
             _logger.LogInformation("Student with ID {StudentId} deleted successfully", id);
-            return Ok(new { message = "student deleted successfully" });
+            return Ok(new { message = _localizer["student_deleted_successfully"].Value });
         }
     }
 
     [HttpPost]
+    [SwaggerOperation(
+        Summary = "Add a new student",
+        Description = "Endpoint to add a new student. Requires valid AddStudentRequest model."
+    )]
     public async Task<IActionResult> AddStudent([FromBody] AddStudentRequest request)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        {
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
+        }
 
         using (_logger.BeginScope("AddStudent request"))
         {
@@ -228,10 +269,16 @@ public class StudentController : ControllerBase
     }
 
     [HttpPost("import/{format}")]
+    [SwaggerOperation(
+        Summary = "Import students from file",
+        Description = "Endpoint to import students from a file in JSON or Excel format. Supported formats are 'json' and 'excel'"
+    )]
     public async Task<IActionResult> AddStudentsFromFile(IFormFile file, string format)
     {
         if (file == null || file.Length == 0)
-            return BadRequest(new { message = "No file uploaded" });
+        {
+            return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["no_file_uploaded"]));
+        }
 
         using (_logger.BeginScope("AddStudentsFromFile request, Format: {Format}", format))
         {
@@ -257,7 +304,7 @@ public class StudentController : ControllerBase
             }
             else
             {
-                return BadRequest(new { message = "Invalid format" });
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_format_Supported_formats_are_json_and_excel"]));
             }
 
             var requests = JsonSerializer.Deserialize<List<AddStudentRequest>>(jsonContent, new JsonSerializerOptions
@@ -267,21 +314,43 @@ public class StudentController : ControllerBase
 
             if (requests == null || !requests.Any())
             {
-                return BadRequest(new { message = "Invalid or empty file" });
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_or_empty_file"]));
             }
 
-            if (requests.Any(r => !ValidateStudentInformationsInRequest(r).Result.Item1)) // If validation fails
+            var errors = new List<int>();
+
+            for (int i = 0; i < requests.Count; i++)
             {
-                return BadRequest(new { message = "Invalid student information in file" });
+                var result = await ValidateStudentInformationsInRequest(requests[i]);
+                if (!result.Item1)
+                {
+                    errors.Add(i);
+                }
+            }
+
+            if (errors.Any())
+            {
+                return BadRequest(new ErrorResponse<object>(
+                    status: 400,
+                    message: _localizer["invalid_student_information_found"],
+                    details: new
+                    {
+                        InvalidEntries = errors.Select(e => new { Index = e, Request = requests[e] })
+                    }
+                ));
             }
 
             await _studentService.AddStudents(requests);
             _logger.LogInformation("Students added successfully from file: {FileName}", file.FileName);
-            return Ok(new { message = "Students added successfully" });
+            return Ok(new { message = _localizer["students_added_successfully"].Value });
         }
     }
 
     [HttpGet("export/{format}")]
+    [SwaggerOperation(
+        Summary = "Export students to file",
+        Description = "Endpoint to export students to a file in JSON or Excel format. Supported formats are 'json' and 'excel'"
+    )]
     public async Task<IActionResult> ExportStudents(string format)
     {
         using (_logger.BeginScope("ExportStudents request, Format: {Format}", format))
@@ -306,11 +375,70 @@ public class StudentController : ControllerBase
             }
             else
             {
-                return BadRequest(new { message = "Invalid format" });
+                return BadRequest(new ErrorResponse<string>(status: 400, message: _localizer["invalid_format_Supported_formats_are_json_and_excel"]));
             }
 
             _logger.LogInformation("Students exported successfully as {Format}", format);
             return File(fileStream, contentType, fileName);
+        }
+    }
+
+    [HttpPut("update-grade")]
+    [SwaggerOperation(
+        Summary = "Update student grade",
+        Description = "Endpoint to update a student's grade for a specific course. Requires valid UpdateStudentGradeRequest model."
+    )]
+    public async Task<IActionResult> UpdateStudentGrade([FromBody] UpdateStudentGradeRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new ErrorResponse<ModelStateDictionary>(status: 400, message: _localizer["invalid_input"], details: ModelState));
+        }
+
+        using (_logger.BeginScope("UpdateStudentGrade request"))
+        {
+            _logger.LogInformation("Updating student grade with request: {@Request}", request);
+
+            try
+            {
+                await _courseEnrollmentService.UpdateStudentGrade(request.StudentId!, request.CourseId!, request.Grade);
+                _logger.LogInformation("Successfully updated student grade");
+
+                return Ok(new { message = _localizer["successfully_updated_student_grade"].Value });
+            }
+            catch
+            {
+                _logger.LogWarning("Failed to update student grade");
+                throw;
+            }
+        }
+    }
+
+    [HttpGet("{id}/transcript")]
+    [SwaggerOperation(
+        Summary = "Get student transcript by ID",
+        Description = "Endpoint to retrieve a student's transcript by their unique ID. Returns a PDF file."
+    )]
+    public async Task<IActionResult> GetStudentTranscriptById(string id)
+    {
+        using (_logger.BeginScope("GetStudentTranscriptById request for StudentId: {StudentId}", id))
+        {
+            // Load HTML template
+            var culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", $"transcript_template-{culture}.html");
+            var htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
+
+            _logger.LogInformation("Fetching transcript for student with ID: {StudentId}", id);
+            var transcriptStream = await _courseEnrollmentService.GetTranscriptOfStudentById(id, htmlTemplate);
+            if (transcriptStream == null)
+            {
+                _logger.LogWarning("Transcript not found for student with ID: {StudentId}", id);
+                return NotFound(new ErrorResponse<string>(status: 404, message: $"{_localizer["transcript_not_found"]}, ID: {id}"));
+            }
+
+            _logger.LogInformation("Transcript fetched successfully for student with ID: {StudentId}", id);
+
+            return File(transcriptStream, "application/pdf", $"{id}_transcript.pdf");
         }
     }
 }

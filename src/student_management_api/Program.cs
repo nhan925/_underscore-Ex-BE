@@ -1,32 +1,40 @@
+using Dapper;
+using DinkToPdf;
+using DinkToPdf.Contracts;
+using DocumentFormat.OpenXml.InkML;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using dotenv;
 using dotenv.net;
 using dotenv.net.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Npgsql;
-using Serilog.Events;
 using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.PostgreSQL;
+using student_management_api.Contracts.IRepositories;
+using student_management_api.Contracts.IServices;
+using student_management_api.Exceptions;
+using student_management_api.Helpers;
+using student_management_api.Localization;
+using student_management_api.Middlewares;
+using student_management_api.Models.DTO;
 using student_management_api.Repositories;
+using student_management_api.Resources;
 using student_management_api.Services;
 using System;
 using System.Data;
+using System.Globalization;
 using System.Text;
-using Microsoft.OpenApi.Models;
-using student_management_api.Contracts.IRepositories;
-using student_management_api.Contracts.IServices;
-using Dapper;
-using student_management_api.Helpers;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Mvc;
-using Serilog.Sinks.PostgreSQL;
-using student_management_api.Middlewares;
-using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Hosting.Server;
-using student_management_api.Models.DTO;
-using DinkToPdf.Contracts;
-using DinkToPdf;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 
 namespace student_management_api;
 
@@ -42,7 +50,13 @@ public class Program
         DotEnv.Load();
         var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION");
         var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
-            ?? throw new Exception("JWT_SECRET is missing");
+            ?? throw new EnvironmentVariableNotFoundException("JWT_SECRET is missing");
+        var AiServiceUrl = Environment.GetEnvironmentVariable("AI_SERVICE_URL")
+            ?? throw new EnvironmentVariableNotFoundException("AI_SERVICE_URL is missing");
+        var AiModel = Environment.GetEnvironmentVariable("AI_MODEL")
+            ?? throw new EnvironmentVariableNotFoundException("AI_MODEL is missing");
+        var AiApiKey = Environment.GetEnvironmentVariable("AI_API_KEY")
+            ?? throw new EnvironmentVariableNotFoundException("AI_API_KEY is missing");
 
         // Register custom type handlers
         SqlMapper.AddTypeHandler(new JsonbTypeHandler<Dictionary<string, string>>());
@@ -87,10 +101,9 @@ public class Program
             options.AddPolicy(name: MyAllowSpecificOrigins,
                 policy =>
                 {
-                    policy.WithOrigins("https://localhost:7088", "http://localhost:5048") // Change to your Blazor domain
+                    policy.AllowAnyOrigin()
                           .AllowAnyMethod()
-                          .AllowAnyHeader()
-                          .AllowCredentials();
+                          .AllowAnyHeader();
                 });
         });
 
@@ -123,6 +136,11 @@ public class Program
         builder.Services.AddScoped<ICourseEnrollmentRepository, CourseEnrollmentRepository>();
 
         builder.Services.AddSingleton<IConverter>(new SynchronizedConverter(new PdfTools()));
+        builder.Services.AddSingleton<IExternalTranslationService>(provider =>
+        {
+            var logger = provider.GetRequiredService<ILogger<GeminiTranslationService>>();
+            return new GeminiTranslationService(logger, AiApiKey, AiModel);
+        });
 
         builder.Services.AddControllers();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -144,7 +162,26 @@ public class Program
             {
                 Title = "Student Management API",
                 Version = "v1",
-                Description = "API for managing students in the system"
+                Description = """
+                ### **API for managing students in the system**
+                - All error will be in this schema
+                    ```
+                    {
+                      "status": int,
+                      "message": string,
+                      "details": object 
+                    }
+                    ```
+
+                - The `details` field will contain additional information about the error, such as validation errors or other relevant details.
+
+                - **All endpoints require JWT authentication**. You can get a token by logging in with the `/api/auth/login` endpoint.
+
+                - **Localization**: The API supports multiple languages. You can specify the language in the `Accept-Language` header or use the `lang` query parameter. Supported languages are:
+                    + `en`: English
+
+                    + `vi`: Vietnamese
+                """
             });
 
             // Enable JWT Authentication in Swagger
@@ -172,11 +209,38 @@ public class Program
                     new string[] {}
                 }
             });
+
+            // Add custom "language" header to all endpoints
+            options.OperationFilter<LanguageHeaderOperationFilter>();
+
+            options.EnableAnnotations();
         });
 
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
+
+        // Add localization services
+        builder.Services.AddLocalization();
+
+        // Set up supported cultures
+        var supportedCultures = new[] { "en", "vi" }; // English, Vietnamese
+
+        builder.Services.Configure<RequestLocalizationOptions>(options =>
+        {
+            var cultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
+            options.DefaultRequestCulture = new RequestCulture("en");
+            options.SupportedCultures = cultures;
+            options.SupportedUICultures = cultures;
+
+            // Clear default providers to control order
+            options.RequestCultureProviders.Clear();
+
+            // Priority order: 1. Query string  2. Accept-Language header
+            options.RequestCultureProviders.Add(new QueryStringRequestCultureProvider());
+            options.RequestCultureProviders.Add(new AcceptLanguageHeaderRequestCultureProvider());
+        });
+
 
         builder.Services.Configure<JsonOptions>(options =>
         {
@@ -184,10 +248,13 @@ public class Program
             options.JsonSerializerOptions.WriteIndented = true;
         });
 
+
         builder.Services.Configure<ApiBehaviorOptions>(options =>
         {
             options.InvalidModelStateResponseFactory = context =>
             {
+                var localizer = context.HttpContext.RequestServices.GetRequiredService<IStringLocalizer<Messages>>();
+
                 var errors = context.ModelState
                     .Where(e => e.Value!.Errors.Count > 0)
                     .SelectMany(e => e.Value!.Errors.Select(err => err.ErrorMessage)) // Extract only messages
@@ -196,12 +263,12 @@ public class Program
                 var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
                 logger.LogWarning("Validation failed: {Errors}", string.Join("; ", errors));
 
-                return new BadRequestObjectResult(new
-                {
-                    title = "One or more validation errors occurred.",
-                    status = 400,
-                    errors = context.ModelState
-                });
+                return new BadRequestObjectResult(new ErrorResponse<List<string>>
+                (
+                    status: 400,
+                    message: localizer["invalid_input"],
+                    details: errors
+                ));
             };
         });
 
@@ -221,6 +288,7 @@ public class Program
         
         app.UseCors(MyAllowSpecificOrigins);
         app.UseHttpsRedirection();
+        app.UseRequestLocalization();
         app.UseAuthentication();
         app.UseMiddleware<LoggingEnrichmentMiddleware>();
         app.UseSerilogRequestLogging();

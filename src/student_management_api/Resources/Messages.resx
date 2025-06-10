@@ -1,0 +1,342 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="add_student_failed" xml:space="preserve">
+    <value>Add student failed</value>
+  </data>
+  <data name="all_rules_turned_off" xml:space="preserve">
+    <value>All rules turned off</value>
+  </data>
+  <data name="all_rules_turned_on" xml:space="preserve">
+    <value>All rules turned on</value>
+  </data>
+  <data name="an_unexpected_error_occurred_Please_try_again_later" xml:space="preserve">
+    <value>An unexpected error occurred. Please try again later</value>
+  </data>
+  <data name="cannot_change_credits_for_a_course_that_has_students_enrolled" xml:space="preserve">
+    <value>Cannot change credits for a course that has students enrolled</value>
+  </data>
+  <data name="cannot_unregister_after_the_semester_has_started" xml:space="preserve">
+    <value>Cannot unregister after the semester has started</value>
+  </data>
+  <data name="classes_exist_for_this_course_The_course_has_been_marked_as_inactive" xml:space="preserve">
+    <value>Classes exist for this course. The course has been marked as inactive</value>
+  </data>
+  <data name="class_id_already_exists" xml:space="preserve">
+    <value>There has been a class with the same ID for this course in this semester !</value>
+  </data>
+  <data name="class_is_full" xml:space="preserve">
+    <value>Class is full</value>
+  </data>
+  <data name="class_with_duplicate_schedule_and_room" xml:space="preserve">
+    <value>Class with the same schedule and room already exists in this semester. Please choose a different schedule or room.</value>
+  </data>
+  <data name="course_added_successfully" xml:space="preserve">
+    <value>Course added successfully</value>
+  </data>
+  <data name="course_deleted_successfully" xml:space="preserve">
+    <value>Course deleted successfully</value>
+  </data>
+  <data name="course_has_been_deleted" xml:space="preserve">
+    <value>The course has been deleted, you cannot delete it again</value>
+  </data>
+  <data name="course_not_found" xml:space="preserve">
+    <value>Course not found</value>
+  </data>
+  <data name="course_not_found_or_no_changes_made" xml:space="preserve">
+    <value>Course not found or no changes made</value>
+  </data>
+  <data name="email_domains_config_updated_successfully" xml:space="preserve">
+    <value>Email domains config updated successfully</value>
+  </data>
+  <data name="exceeded_30_minutes_cannot_delete" xml:space="preserve">
+    <value>Exceeded 30 minutes, cannot delete</value>
+  </data>
+  <data name="faculty_not_found" xml:space="preserve">
+    <value>Faculty not found</value>
+  </data>
+  <data name="failed_to_add_class" xml:space="preserve">
+    <value>Failed to add class</value>
+  </data>
+  <data name="failed_to_add_faculty" xml:space="preserve">
+    <value>Failed to add faculty</value>
+  </data>
+  <data name="failed_to_add_program" xml:space="preserve">
+    <value>Failed to add program</value>
+  </data>
+  <data name="failed_to_add_student" xml:space="preserve">
+    <value>Failed to add student</value>
+  </data>
+  <data name="failed_to_add_student_status" xml:space="preserve">
+    <value>Failed to add student status</value>
+  </data>
+  <data name="failed_to_create_course" xml:space="preserve">
+    <value>Failed to create course</value>
+  </data>
+  <data name="failed_to_log_enrollment_history" xml:space="preserve">
+    <value>Failed to log enrollment history</value>
+  </data>
+  <data name="failed_to_register_for_the_course" xml:space="preserve">
+    <value>Failed to register for the course</value>
+  </data>
+  <data name="failed_to_update_student_grade" xml:space="preserve">
+    <value>Failed to update student grade</value>
+  </data>
+  <data name="invalid_action_specified_Use_register_or_unregister" xml:space="preserve">
+    <value>Invalid action specified. Use 'register' or 'unregister'</value>
+  </data>
+  <data name="invalid_config_type" xml:space="preserve">
+    <value>Invalid config type</value>
+  </data>
+  <data name="invalid_credentials" xml:space="preserve">
+    <value>Invalid credentials</value>
+  </data>
+  <data name="invalid_email_domain" xml:space="preserve">
+    <value>Invalid email domain</value>
+  </data>
+  <data name="invalid_format_Supported_formats_are_json_and_excel" xml:space="preserve">
+    <value>Invalid format. Supported formats are 'json' and 'excel'</value>
+  </data>
+  <data name="invalid_input" xml:space="preserve">
+    <value>Invalid input data</value>
+  </data>
+  <data name="invalid_or_empty_file" xml:space="preserve">
+    <value>Invalid or empty file</value>
+  </data>
+  <data name="invalid_password" xml:space="preserve">
+    <value>Invalid password</value>
+  </data>
+  <data name="invalid_phone_number" xml:space="preserve">
+    <value>Invalid phone number</value>
+  </data>
+  <data name="invalid_request" xml:space="preserve">
+    <value>Invalid request</value>
+  </data>
+  <data name="invalid_request_type" xml:space="preserve">
+    <value>Invalid request type</value>
+  </data>
+  <data name="invalid_student_information_found" xml:space="preserve">
+    <value>Invalid student information found</value>
+  </data>
+  <data name="invalid_student_status_transition" xml:space="preserve">
+    <value>Invalid student status transition</value>
+  </data>
+  <data name="login_failed" xml:space="preserve">
+    <value>Login failed</value>
+  </data>
+  <data name="no_changes_applied" xml:space="preserve">
+    <value>No changes applied</value>
+  </data>
+  <data name="no_enrollment_found_to_unregister_or_the_student_has_completed_the_course" xml:space="preserve">
+    <value>No enrollment found to unregister or the student has completed the course</value>
+  </data>
+  <data name="no_file_uploaded" xml:space="preserve">
+    <value>No file uploaded</value>
+  </data>
+  <data name="no_rules_found_or_no_changes_applied" xml:space="preserve">
+    <value>No rules found or no changes applied</value>
+  </data>
+  <data name="one_or_more_statuses_are_not_found" xml:space="preserve">
+    <value>One or more statuses are not found</value>
+  </data>
+  <data name="phone_number_country_config_updated_successfully" xml:space="preserve">
+    <value>Phone number country config updated successfully</value>
+  </data>
+  <data name="prerequisite_course_not_exists" xml:space="preserve">
+    <value>Prerequisite course not exists</value>
+  </data>
+  <data name="program_not_found" xml:space="preserve">
+    <value>Program not found</value>
+  </data>
+  <data name="students_added_successfully" xml:space="preserve">
+    <value>Students added successfully</value>
+  </data>
+  <data name="student_deleted_successfully" xml:space="preserve">
+    <value>Student deleted successfully</value>
+  </data>
+  <data name="student_has_not_passed_all_prerequisites" xml:space="preserve">
+    <value>Student has not passed all prerequisites</value>
+  </data>
+  <data name="student_not_found" xml:space="preserve">
+    <value>Student not found</value>
+  </data>
+  <data name="student_not_found_or_already_deleted" xml:space="preserve">
+    <value>Student not found or already deleted</value>
+  </data>
+  <data name="student_not_found_or_no_changes_made" xml:space="preserve">
+    <value>Student not found or no changes made</value>
+  </data>
+  <data name="student_status_not_found" xml:space="preserve">
+    <value>Student status not found</value>
+  </data>
+  <data name="student_status_rules_config_updated_successfully" xml:space="preserve">
+    <value>Student status rules config updated successfully</value>
+  </data>
+  <data name="student_updated_successfully" xml:space="preserve">
+    <value>Student updated successfully</value>
+  </data>
+  <data name="successfully_registered_class" xml:space="preserve">
+    <value>Successfully registered class</value>
+  </data>
+  <data name="successfully_unregistered_class" xml:space="preserve">
+    <value>Successfully unregistered class</value>
+  </data>
+  <data name="successfully_updated_student_grade" xml:space="preserve">
+    <value>Successfully updated student grade</value>
+  </data>
+  <data name="tkpm_university" xml:space="preserve">
+    <value>TKPM University</value>
+  </data>
+  <data name="transcript_not_found" xml:space="preserve">
+    <value>Transcript not found</value>
+  </data>
+  <data name="update_course_successfully" xml:space="preserve">
+    <value>Update course successfully</value>
+  </data>
+  <data name="update_faculty_successfully" xml:space="preserve">
+    <value>Update faculty successfully</value>
+  </data>
+  <data name="update_program_successfully" xml:space="preserve">
+    <value>Update program successfully</value>
+  </data>
+  <data name="update_student_failed" xml:space="preserve">
+    <value>Update student failed</value>
+  </data>
+  <data name="update_student_status_successfully" xml:space="preserve">
+    <value>Update student status successfully</value>
+  </data>
+  <data name="user_not_found" xml:space="preserve">
+    <value>User not found</value>
+  </data>
+  <data name="value_is_empty" xml:space="preserve">
+    <value>Value is empty</value>
+  </data>
+  <data name="class_not_found" xml:space="preserve">
+    <value>Class not found</value>
+  </data>
+  <data name="invalid_composited_id_for_class" xml:space="preserve">
+    <value>Invalid composited ID for class</value>
+  </data>
+  <data name="cannot_register_after_the_semester_has_ended" xml:space="preserve">
+    <value>Cannot register after the semester has ended</value>
+  </data>
+  <data name="student_is_enrolled_in_courses" xml:space="preserve">
+    <value>Student is enrolled in courses</value>
+  </data>
+</root>

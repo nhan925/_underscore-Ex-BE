@@ -10,29 +10,5 @@ public class StudentInClass
 
     public float? Grade { get; set; }
 
-    private string? _status;
-    public string? Status
-    {
-        get
-        {
-            if (_status == "enrolled")
-            {
-                return "Đã đăng ký";
-            }
-            else if (_status == "failed")
-            {
-                return "Rớt";
-            }
-            else if (_status == "passed")
-            {
-                return "Đã qua môn";
-            }
-            else
-            {
-                return _status;
-            }
-        }
-
-        set => _status = value;
-    }
+    public string? Status { get; set; }
 }
